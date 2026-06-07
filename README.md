@@ -63,6 +63,112 @@ PYTHONPATH=src python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 
 	- `data_limpia`: fila completa limpiada automaticamente.
 	- `extraccion`: direccion estructurada + `confidence` por entidad.
 
+## API HTTP con cache y long polling
+
+Ademas del pipeline por consola, el proyecto expone una API HTTP para clientes que necesiten leer datos cacheados y enterarse cuando el dataset cambie.
+
+### Levantar el servidor
+
+```bash
+PYTHONPATH=src uvicorn safeway.api:app --host 0.0.0.0 --port 8000
+```
+
+### Endpoints principales
+
+1. Salud del servicio:
+
+```bash
+curl http://localhost:8000/health
+```
+
+2. Snapshot del dataset con cache:
+
+```bash
+curl "http://localhost:8000/datasets/stq8-drvp?max_rows=200"
+```
+
+Este endpoint:
+	- descarga desde SODA si no hay cache o el cache vencio
+	- devuelve la ultima version cacheada si no hubo cambios
+	- responde con `processed`, que contiene todas las filas limpias y su extraccion
+
+Ejemplo de respuesta resumida:
+
+```json
+{
+	"dataset_id": "stq8-drvp",
+	"max_rows": 200,
+	"version": "a1b2c3d4...",
+	"fetched_at": 1717777777.0,
+	"processed": [
+		{
+			"comparendo": "123456",
+			"data_original": {"lugar": "CALLE 10 #5-20 CUCUTA"},
+			"data_limpia": {"lugar": "CALLE 10 # 5-20 CUCUTA"},
+			"extraccion": {
+				"VIA_PRINCIPAL": {"value": "CALLE 10", "confidence": 0.84},
+				"NUMERO_O_KM": {"value": "10 # 5-20", "confidence": 0.88},
+				"REFERENCIA_SEMANTICA": {"value": null, "confidence": 0.0},
+				"BARRIO_O_MUNICIPIO": {"value": "CUCUTA", "confidence": 0.95}
+			}
+		}
+	],
+	"cached": true
+}
+```
+
+3. Forzar refresco del cache:
+
+```bash
+curl "http://localhost:8000/datasets/stq8-drvp?max_rows=200&force_refresh=true"
+```
+
+4. Long polling para detectar actualizaciones:
+
+```bash
+curl "http://localhost:8000/datasets/stq8-drvp/updates?max_rows=200&last_version=VERSION_ACTUAL&timeout_seconds=30"
+```
+
+Este endpoint:
+	- espera hasta `timeout_seconds` por una nueva version del dataset
+	- si detecta cambio, responde con `changed: true` y devuelve `data`
+	- si no detecta cambio, responde con `changed: false` y `timed_out: true`
+
+Ejemplo cuando hubo cambio:
+
+```json
+{
+	"dataset_id": "stq8-drvp",
+	"max_rows": 200,
+	"version": "nueva-version-hash",
+	"changed": true,
+	"timed_out": false,
+	"fetched_at": 1717777777.0,
+	"data": []
+}
+```
+
+Ejemplo cuando no hubo cambio:
+
+```json
+{
+	"dataset_id": "stq8-drvp",
+	"max_rows": 200,
+	"version": "misma-version-hash",
+	"changed": false,
+	"timed_out": true,
+	"fetched_at": 1717777777.0
+}
+```
+
+### Como funciona el cache
+
+- El cache vive en memoria dentro del proceso de la API.
+- Cada dataset se guarda por combinacion de `dataset_id` y `max_rows`.
+- La version del dataset se calcula con un hash del contenido procesado.
+- Si el contenido cambia en SODA, cambia la version y el long polling notifica a los clientes en la siguiente consulta.
+- Los clientes conectados deben volver a consultar el endpoint de updates al recibir una respuesta, que es el patron normal de long polling.
+
 ## Estructura del proyecto
 
 ```text
@@ -71,10 +177,16 @@ PYTHONPATH=src python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 
 │   └── fewshot_50_norte_santander.json
 ├── src/
 │   └── safeway/
+│       ├── api.py
 │       ├── cleaning.py
 │       ├── extractor.py
 │       ├── pipeline.py
 │       └── soda_client.py
+├── tests/
+│   ├── test_api.py
+│   ├── test_cleaning.py
+│   ├── test_extractor.py
+│   └── test_pipeline.py
 ├── requirements.txt
 └── README.md
 ```

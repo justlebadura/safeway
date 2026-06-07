@@ -10,16 +10,8 @@ from .extractor import AddressExtractor
 from .soda_client import SodaClient
 
 
-def run_pipeline(dataset_id: str, max_rows: int, output_file: Path) -> list[dict[str, Any]]:
-    client = SodaClient(dataset_id=dataset_id)
-    extractor = AddressExtractor()
-
-    rows = client.fetch_rows(
-        select="*",
-        where=None,
-        limit=1000,
-        max_rows=max_rows,
-    )
+def process_rows(rows: list[dict[str, Any]], extractor: AddressExtractor | None = None) -> list[dict[str, Any]]:
+    extractor = extractor or AddressExtractor()
 
     processed: list[dict[str, Any]] = []
     for row in rows:
@@ -34,6 +26,21 @@ def run_pipeline(dataset_id: str, max_rows: int, output_file: Path) -> list[dict
                 "extraccion": extraction,
             }
         )
+
+    return processed
+
+
+def run_pipeline(dataset_id: str, max_rows: int, output_file: Path) -> list[dict[str, Any]]:
+    client = SodaClient(dataset_id=dataset_id)
+    extractor = AddressExtractor()
+
+    rows = client.fetch_rows(
+        select="*",
+        where=None,
+        limit=1000,
+        max_rows=max_rows,
+    )
+    processed = process_rows(rows, extractor=extractor)
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with output_file.open("w", encoding="utf-8") as f:
