@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .cleaning import clean_location_text
+from .cleaning import clean_soda_row
 from .extractor import AddressExtractor
 from .soda_client import SodaClient
 
@@ -15,22 +15,22 @@ def run_pipeline(dataset_id: str, max_rows: int, output_file: Path) -> list[dict
     extractor = AddressExtractor()
 
     rows = client.fetch_rows(
-        select="comparendo,lugar",
-        where="lugar is not null",
+        select="*",
+        where=None,
         limit=1000,
         max_rows=max_rows,
     )
 
     processed: list[dict[str, Any]] = []
     for row in rows:
-        raw_lugar = row.get("lugar", "")
-        cleaned_lugar = clean_location_text(raw_lugar)
+        cleaned_row = clean_soda_row(row)
+        cleaned_lugar = str(cleaned_row.get("lugar") or "")
         extraction = extractor.extract(cleaned_lugar)
         processed.append(
             {
                 "comparendo": row.get("comparendo"),
-                "lugar_original": raw_lugar,
-                "lugar_limpio": cleaned_lugar,
+                "data_original": row,
+                "data_limpia": cleaned_row,
                 "extraccion": extraction,
             }
         )

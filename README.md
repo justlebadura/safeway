@@ -18,6 +18,51 @@ Implementar una cadena dinamica:
 - Recurso API: `https://www.datos.gov.co/resource/stq8-drvp.json`
 - Campo de ubicacion usado: `lugar`
 
+## Como funciona la API
+
+Este proyecto usa la API SODA de datos abiertos en dos niveles:
+
+1. API externa (SODA):
+	- Se consulta `https://www.datos.gov.co/resource/stq8-drvp.json`.
+	- Se usa paginacion con `$limit` y `$offset` para traer lotes de filas.
+	- Opcionalmente se envia `X-App-Token` (variable `SODA_APP_TOKEN`) para mejorar limites.
+
+2. Procesamiento interno (pipeline de este repo):
+	- Cada fila recibida se limpia automaticamente en todos sus campos (`data_limpia`).
+	- Si el campo tiene `fecha` en su nombre, se intenta normalizar a formato ISO.
+	- El campo `lugar` se normaliza con reglas de direccion para extraccion.
+	- Se genera `extraccion` con entidades estructuradas y confianza.
+	- Si no hay senal espacial valida, retorna ` ["UNKNOWN"] `.
+
+Flujo resumido:
+
+`SODA -> data_original -> data_limpia -> extraccion`
+
+## Uso de la API (paso a paso)
+
+1. Configurar dependencias:
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Opcional: definir token SODA:
+
+```bash
+export SODA_APP_TOKEN="tu_token"
+```
+
+3. Ejecutar pipeline:
+
+```bash
+PYTHONPATH=src python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs/extracciones_full.json
+```
+
+4. Revisar salida JSON en `outputs/extracciones_full.json`:
+	- `data_original`: fila completa tal cual llega desde SODA.
+	- `data_limpia`: fila completa limpiada automaticamente.
+	- `extraccion`: direccion estructurada + `confidence` por entidad.
+
 ## Estructura del proyecto
 
 ```text
@@ -58,8 +103,8 @@ Salida:
 
 - Archivo JSON con objetos por fila, incluyendo:
 	- `comparendo`
-	- `lugar_original`
-	- `lugar_limpio`
+	- `data_original` (fila completa recibida desde SODA)
+	- `data_limpia` (fila completa con limpieza automatica de texto/fechas)
 	- `extraccion`
 
 ## Pruebas automaticas
@@ -118,13 +163,14 @@ Cuando no hay referencia espacial valida:
 - Endpoint de metadatos del dataset:
 	- `https://www.datos.gov.co/api/views/stq8-drvp.json`
 - Consulta principal usada en pipeline:
-	- `$select=comparendo,lugar`
-	- `$where=lugar is not null`
+	- `$select=*`
+	- sin `$where` para no perder columnas ni filas en origen
 	- paginacion con `$limit` y `$offset`
 - Formula simple de confianza (heuristica):
 	- coincidencia fuerte regex + entidad spaCy: alta ($\sim 0.90$)
 	- coincidencia regex media: media-alta ($\sim 0.74-0.88$)
 	- no encontrado: $0.0$
+- Si al ejecutar falla con error de DNS/NameResolutionError, el problema es de conectividad hacia `www.datos.gov.co`, no de la logica del pipeline.
 
 ## Avance #1
 
