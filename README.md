@@ -54,10 +54,14 @@ export SODA_APP_TOKEN="tu_token"
 
 3. Ejecutar pipeline:
 
+Linux:
 ```bash
 PYTHONPATH=src python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs/extracciones_full.json
 ```
-
+Windows:
+```cmd
+set PYTHONPATH=src; python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs\extracciones.json
+```
 4. Revisar salida JSON en `outputs/extracciones_full.json`:
 	- `data_original`: fila completa tal cual llega desde SODA.
 	- `data_limpia`: fila completa limpiada automaticamente.
