@@ -98,7 +98,48 @@ class DatasetCacheService:
 
 def serialize_entry(entry: CacheEntry) -> dict[str, Any]:
     payload = asdict(entry)
+    relational_rows = []
+    cleaned_rows = []
+    extraction_rows = []
+
+    for index, row in enumerate(entry.processed, start=1):
+        relational_rows.append(
+            {
+                "id": index,
+                "dataset_id": entry.dataset_id,
+                "comparendo": row.get("comparendo"),
+                "data_original": row.get("data_original"),
+            }
+        )
+        cleaned_rows.append(
+            {
+                "id": index,
+                "comparendo_id": index,
+                "data_limpia": row.get("data_limpia"),
+            }
+        )
+        extraction_rows.append(
+            {
+                "id": index,
+                "comparendo_id": index,
+                "extraccion": row.get("extraccion"),
+            }
+        )
+
     payload["cached"] = True
+    payload["tables"] = {
+        "dataset_metadata": [
+            {
+                "dataset_id": entry.dataset_id,
+                "max_rows": entry.max_rows,
+                "version": entry.version,
+                "fetched_at": entry.fetched_at,
+            }
+        ],
+        "comparendos": relational_rows,
+        "comparendos_limpios": cleaned_rows,
+        "extracciones": extraction_rows,
+    }
     return payload
 
 
@@ -144,6 +185,6 @@ async def poll_dataset_updates(
         "fetched_at": entry.fetched_at,
     }
     if changed:
-        response["data"] = entry.processed
+        response["data"] = serialize_entry(entry)
 
     return response

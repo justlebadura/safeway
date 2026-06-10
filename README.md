@@ -59,8 +59,14 @@ Linux:
 PYTHONPATH=src python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs/extracciones_full.json
 ```
 Windows:
+PowerShell:
+```powershell
+$env:PYTHONPATH = "src"; python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs\extracciones_full.json
+```
+CMD:
 ```cmd
-set PYTHONPATH=src; python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs\extracciones.json
+set PYTHONPATH=src
+python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs\extracciones_full.json
 ```
 4. Revisar salida JSON en `outputs/extracciones_full.json`:
 	- `data_original`: fila completa tal cual llega desde SODA.
@@ -94,7 +100,8 @@ curl "http://localhost:8000/datasets/stq8-drvp?max_rows=200"
 Este endpoint:
 	- descarga desde SODA si no hay cache o el cache vencio
 	- devuelve la ultima version cacheada si no hubo cambios
-	- responde con `processed`, que contiene todas las filas limpias y su extraccion
+	- responde con `tables`, que separa la salida en formato relacional
+	- conserva `processed` como vista detallada por fila
 
 Ejemplo de respuesta resumida:
 
@@ -104,6 +111,43 @@ Ejemplo de respuesta resumida:
 	"max_rows": 200,
 	"version": "a1b2c3d4...",
 	"fetched_at": 1717777777.0,
+	"tables": {
+		"dataset_metadata": [
+			{
+				"dataset_id": "stq8-drvp",
+				"max_rows": 200,
+				"version": "a1b2c3d4...",
+				"fetched_at": 1717777777.0
+			}
+		],
+		"comparendos": [
+			{
+				"id": 1,
+				"dataset_id": "stq8-drvp",
+				"comparendo": "123456",
+				"data_original": {"lugar": "CALLE 10 #5-20 CUCUTA"}
+			}
+		],
+		"comparendos_limpios": [
+			{
+				"id": 1,
+				"comparendo_id": 1,
+				"data_limpia": {"lugar": "CALLE 10 # 5-20 CUCUTA"}
+			}
+		],
+		"extracciones": [
+			{
+				"id": 1,
+				"comparendo_id": 1,
+				"extraccion": {
+					"VIA_PRINCIPAL": {"value": "CALLE 10", "confidence": 0.84},
+					"NUMERO_O_KM": {"value": "10 # 5-20", "confidence": 0.88},
+					"REFERENCIA_SEMANTICA": {"value": null, "confidence": 0.0},
+					"BARRIO_O_MUNICIPIO": {"value": "CUCUTA", "confidence": 0.95}
+				}
+			}
+		]
+	},
 	"processed": [
 		{
 			"comparendo": "123456",
@@ -137,6 +181,7 @@ Este endpoint:
 	- espera hasta `timeout_seconds` por una nueva version del dataset
 	- si detecta cambio, responde con `changed: true` y devuelve `data`
 	- si no detecta cambio, responde con `changed: false` y `timed_out: true`
+	- `data` usa el mismo formato relacional de `/datasets/{dataset_id}`
 
 Ejemplo cuando hubo cambio:
 
@@ -148,7 +193,13 @@ Ejemplo cuando hubo cambio:
 	"changed": true,
 	"timed_out": false,
 	"fetched_at": 1717777777.0,
-	"data": []
+	"data": {
+		"tables": {
+			"comparendos": [],
+			"comparendos_limpios": [],
+			"extracciones": []
+		}
+	}
 }
 ```
 

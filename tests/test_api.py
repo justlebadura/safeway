@@ -44,6 +44,10 @@ def test_get_dataset_uses_cache_and_returns_processed_rows(monkeypatch) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["dataset_id"] == "stq8-drvp"
+    assert payload["tables"]["dataset_metadata"][0]["dataset_id"] == "stq8-drvp"
+    assert payload["tables"]["comparendos"][0]["comparendo"] == "1"
+    assert payload["tables"]["comparendos_limpios"][0]["comparendo_id"] == 1
+    assert payload["tables"]["extracciones"][0]["comparendo_id"] == 1
     assert payload["processed"][0]["data_limpia"]["fecha"] == "2024-01-01T10:00:00"
     assert payload["processed"][0]["extraccion"]["VIA_PRINCIPAL"]["value"] == "CALLE 10"
 
@@ -71,7 +75,10 @@ def test_long_poll_returns_updated_data_when_version_changes(monkeypatch) -> Non
     assert payload["changed"] is True
     assert payload["timed_out"] is False
     assert payload["version"] != version
-    assert payload["data"][0]["data_limpia"]["lugar"] == "AV LIBERTADORES # 12-34 CUCUTA"
+    assert payload["data"]["tables"]["comparendos"][0]["comparendo"] == "1"
+    assert payload["data"]["tables"]["comparendos_limpios"][0]["comparendo_id"] == 1
+    assert payload["data"]["tables"]["extracciones"][0]["comparendo_id"] == 1
+    assert payload["data"]["processed"][0]["data_limpia"]["lugar"] == "AV LIBERTADORES # 12-34 CUCUTA"
 
 
 def test_long_poll_times_out_without_change(monkeypatch) -> None:
