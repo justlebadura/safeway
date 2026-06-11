@@ -7,6 +7,8 @@ import spacy
 from spacy.language import Language
 from spacy.pipeline import EntityRuler
 
+from .cleaning import normalize_text
+
 
 MUNICIPIOS_NORTE_SANTANDER = [
     "ABREGO",
@@ -29,7 +31,7 @@ MUNICIPIOS_NORTE_SANTANDER = [
     "HERRAN",
     "LABATECA",
     "LA ESPERANZA",
-    "LA PLAYA",
+    "LA PLAYA DE BELEN",
     "LOS PATIOS",
     "LOURDES",
     "MUTISCUA",
@@ -50,6 +52,23 @@ MUNICIPIOS_NORTE_SANTANDER = [
     "VILLA CARO",
     "VILLA DEL ROSARIO",
 ]
+
+MUNICIPIO_ALIASES = {
+    "LA PLAYA": "LA PLAYA DE BELEN",
+    "SAN JOSE DE CUCUTA": "CUCUTA",
+}
+
+
+def _normalized_municipalities() -> dict[str, str]:
+    # Map normalized municipality tokens to a normalized canonical value.
+    canonical = {normalize_text(name): normalize_text(name) for name in MUNICIPIOS_NORTE_SANTANDER}
+    for alias, target in MUNICIPIO_ALIASES.items():
+        canonical[normalize_text(alias)] = normalize_text(target)
+    return canonical
+
+
+MUNICIPIO_CANONICAL_BY_NORMALIZED = _normalized_municipalities()
+MUNICIPIO_PATTERNS = sorted(MUNICIPIO_CANONICAL_BY_NORMALIZED.keys(), key=len, reverse=True)
 
 
 ROAD_PATTERN = re.compile(
@@ -83,7 +102,7 @@ def build_nlp() -> Language:
     assert isinstance(ruler, EntityRuler)
 
     patterns = []
-    for municipality in MUNICIPIOS_NORTE_SANTANDER:
+    for municipality in MUNICIPIO_PATTERNS:
         patterns.append({"label": "LOC", "pattern": municipality})
 
     patterns.extend(
@@ -187,10 +206,12 @@ class AddressExtractor:
 
         municipality = next((ent.text for ent in doc.ents if ent.label_ == "LOC"), None)
         if municipality:
-            return {"value": municipality, "confidence": 0.95}
+            normalized = normalize_text(municipality)
+            canonical = MUNICIPIO_CANONICAL_BY_NORMALIZED.get(normalized, normalized)
+            return {"value": canonical, "confidence": 0.95}
 
-        for muni in MUNICIPIOS_NORTE_SANTANDER:
-            if muni in text:
-                return {"value": muni, "confidence": 0.9}
+        for muni in MUNICIPIO_PATTERNS:
+            if re.search(rf"\b{re.escape(muni)}\b", text):
+                return {"value": MUNICIPIO_CANONICAL_BY_NORMALIZED[muni], "confidence": 0.9}
 
         return {"value": None, "confidence": 0.0}
