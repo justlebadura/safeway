@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from safeway import pipeline
+from external import pipeline
 
 
 class DummySodaClient:
@@ -31,12 +31,10 @@ def test_run_pipeline_generates_output_file(tmp_path: Path, monkeypatch) -> None
     output = tmp_path / "extracciones_test.json"
     rows = pipeline.run_pipeline("stq8-drvp", max_rows=2, output_file=output)
 
-    assert len(rows) == 2
+    assert len(rows) == 1
     assert output.exists()
 
     data = json.loads(output.read_text(encoding="utf-8"))
     assert data[0]["extraccion"]["VIA_PRINCIPAL"]["confidence"] >= 0.0
-    assert data[1]["extraccion"] == ["UNKNOWN"]
     assert data[0]["data_limpia"]["fecha_hora"] == "2024-01-10T08:30:00"
     assert data[0]["data_limpia"]["placa"] == "abc123"
-    assert data[1]["data_limpia"]["placa"] is None

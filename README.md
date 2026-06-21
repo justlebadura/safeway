@@ -1,372 +1,117 @@
-# Safeway - Extraccion estructurada de direcciones imprecisas
+# Safeway - Extracción y Trazado de Rutas Seguras de Accidentabilidad
 
-Pipeline en Python para consumir datos abiertos por API SODA, limpiar texto de direcciones y extraer entidades espaciales con confianza para Norte de Santander.
+Safeway es una plataforma web y API HTTP modular (diseñada en Programación Orientada a Objetos) para consumir datos abiertos por API SODA/CSV, estructurar direcciones físicas con NLP, georreferenciar incidentes con coordenadas de fallback inteligentes, y trazar rutas de mínimo riesgo utilizando un motor de optimización basado en Dijkstra.
 
-## Objetivo
+---
 
-Implementar una cadena dinamica:
+## 🏛️ Arquitectura del Proyecto
 
-1. Descargar datos de SODA.
-2. Limpiar campo textual de ubicacion.
-3. Extraer direccion estructurada con 4 claves obligatorias.
-4. Retornar metricas de confianza por entidad y ` ["UNKNOWN"] ` cuando no hay referencia espacial valida.
+El backend se encuentra desacoplado bajo una arquitectura limpia de microservicios:
 
-## Dataset
-
-- Portal: https://www.datos.gov.co
-- Dataset: `stq8-drvp`
-- Recurso API: `https://www.datos.gov.co/resource/stq8-drvp.json`
-- Campo de ubicacion usado: `lugar`
-
-## Como funciona la API
-
-Este proyecto usa la API SODA de datos abiertos en dos niveles:
-
-1. API externa (SODA):
-	- Se consulta `https://www.datos.gov.co/resource/stq8-drvp.json`.
-	- Se usa paginacion con `$limit` y `$offset` para traer lotes de filas.
-	- Opcionalmente se envia `X-App-Token` (variable `SODA_APP_TOKEN`) para mejorar limites.
-
-2. Procesamiento interno (pipeline de este repo):
-	- Cada fila recibida se limpia automaticamente en todos sus campos (`data_limpia`).
-	- Si el campo tiene `fecha` en su nombre, se intenta normalizar a formato ISO.
-	- El campo `lugar` se normaliza con reglas de direccion para extraccion.
-	- Se genera `extraccion` con entidades estructuradas y confianza.
-	- Si no hay senal espacial valida, retorna ` ["UNKNOWN"] `.
-
-Flujo resumido:
-
-`SODA -> data_original -> data_limpia -> extraccion`
-
-## Uso de la API (paso a paso)
-
-1. Configurar dependencias:
-
-```bash
-pip install -r requirements.txt
+```
+safeway/
+├── backend/
+│   ├── api.py                     # Controlador HTTP (Capa de entrega con FastAPI)
+│   ├── external/
+│   │   ├── pipeline.py            # Orquestador del flujo ETL por consola
+│   │   └── soda_client.py         # Cliente HTTP genérico para APIs SODA
+│   └── microservices/
+│       ├── api_soda_cleaner.py    # CLEANER: Sanitización, normalización de datos y caché en disco/RAM
+│       ├── grapher.py             # GRAPHER: Agrupación y snapping de accidentes en nodos viales
+│       ├── mapper.py              # LOCATOR: Geolocalización, NLP NER para direcciones y fallbacks de coordenadas
+│       └── routing.py             # ROUTER: Cálculo de peligro dinámico y optimizador de rutas (Dijkstra)
+├── data/                          # Caché de datasets descargados y ediciones manuales
+├── frontend/
+│   └── index.html                 # Interfaz interactiva de mapas con Leaflet.js
+├── tests/                         # Suite de pruebas automatizadas (pytest)
+└── requirements.txt               # Dependencias del proyecto
 ```
 
-2. Opcional: definir token SODA:
+---
 
-```bash
-export SODA_APP_TOKEN="tu_token"
-```
+## ⚙️ Descripción de Microservicios
 
-3. Ejecutar pipeline:
+### 1. 🧹 Cleaner (`api_soda_cleaner.py`)
+*   **Función**: Normaliza formatos de fechas, horas y tipos de vehículos en los esquemas SODA.
+*   **Caché inteligente**: Almacena en memoria y en disco local (`data/raw_*.json`) las respuestas remotas para optimizar tiempos de respuesta.
+*   **Edición**: Almacena ediciones manuales (`data/edits_*.json`) y las fusiona de forma reactiva invalidando la caché.
 
-Linux:
-```bash
-PYTHONPATH=src python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs/extracciones_full.json
-```
-Windows:
-PowerShell:
-```powershell
-$env:PYTHONPATH = "src"; python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs\extracciones_full.json
-```
-CMD:
-```cmd
-set PYTHONPATH=src
-python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs\extracciones_full.json
-```
-4. Revisar salida JSON en `outputs/extracciones_full.json`:
-	- `data_original`: fila completa tal cual llega desde SODA.
-	- `data_limpia`: fila completa limpiada automaticamente.
-	- `extraccion`: direccion estructurada + `confidence` por entidad.
+### 2. 📍 Locator (`mapper.py`)
+*   **Función**: Utiliza modelos de procesamiento de lenguaje natural local (`spaCy EntityRuler`) y expresiones regulares para estructurar direcciones físicas en 4 claves:
+    1.  `VIA_PRINCIPAL`
+    2.  `NUMERO_O_KM`
+    3.  `REFERENCIA_SEMANTICA`
+    4.  `BARRIO_O_MUNICIPIO`
+*   **Manejo de Fallbacks**: Si un registro no posee georreferencia original válida, calcula una coordenada pseudo-aleatoria dispersa alrededor del centro del municipio correspondiente, marcándola con la propiedad `is_fallback_coord: true`.
 
-## API HTTP con cache y long polling
+### 3. 🗺️ Grapher (`grapher.py`)
+*   **Función**: Toma los accidentes geolocalizados y los agrupa espacialmente utilizando un umbral de proximidad de ~40 metros (intersecciones estructurales).
+*   **Control de Fallbacks**: Excluye explícitamente los accidentes cuya coordenada es estimada (`is_fallback_coord`) para evitar distorsiones viales en el mapa de grafos.
 
-Ademas del pipeline por consola, el proyecto expone una API HTTP para clientes que necesiten leer datos cacheados y enterarse cuando el dataset cambie.
+### 4. 🔀 Router & Optimizer (`routing.py`)
+*   **Función**: Implementa un algoritmo de Dijkstra que calcula el trayecto más seguro entre dos nodos viales.
+*   **Cálculo de Riesgo Dinámico**: La peligrosidad de un tramo se calcula en base a:
+    *   **Decaimiento temporal**: Accidentes más recientes (ej. del 2026) tienen más peso.
+    *   **Gravedad**: Accidentes con heridos o víctimas fatales aumentan drásticamente el riesgo.
+    *   **Horarios y Clima**: Modificadores dinámicos si se indica que es de noche, hora pico, o si hay lluvia activa.
 
-### Levantar el servidor
+### 5. 📊 Reporter (`reporter.py`)
+*   **Función**: Filtra datos espaciales e históricos por variables múltiples y genera gráficos estadísticos consolidados en formato de imagen de alta calidad.
 
-```bash
-PYTHONPATH=src uvicorn safeway.api:app --host 0.0.0.0 --port 8000
-```
+---
 
-### Endpoints principales
+## 🚀 Instalación y Configuración
 
-1. Salud del servicio:
+1.  **Crear el entorno virtual e instalar dependencias**:
+    ```bash
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    ```
 
-```bash
-curl http://localhost:8000/health
-```
+2.  **Iniciar el Servidor de Desarrollo**:
+    ```bash
+    PYTHONPATH=backend .venv/bin/uvicorn api:app --host 0.0.0.0 --port 8080 --reload
+    ```
+    El servidor estará disponible en [http://localhost:8080/](http://localhost:8080/).
 
-2. Snapshot del dataset con cache:
+3.  **Ejecutar Pruebas Unitarias**:
+    ```bash
+    PYTHONPATH=backend .venv/bin/pytest
+    ```
 
-```bash
-curl "http://localhost:8000/datasets/stq8-drvp?max_rows=200"
-```
+---
 
-Este endpoint:
-	- descarga desde SODA si no hay cache o el cache vencio
-	- devuelve la ultima version cacheada si no hubo cambios
-	- responde con `tables`, que separa la salida en formato relacional
-	- conserva `processed` como vista detallada por fila
+## 📈 Nuevas APIs de Reporte y Exportación
 
-Ejemplo de respuesta resumida:
+### 1. 📥 Exportar Datos Filtrados (`/datasets/export`)
+Permite exportar los accidentes filtrados según múltiples condiciones en formato **JSON** o **CSV**.
 
-```json
-{
-	"dataset_id": "stq8-drvp",
-	"max_rows": 200,
-	"version": "a1b2c3d4...",
-	"fetched_at": 1717777777.0,
-	"tables": {
-		"dataset_metadata": [
-			{
-				"dataset_id": "stq8-drvp",
-				"max_rows": 200,
-				"version": "a1b2c3d4...",
-				"fetched_at": 1717777777.0
-			}
-		],
-		"comparendos": [
-			{
-				"id": 1,
-				"dataset_id": "stq8-drvp",
-				"comparendo": "123456",
-				"data_original": {"lugar": "CALLE 10 #5-20 CUCUTA"}
-			}
-		],
-		"comparendos_limpios": [
-			{
-				"id": 1,
-				"comparendo_id": 1,
-				"data_limpia": {"lugar": "CALLE 10 # 5-20 CUCUTA"}
-			}
-		],
-		"extracciones": [
-			{
-				"id": 1,
-				"comparendo_id": 1,
-				"extraccion": {
-					"VIA_PRINCIPAL": {"value": "CALLE 10", "confidence": 0.84},
-					"NUMERO_O_KM": {"value": "10 # 5-20", "confidence": 0.88},
-					"REFERENCIA_SEMANTICA": {"value": null, "confidence": 0.0},
-					"BARRIO_O_MUNICIPIO": {"value": "CUCUTA", "confidence": 0.95}
-				}
-			}
-		]
-	},
-	"processed": [
-		{
-			"comparendo": "123456",
-			"data_original": {"lugar": "CALLE 10 #5-20 CUCUTA"},
-			"data_limpia": {"lugar": "CALLE 10 # 5-20 CUCUTA"},
-			"extraccion": {
-				"VIA_PRINCIPAL": {"value": "CALLE 10", "confidence": 0.84},
-				"NUMERO_O_KM": {"value": "10 # 5-20", "confidence": 0.88},
-				"REFERENCIA_SEMANTICA": {"value": null, "confidence": 0.0},
-				"BARRIO_O_MUNICIPIO": {"value": "CUCUTA", "confidence": 0.95}
-			}
-		}
-	],
-	"cached": true
-}
-```
+*   **Ruta**: `GET /datasets/export`
+*   **Parámetros de consulta (Query params)**:
+    *   `dataset_ids`: IDs de datasets separados por comas (por defecto todos).
+    *   `max_rows`: Límite de filas a recuperar.
+    *   `start_year` / `end_year`: Rango de años a filtrar.
+    *   `rain_only`: `true` filtra incidentes bajo lluvia, `false` clima seco.
+    *   `vehicle_type`: Filtra por tipo de vehículo (ej: `moto`, `bus`).
+    *   `city`: Filtra por municipio (ej: `cucuta`, `cali`, `bogota`).
+    *   `export_format`: `json` (por defecto) o `csv` (descarga directa de archivo).
+*   **Ejemplo**: `GET http://localhost:8080/datasets/export?export_format=csv&start_year=2024&rain_only=true`
 
-3. Forzar refresco del cache:
+### 2. 🖼️ Generar Gráfico Estadístico PNG (`/datasets/chart.png`)
+Genera dinámicamente un gráfico consolidado de 4 cuadrantes (Accidentes por Año, Top 5 Ciudades, Top 5 Vehículos, Proporción de Lluvia) utilizando un diseño oscuro premium y lo sirve directamente como una imagen PNG.
 
-```bash
-curl "http://localhost:8000/datasets/stq8-drvp?max_rows=200&force_refresh=true"
-```
+*   **Ruta**: `GET /datasets/chart.png`
+*   **Parámetros de consulta**: Admite los mismos filtros de filtrado temporal, climático, de ciudad y vehículos que el endpoint de exportación.
+*   **Ejemplo**: Accede desde tu navegador o etiqueta HTML a `http://localhost:8080/datasets/chart.png?city=cucuta&start_year=2020`
 
-4. Long polling para detectar actualizaciones:
+---
 
-```bash
-curl "http://localhost:8000/datasets/stq8-drvp/updates?max_rows=200&last_version=VERSION_ACTUAL&timeout_seconds=30"
-```
+## 🌐 Interfaz Gráfica (Frontend)
 
-Este endpoint:
-	- espera hasta `timeout_seconds` por una nueva version del dataset
-	- si detecta cambio, responde con `changed: true` y devuelve `data`
-	- si no detecta cambio, responde con `changed: false` y `timed_out: true`
-	- `data` usa el mismo formato relacional de `/datasets/{dataset_id}`
-
-Ejemplo cuando hubo cambio:
-
-```json
-{
-	"dataset_id": "stq8-drvp",
-	"max_rows": 200,
-	"version": "nueva-version-hash",
-	"changed": true,
-	"timed_out": false,
-	"fetched_at": 1717777777.0,
-	"data": {
-		"tables": {
-			"comparendos": [],
-			"comparendos_limpios": [],
-			"extracciones": []
-		}
-	}
-}
-```
-
-Ejemplo cuando no hubo cambio:
-
-```json
-{
-	"dataset_id": "stq8-drvp",
-	"max_rows": 200,
-	"version": "misma-version-hash",
-	"changed": false,
-	"timed_out": true,
-	"fetched_at": 1717777777.0
-}
-```
-
-### Como funciona el cache
-
-- El cache vive en memoria dentro del proceso de la API.
-- Cada dataset se guarda por combinacion de `dataset_id` y `max_rows`.
-- La version del dataset se calcula con un hash del contenido procesado.
-- Si el contenido cambia en SODA, cambia la version y el long polling notifica a los clientes en la siguiente consulta.
-- Los clientes conectados deben volver a consultar el endpoint de updates al recibir una respuesta, que es el patron normal de long polling.
-
-## Estructura del proyecto
-
-```text
-.
-├── data/
-│   └── fewshot_50_norte_santander.json
-├── src/
-│   └── safeway/
-│       ├── api.py
-│       ├── cleaning.py
-│       ├── extractor.py
-│       ├── pipeline.py
-│       └── soda_client.py
-├── tests/
-│   ├── test_api.py
-│   ├── test_cleaning.py
-│   ├── test_extractor.py
-│   └── test_pipeline.py
-├── requirements.txt
-└── README.md
-```
-
-## Instalacion
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Opcional para mejorar limites de consulta:
-
-```bash
-export SODA_APP_TOKEN="tu_token"
-```
-
-## Ejecucion
-
-```bash
-PYTHONPATH=src python -m safeway.pipeline --dataset-id stq8-drvp --max-rows 200 --output outputs/extracciones.json
-```
-
-Salida:
-
-- Archivo JSON con objetos por fila, incluyendo:
-	- `comparendo`
-	- `data_original` (fila completa recibida desde SODA)
-	- `data_limpia` (fila completa con limpieza automatica de texto/fechas)
-	- `extraccion`
-
-## Pruebas automaticas
-
-Para validar que la limpieza y la extraccion funcionan automaticamente en cada cambio:
-
-```bash
-PYTHONPATH=src pytest -q
-```
-
-Las pruebas cubren:
-
-- Normalizacion de texto en limpieza.
-- Estructura obligatoria y confianza en extraccion.
-- Respuesta ` ["UNKNOWN"] ` cuando no hay referencia espacial valida.
-- Flujo del pipeline sin depender de red (mock de cliente SODA).
-
-## Formato de salida de extraccion
-
-Cuando hay referencia espacial:
-
-```json
-{
-	"VIA_PRINCIPAL": {"value": "CALLE 10", "confidence": 0.84},
-	"NUMERO_O_KM": {"value": "10 # 5-20", "confidence": 0.88},
-	"REFERENCIA_SEMANTICA": {"value": "FRENTE A TERMINAL", "confidence": 0.76},
-	"BARRIO_O_MUNICIPIO": {"value": "CUCUTA", "confidence": 0.95}
-}
-```
-
-Cuando no hay referencia espacial valida:
-
-```json
-["UNKNOWN"]
-```
-
-## Cobertura de criterios de aceptacion
-
-- [x] Extraccion estructurada con claves obligatorias:
-	- `VIA_PRINCIPAL`
-	- `NUMERO_O_KM`
-	- `REFERENCIA_SEMANTICA`
-	- `BARRIO_O_MUNICIPIO`
-- [x] Metricas de confianza por entidad (rango 0.0 a 1.0).
-- [x] Manejo de alucinaciones con token ` ["UNKNOWN"] `.
-- [x] Conexion dinamica descargar -> procesar -> usar datos (API SODA + pipeline).
-
-## Criterios tecnicos aplicados
-
-- Libreria NLP usada: `spaCy` (pipeline local `spacy.blank("es")` + `EntityRuler`).
-- Reglas hibridas: regex + entidades reconocidas por `EntityRuler`.
-- Few-shot / set critico: `data/fewshot_50_norte_santander.json` con 50 ejemplos.
-
-## Notas tecnicas
-
-- Endpoint de metadatos del dataset:
-	- `https://www.datos.gov.co/api/views/stq8-drvp.json`
-- Consulta principal usada en pipeline:
-	- `$select=*`
-	- sin `$where` para no perder columnas ni filas en origen
-	- paginacion con `$limit` y `$offset`
-- Formula simple de confianza (heuristica):
-	- coincidencia fuerte regex + entidad spaCy: alta ($\sim 0.90$)
-	- coincidencia regex media: media-alta ($\sim 0.74-0.88$)
-	- no encontrado: $0.0$
-- Si al ejecutar falla con error de DNS/NameResolutionError, el problema es de conectividad hacia `www.datos.gov.co`, no de la logica del pipeline.
-
-## Avance #1
-
-- Se creo un pipeline funcional end-to-end con API SODA.
-- Se implemento limpieza y normalizacion del campo `lugar`.
-- Se implemento extractor estructurado con las 4 claves obligatorias y score por entidad.
-- Se incluyo manejo de ` ["UNKNOWN"] ` para evitar alucinaciones.
-- Se agrego set de 50 ejemplos criticos de Norte de Santander.
-
-Hechos relevantes:
-
-- El dataset `stq8-drvp` contiene la ubicacion en la columna `lugar`.
-- El enfoque actual es hibrido (NLP local + reglas), sin dependencia de un LLM remoto.
-
-## Detalles de revision
-
-- Proceso calificativo sugerido:
-	1. Ejecutar pipeline sobre muestra ($n=200$ o mayor).
-	2. Medir cobertura de estructura valida vs `UNKNOWN`.
-	3. Muestrear manualmente errores por tipo de entidad.
-	4. Ajustar reglas/patrones y recalibrar confianza.
-- Responsable de calificacion:
-	- Pendiente de asignar (QA/analista de datos del equipo).
-
-## Entrega
-
-Artefactos entregables:
-
-1. Codigo fuente del pipeline (`src/safeway`).
-2. Dependencias (`requirements.txt`).
-3. Set critico de 50 ejemplos (`data/fewshot_50_norte_santander.json`).
-4. Documento tecnico y trazabilidad de criterios (este `README.md`).
+Ubicada en [frontend/index.html](file:///home/lebadura/Documentos/GitHub/safeway/frontend/index.html), ofrece:
+*   **Mapa de Calor e Incidentes**: Puntos rojos indican zonas de alta densidad de accidentalidad.
+*   **Visualización de Fallbacks**: Los marcadores que cayeron en coordenadas estimadas muestran una advertencia amarilla `⚠️ Fallback` tanto en el mapa como en la barra lateral.
+*   **Modo de Grafos**: Dibuja la red estructurada de calles y el índice de riesgo vicular de cada esquina.
+*   **Buscador de Rutas Seguras**: Introduce el nodo de origen y destino para que el backend trace la ruta minimizando riesgos.
+*   **Editor en Vivo**: Haz click en cualquier marcador para corregir manualmente su dirección o moverlo arrastrándolo por el mapa.

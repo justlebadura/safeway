@@ -7,7 +7,95 @@ import spacy
 from spacy.language import Language
 from spacy.pipeline import EntityRuler
 
-from .cleaning import normalize_text
+import unicodedata
+
+def normalize_text(text: str) -> str:
+    """Normaliza texto para facilitar reglas de extracción."""
+    raw = text or ""
+    raw = raw.strip().upper()
+    raw = "".join(
+        ch for ch in unicodedata.normalize("NFD", raw) if unicodedata.category(ch) != "Mn"
+    )
+    raw = re.sub(r"\s+", " ", raw)
+    return raw
+
+
+import hashlib
+
+def parse_coordinate(val: Any) -> float | None:
+    if val is None:
+        return None
+    if isinstance(val, (int, float)):
+        return float(val)
+    try:
+        cleaned = str(val).strip().replace(",", ".")
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
+FALLBACK_COORDINATES = {
+    "CUCUTA": (7.89391, -72.50782),
+    "VILLA DEL ROSARIO": (7.83389, -72.47417),
+    "LOS PATIOS": (7.85972, -72.50806),
+    "OCAÑA": (8.23778, -73.35333),
+    "PAMPLONA": (7.37583, -72.64833),
+    "SARDINATA": (8.08278, -72.80056),
+    "TIBU": (8.63889, -72.73333),
+    "CHINACOTA": (7.60833, -72.60056),
+    "BUCARAMANGA": (7.12539, -73.1198),
+    "BOGOTA": (4.60971, -74.08175),
+    "PALMIRA": (3.51833, -76.30400),
+    "BARRANQUILLA": (10.963889, -74.796389),
+    "CALI": (3.451647, -76.531985),
+}
+
+
+def resolve_coordinates(
+    row_id: str,
+    latitude: float | None,
+    longitude: float | None,
+    extraccion: Any,
+    dataset_id: str,
+) -> tuple[float, float, bool]:
+    if latitude is not None and longitude is not None:
+        return latitude, longitude, False
+
+    muni_name = None
+    if isinstance(extraccion, dict) and extraccion.get("BARRIO_O_MUNICIPIO"):
+        muni_name = extraccion["BARRIO_O_MUNICIPIO"].get("value")
+
+    if dataset_id == "7cci-nqqb":
+        default_city = "BUCARAMANGA"
+    elif dataset_id == "3v2w-chcq":
+        default_city = "BOGOTA"
+    elif dataset_id == "sjpx-eqfp":
+        default_city = "PALMIRA"
+    elif dataset_id == "sefb-a755":
+        default_city = "BARRANQUILLA"
+    elif dataset_id == "ixgc-yijx":
+        default_city = "CALI"
+    else:
+        default_city = "CUCUTA"
+
+    city_key = (muni_name or default_city).upper()
+
+    coords = FALLBACK_COORDINATES.get(city_key)
+    if not coords:
+        if city_key == "BOGOTA":
+            coords = (4.60971, -74.08175)
+        elif city_key == "PALMIRA":
+            coords = (3.51833, -76.30400)
+        else:
+            coords = FALLBACK_COORDINATES.get(default_city)
+    if not coords:
+        coords = FALLBACK_COORDINATES.get("CUCUTA")
+
+    h = int(hashlib.md5(row_id.encode("utf-8")).hexdigest(), 16)
+    lat_off = ((h % 1000) / 1000.0 - 0.5) * 0.015
+    lng_off = (((h // 1000) % 1000) / 1000.0 - 0.5) * 0.015
+
+    return coords[0] + lat_off, coords[1] + lng_off, True
 
 
 MUNICIPIOS_NORTE_SANTANDER = [
@@ -96,6 +184,12 @@ REFERENCE_KEYWORDS = [
 ]
 
 
+BLACKLIST_TERMS = {
+    "OBSERVACION", "ADMINISTRATIVA", "SIN", "DATOS", "NO", "REGISTRA", "NINGUNO",
+    "N/A", "PENDIENTE", "DESCONOCIDO", "DIRECCION", "RUTA", "N/D", "ADMINISTRATIVO"
+}
+
+
 def build_nlp() -> Language:
     nlp = spacy.blank("es")
     ruler = nlp.add_pipe("entity_ruler")
@@ -145,6 +239,12 @@ class AddressExtractor:
         num_km = self._extract_num_or_km(text)
         ref = self._extract_reference(text)
         barrio_muni = self._extract_barrio_or_municipality(text, doc)
+
+        if barrio_muni["value"] is None and text:
+            words = text.split()
+            has_blacklist = any(w in BLACKLIST_TERMS for w in words)
+            if not has_blacklist and len(words) <= 3:
+                barrio_muni = {"value": text, "confidence": 0.70}
 
         has_spatial_signal = any(
             item["value"] is not None for item in [via, num_km, ref, barrio_muni]

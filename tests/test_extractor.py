@@ -1,5 +1,5 @@
-from safeway.cleaning import clean_location_text
-from safeway.extractor import AddressExtractor
+from microservices.api_soda_cleaner import clean_location_text
+from microservices.mapper import AddressExtractor
 
 
 extractor = AddressExtractor()

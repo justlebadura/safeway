@@ -1,4 +1,4 @@
-from safeway.cleaning import clean_location_text
+from microservices.api_soda_cleaner import clean_location_text
 
 
 def test_clean_location_text_normalizes_case_accents_and_spaces() -> None:

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from safeway import api
+import api
+from microservices import api_soda_cleaner as cleaner
 
 
 class SequencedSodaClient:
@@ -23,8 +24,8 @@ class SequencedSodaClient:
         return self.sequences[0]
 
 
-def build_service(refresh_interval_seconds: int = 60, poll_interval_seconds: float = 0.01) -> api.DatasetCacheService:
-    return api.DatasetCacheService(
+def build_service(refresh_interval_seconds: int = 60, poll_interval_seconds: float = 0.01) -> cleaner.DatasetCacheService:
+    return cleaner.DatasetCacheService(
         refresh_interval_seconds=refresh_interval_seconds,
         poll_interval_seconds=poll_interval_seconds,
         client_factory=SequencedSodaClient,
@@ -36,6 +37,7 @@ def test_get_dataset_uses_cache_and_returns_processed_rows(monkeypatch) -> None:
         [{"comparendo": "1", "lugar": "CALLE 10 #5-20 CUCUTA", "fecha": "2024-01-01T10:00:00.000"}]
     ]
     service = build_service(refresh_interval_seconds=999)
+    monkeypatch.setattr(cleaner, "cache_service", service)
     monkeypatch.setattr(api, "cache_service", service)
     client = TestClient(api.app)
 
@@ -59,6 +61,7 @@ def test_long_poll_returns_updated_data_when_version_changes(monkeypatch) -> Non
         [{"comparendo": "1", "lugar": "AV LIBERTADORES #12-34 CUCUTA"}],
     ]
     service = build_service(refresh_interval_seconds=0, poll_interval_seconds=0.01)
+    monkeypatch.setattr(cleaner, "cache_service", service)
     monkeypatch.setattr(api, "cache_service", service)
     client = TestClient(api.app)
 
@@ -86,6 +89,7 @@ def test_long_poll_times_out_without_change(monkeypatch) -> None:
         [{"comparendo": "1", "lugar": "CALLE 10 #5-20 CUCUTA"}],
     ]
     service = build_service(refresh_interval_seconds=999, poll_interval_seconds=0.01)
+    monkeypatch.setattr(cleaner, "cache_service", service)
     monkeypatch.setattr(api, "cache_service", service)
     client = TestClient(api.app)
 
