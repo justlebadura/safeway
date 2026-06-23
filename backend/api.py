@@ -74,6 +74,79 @@ def get_combined_datasets(
     return get_combined_datasets_snapshot(dataset_ids, max_rows, force_refresh)
 
 
+@app.get("/datasets/export")
+def export_dataset_records(
+    dataset_ids: str = Query(default="stq8-drvp,7cci-nqqb,3v2w-chcq,sjpx-eqfp,dr5c-eewa"),
+    max_rows: int = Query(default=2000, ge=1, le=5000),
+    start_year: int | None = Query(default=None),
+    end_year: int | None = Query(default=None),
+    rain_only: bool | None = Query(default=None),
+    vehicle_type: str | None = Query(default=None),
+    city: str | None = Query(default=None),
+    export_format: str = Query(default="json")
+) -> Any:
+    snapshot = get_combined_datasets_snapshot(dataset_ids, max_rows)
+    records = snapshot["tables"]["records"]
+
+    filtered = get_filtered_accidents(
+        records,
+        start_year=start_year,
+        end_year=end_year,
+        rain_only=rain_only,
+        vehicle_type=vehicle_type,
+        city=city
+    )
+
+    if export_format.lower() == "csv":
+        import csv
+        import io
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["id", "dataset_id", "row_id", "latitude", "longitude", "location", "is_fallback_coord", "date_iso", "time", "vehicles"])
+        for r in filtered:
+            writer.writerow([
+                r.get("id"),
+                r.get("dataset_id"),
+                r.get("row_id"),
+                r.get("latitude"),
+                r.get("longitude"),
+                r.get("location"),
+                r.get("is_fallback_coord"),
+                r.get("date_iso"),
+                r.get("time"),
+                r.get("vehicles")
+            ])
+        return Response(content=output.getvalue(), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=export.csv"})
+
+    return {"count": len(filtered), "records": filtered}
+
+
+@app.get("/datasets/chart.png")
+def get_chart_image(
+    dataset_ids: str = Query(default="stq8-drvp,7cci-nqqb,3v2w-chcq,sjpx-eqfp,dr5c-eewa"),
+    max_rows: int = Query(default=2000, ge=1, le=5000),
+    start_year: int | None = Query(default=None),
+    end_year: int | None = Query(default=None),
+    rain_only: bool | None = Query(default=None),
+    vehicle_type: str | None = Query(default=None),
+    city: str | None = Query(default=None),
+) -> Response:
+    snapshot = get_combined_datasets_snapshot(dataset_ids, max_rows)
+    records = snapshot["tables"]["records"]
+
+    filtered = get_filtered_accidents(
+        records,
+        start_year=start_year,
+        end_year=end_year,
+        rain_only=rain_only,
+        vehicle_type=vehicle_type,
+        city=city
+    )
+
+    img_bytes = generate_report_chart(filtered)
+    return Response(content=img_bytes, media_type="image/png")
+
+
 @app.get("/datasets/{dataset_id}")
 def get_dataset(
     dataset_id: str,
@@ -139,75 +212,3 @@ def update_node(
 ) -> dict[str, Any]:
     return update_dataset_node(dataset_id, row_id, payload)
 
-
-@app.get("/datasets/export")
-def export_dataset_records(
-    dataset_ids: str = Query(default="stq8-drvp,7cci-nqqb,3v2w-chcq,sjpx-eqfp,dr5c-eewa"),
-    max_rows: int = Query(default=2000, ge=1, le=5000),
-    start_year: int | None = Query(default=None),
-    end_year: int | None = Query(default=None),
-    rain_only: bool | None = Query(default=None),
-    vehicle_type: str | None = Query(default=None),
-    city: str | None = Query(default=None),
-    export_format: str = Query(default="json")
-) -> Any:
-    snapshot = get_combined_datasets_snapshot(dataset_ids, max_rows)
-    records = snapshot["tables"]["records"]
-    
-    filtered = get_filtered_accidents(
-        records,
-        start_year=start_year,
-        end_year=end_year,
-        rain_only=rain_only,
-        vehicle_type=vehicle_type,
-        city=city
-    )
-
-    if export_format.lower() == "csv":
-        import csv
-        import io
-        output = io.StringIO()
-        writer = csv.writer(output)
-        writer.writerow(["id", "dataset_id", "row_id", "latitude", "longitude", "location", "is_fallback_coord", "date_iso", "time", "vehicles"])
-        for r in filtered:
-            writer.writerow([
-                r.get("id"),
-                r.get("dataset_id"),
-                r.get("row_id"),
-                r.get("latitude"),
-                r.get("longitude"),
-                r.get("location"),
-                r.get("is_fallback_coord"),
-                r.get("date_iso"),
-                r.get("time"),
-                r.get("vehicles")
-            ])
-        return Response(content=output.getvalue(), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=export.csv"})
-
-    return {"count": len(filtered), "records": filtered}
-
-
-@app.get("/datasets/chart.png")
-def get_chart_image(
-    dataset_ids: str = Query(default="stq8-drvp,7cci-nqqb,3v2w-chcq,sjpx-eqfp,dr5c-eewa"),
-    max_rows: int = Query(default=2000, ge=1, le=5000),
-    start_year: int | None = Query(default=None),
-    end_year: int | None = Query(default=None),
-    rain_only: bool | None = Query(default=None),
-    vehicle_type: str | None = Query(default=None),
-    city: str | None = Query(default=None),
-) -> Response:
-    snapshot = get_combined_datasets_snapshot(dataset_ids, max_rows)
-    records = snapshot["tables"]["records"]
-    
-    filtered = get_filtered_accidents(
-        records,
-        start_year=start_year,
-        end_year=end_year,
-        rain_only=rain_only,
-        vehicle_type=vehicle_type,
-        city=city
-    )
-    
-    img_bytes = generate_report_chart(filtered)
-    return Response(content=img_bytes, media_type="image/png")

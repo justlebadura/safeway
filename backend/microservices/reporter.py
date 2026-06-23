@@ -17,6 +17,10 @@ def get_filtered_accidents(
 ) -> list[dict[str, Any]]:
     filtered = []
     for acc in accidents:
+        # Skip records with fallback (approximate) coordinates
+        if acc.get("is_fallback_coord"):
+            continue
+
         # Date & Year filter
         year = None
         date_iso = acc.get("date_iso")
