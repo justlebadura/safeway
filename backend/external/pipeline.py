@@ -5,8 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from microservices.mapper import AddressExtractor
-from external.soda_client import SodaClient
+from backend.microservices.mapper import AddressExtractor
+from backend.external.soda_client import SodaClient
 
 
 def process_rows(
@@ -15,7 +15,7 @@ def process_rows(
     id_field: str = "comparendo",
     location_field: str = "lugar",
 ) -> list[dict[str, Any]]:
-    from microservices.api_soda_cleaner import clean_soda_row
+    from backend.microservices.api_soda_cleaner import clean_soda_row
     extractor = extractor or AddressExtractor()
 
     processed: list[dict[str, Any]] = []

@@ -11,9 +11,9 @@ from threading import Lock
 from time import time
 from typing import Callable, List
 
-from external.pipeline import process_rows
-from external.soda_client import SodaClient
-from microservices.mapper import resolve_coordinates
+from backend.external.pipeline import process_rows
+from backend.external.soda_client import SodaClient
+from backend.microservices.mapper import resolve_coordinates
 
 
 DATASET_CONFIGS = {
@@ -165,7 +165,7 @@ def normalize_row_features(row: dict[str, Any], dataset_id: str) -> dict[str, An
     lat_field = config.get("latitude_field")
     lng_field = config.get("longitude_field")
     
-    from microservices.mapper import parse_coordinate
+    from backend.microservices.mapper import parse_coordinate
     lat = parse_coordinate(row.get(lat_field)) if lat_field else None
     lng = parse_coordinate(row.get(lng_field)) if lng_field else None
     
