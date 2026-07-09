@@ -3,9 +3,13 @@ from __future__ import annotations
 import re
 from typing import Any
 
-import spacy
-from spacy.language import Language
-from spacy.pipeline import EntityRuler
+try:
+    import spacy
+    from spacy.language import Language
+    from spacy.pipeline import EntityRuler
+    _SPACY_AVAILABLE = True
+except ImportError:
+    _SPACY_AVAILABLE = False
 
 import unicodedata
 
@@ -190,7 +194,9 @@ BLACKLIST_TERMS = {
 }
 
 
-def build_nlp() -> Language:
+def build_nlp() -> Any:
+    if not _SPACY_AVAILABLE:
+        return None
     nlp = spacy.blank("es")
     ruler = nlp.add_pipe("entity_ruler")
     assert isinstance(ruler, EntityRuler)
@@ -227,14 +233,14 @@ class AddressExtractor:
     ]
 
     def __init__(self) -> None:
-        self.nlp = build_nlp()
+        self.nlp = build_nlp()  # None when spacy unavailable
 
     def extract(self, cleaned_text: str) -> dict[str, Any] | list[str]:
         text = (cleaned_text or "").strip().upper()
         if not text:
             return ["UNKNOWN"]
 
-        doc = self.nlp(text)
+        doc = self.nlp(text) if self.nlp is not None else None
         via = self._extract_via(text, doc)
         num_km = self._extract_num_or_km(text)
         ref = self._extract_reference(text)
@@ -261,7 +267,7 @@ class AddressExtractor:
 
     def _extract_via(self, text: str, doc: Any) -> dict[str, Any]:
         match = ROAD_PATTERN.search(text)
-        entity_match = next((ent.text for ent in doc.ents if ent.label_ == "ROAD"), None)
+        entity_match = next((ent.text for ent in doc.ents if ent.label_ == "ROAD"), None) if doc is not None else None
 
         if match:
             value = match.group(0).strip()
@@ -304,7 +310,7 @@ class AddressExtractor:
             value = re.sub(r"\s+", " ", raw)
             return {"value": value, "confidence": 0.81}
 
-        municipality = next((ent.text for ent in doc.ents if ent.label_ == "LOC"), None)
+        municipality = next((ent.text for ent in doc.ents if ent.label_ == "LOC"), None) if doc is not None else None
         if municipality:
             normalized = normalize_text(municipality)
             canonical = MUNICIPIO_CANONICAL_BY_NORMALIZED.get(normalized, normalized)
