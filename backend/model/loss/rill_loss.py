@@ -28,13 +28,12 @@ class HybridLoss(nn.Module):
         # Data loss
         data_loss = F.mse_loss(pred, y_true)
         
-        # Logic Loss (simplified RILL approximation: Consistency constraint)
-        # Smoothness: loss if neighbors have very different risk predictions
-        nodes_risk = pred
-        # Simplified: sum of squared differences of risk between connected nodes
-        smoothness_loss = 0.0
-        for i in range(edge_index.shape[1]):
-            u, v = edge_index[0, i], edge_index[1, i]
-            smoothness_loss += (nodes_risk[u] - nodes_risk[v])**2
+        # Vectorized Logic Loss (RILL approximation: spatial consistency constraint)
+        # u and v are tensors of indices of connected nodes
+        u = edge_index[0]
+        v = edge_index[1]
+        
+        # Calculate squared differences in parallel using prediction tensor
+        smoothness_loss = torch.sum((pred[u] - pred[v]) ** 2)
         
         return data_loss + self.lambda_logic * smoothness_loss

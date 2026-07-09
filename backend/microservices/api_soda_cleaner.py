@@ -11,7 +11,8 @@ from threading import Lock
 from time import time
 from typing import Callable, List
 
-from backend.external.pipeline import process_rows
+# Import removed to prevent circular import:
+# from backend.external.pipeline import process_rows
 from backend.external.soda_client import SodaClient
 from backend.microservices.mapper import resolve_coordinates
 
@@ -423,6 +424,7 @@ class DatasetCacheService:
             v_row[effective_loc] = norm["raw_location"]
             virtual_rows.append(v_row)
 
+        from backend.external.pipeline import process_rows
         processed = process_rows(virtual_rows, id_field=effective_id, location_field=effective_loc)
         for row, norm in zip(processed, normalized_data):
             row["latitude"] = norm["lat"]

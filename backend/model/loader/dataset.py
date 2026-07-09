@@ -14,7 +14,7 @@ class TemporalGraphDataset:
         self.num_nodes = 0
         self.edge_index = None
 
-    def load_from_json(self, dataset_ids: str = "stq8-drvp,7cci-nqqb,3v2w-chcq,sjpx-eqfp,dr5c-eewa", max_rows: int = 200):
+    def load_from_json(self, dataset_ids: str = "7cci-nqqb", max_rows: int = 1500):
         """
         Carga datos procesados usando el servicio central de limpieza.
         """

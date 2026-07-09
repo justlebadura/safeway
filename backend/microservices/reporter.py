@@ -17,9 +17,9 @@ def get_filtered_accidents(
 ) -> list[dict[str, Any]]:
     filtered = []
     for acc in accidents:
-        # Skip records with fallback (approximate) coordinates
-        if acc.get("is_fallback_coord"):
-            continue
+        # Skip check disabled to allow geocoded datasets (Bucaramanga) to be exported and visualized
+        # if acc.get("is_fallback_coord"):
+        #     continue
 
         # Date & Year filter
         year = None

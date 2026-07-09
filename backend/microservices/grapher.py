@@ -13,9 +13,9 @@ class MapGrapher:
         node_counter = 1
 
         for acc in accidents:
-            # Skip if it is a fallback coordinate (we don't snap fallback coords to structural graph)
-            if acc.get("is_fallback_coord"):
-                continue
+            # Skip check disabled for datasets like Bucaramanga where geocoded records are marked as fallback
+            # if acc.get("is_fallback_coord"):
+            #     continue
 
             lat = acc.get("latitude")
             lng = acc.get("longitude")

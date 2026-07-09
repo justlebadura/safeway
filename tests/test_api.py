@@ -106,3 +106,51 @@ def test_long_poll_times_out_without_change(monkeypatch) -> None:
     assert payload["changed"] is False
     assert payload["timed_out"] is True
     assert "data" not in payload
+
+
+def test_combined_route_with_use_symbolic(monkeypatch) -> None:
+    SequencedSodaClient.sequences = [
+        [
+            {
+                "orden": "1",
+                "barrio": "CENTRO",
+                "fecha": "2024-01-01",
+                "hora": "10:00:00",
+                "vehicles": "HERIDO",
+                "latitude": "7.119",
+                "longitude": "-73.122"
+            },
+            {
+                "orden": "2",
+                "barrio": "CENTRO",
+                "fecha": "2024-01-02",
+                "hora": "12:00:00",
+                "vehicles": "MUERTO",
+                "latitude": "7.120",
+                "longitude": "-73.123"
+            }
+        ]
+    ]
+    service = build_service(refresh_interval_seconds=999)
+    monkeypatch.setattr(cleaner, "cache_service", service)
+    monkeypatch.setattr(api, "cache_service", service)
+    client = TestClient(api.app)
+
+    response = client.get(
+        "/datasets/combined/route",
+        params={
+            "dataset_ids": "7cci-nqqb",
+            "start_id": "node_1",
+            "end_id": "node_2",
+            "rain_active": "true",
+            "target_hour": 12,
+            "use_symbolic": "true"
+        }
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert "safest" in payload
+    assert "fastest" in payload
+    assert "hazard_score" in payload["safest"]
+    assert "path" in payload["safest"]
