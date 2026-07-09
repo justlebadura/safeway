@@ -170,81 +170,91 @@ class RouteOptimizer:
             else:
                 return 1.9
 
-        # Dijkstra queue: (total_cost, current_segment_id, path_taken_segment_ids, visited_intersection_ids)
+        def node_risk(node) -> float:
+            """Use the heuristic calculate_risk for Dijkstra cost (has real variance),
+            keep predicted_risk only for the final hazard display score."""
+            return node.calculate_risk(target_year, rain_active, target_hour)
+
+        # Dijkstra queue: (total_cost, tiebreak, current_segment_id, path_taken, visited_set)
+        # visited_nodes is now a frozenset for O(1) lookup and correct immutability
         queue = []
+        tiebreak = 0
         for s_id in start_segs:
             seg = self.segments[s_id]
             h_factor = get_road_hierarchy_factor(seg.label)
             init_cost = seg.distance * h_factor
             if use_hazard:
-                risk_u = getattr(seg.u, "predicted_risk", None) or seg.u.calculate_risk(target_year, rain_active, target_hour)
-                risk_v = getattr(seg.v, "predicted_risk", None) or seg.v.calculate_risk(target_year, rain_active, target_hour)
-                init_cost += ((risk_u + risk_v) / 2.0 * 0.01)
-            heapq.heappush(queue, (init_cost, s_id, [s_id], [seg.u.id, seg.v.id]))
+                init_cost += ((node_risk(seg.u) + node_risk(seg.v)) / 2.0 * 0.01)
+            heapq.heappush(queue, (init_cost, tiebreak, s_id, [s_id], frozenset([seg.u.id, seg.v.id])))
+            tiebreak += 1
 
-        visited = set()
+        visited_segs = set()
 
         while queue:
-            (weight, curr_seg_id, path, visited_nodes) = heapq.heappop(queue)
+            (weight, _, curr_seg_id, path, visited_nodes) = heapq.heappop(queue)
 
-            if curr_seg_id in visited:
+            if curr_seg_id in visited_segs:
                 continue
-            visited.add(curr_seg_id)
+            visited_segs.add(curr_seg_id)
 
             curr_seg = self.segments[curr_seg_id]
 
             # Reached destination intersection
             if curr_seg.v.id == end_id:
-                # Reconstruct path coordinates: starting node of first segment, and ending node of all segments
                 coords_path = [(self.segments[path[0]].u.lat, self.segments[path[0]].u.lng)]
                 for s_id in path:
                     coords_path.append((self.segments[s_id].v.lat, self.segments[s_id].v.lng))
                 return coords_path, weight
 
             for neighbor_seg_id in self.adjacency[curr_seg_id]:
-                if neighbor_seg_id in visited:
+                if neighbor_seg_id in visited_segs:
                     continue
 
                 neighbor_seg = self.segments[neighbor_seg_id]
 
-                # Prevent loops by checking if the end node of neighbor segment is already visited
+                # Hard block: don't revisit any intersection already in path (eliminates loops/backtracking)
                 if neighbor_seg.v.id in visited_nodes:
                     continue
 
-                # 1. Base segment distance
-                dist = neighbor_seg.distance
-                
-                # 2. Road Hierarchy Penalization
-                h_factor = get_road_hierarchy_factor(neighbor_seg.label)
-                base_cost = dist * h_factor
-
-                # 3. Turn Penalty (calculates vector angle between incoming and outgoing segments)
+                # Hard block: U-turns and near-reversals (simulate one-way enforcement)
                 # Current vector: curr_seg.u -> curr_seg.v
                 v1_lat = curr_seg.v.lat - curr_seg.u.lat
                 v1_lng = curr_seg.v.lng - curr_seg.u.lng
                 # Neighbor vector: neighbor_seg.u -> neighbor_seg.v
                 v2_lat = neighbor_seg.v.lat - neighbor_seg.u.lat
                 v2_lng = neighbor_seg.v.lng - neighbor_seg.u.lng
-                
+
                 turn_penalty = 0.0
-                dot = v1_lat * v2_lat + v1_lng * v2_lng
                 m1 = math.sqrt(v1_lat**2 + v1_lng**2)
                 m2 = math.sqrt(v2_lat**2 + v2_lng**2)
                 if m1 > 0 and m2 > 0:
-                    cos_angle = max(-1.0, min(1.0, dot / (m1 * m2)))
-                    angle = math.acos(cos_angle)
-                    if angle > 0.78:  # Turn > 45 degrees
-                        turn_penalty = 0.0015  # Virtual distance penalty (~150m)
+                    cos_angle = max(-1.0, min(1.0, (v1_lat * v2_lat + v1_lng * v2_lng) / (m1 * m2)))
+                    angle_deg = math.degrees(math.acos(cos_angle))
 
-                edge_cost = base_cost + turn_penalty
-                
+                    # Hard block near-reversals (>150°): enforces one-way streets
+                    if angle_deg > 150:
+                        continue
+
+                    # Soft penalty for significant turns (>45°)
+                    if angle_deg > 45:
+                        turn_penalty = 0.0015
+
+                # 1. Base segment distance
+                h_factor = get_road_hierarchy_factor(neighbor_seg.label)
+                edge_cost = neighbor_seg.distance * h_factor + turn_penalty
+
                 if use_hazard:
-                    risk_v = getattr(neighbor_seg.v, "predicted_risk", None)
-                    if risk_v is None:
-                        risk_v = neighbor_seg.v.calculate_risk(target_year, rain_active, target_hour)
-                    edge_cost += (risk_v * 0.01)
+                    edge_cost += (node_risk(neighbor_seg.v) * 0.01)
 
-                heapq.heappush(queue, (weight + edge_cost, neighbor_seg_id, path + [neighbor_seg_id], visited_nodes + [neighbor_seg.v.id]))
+                new_visited = visited_nodes | {neighbor_seg.v.id}
+                heapq.heappush(queue, (
+                    weight + edge_cost,
+                    tiebreak,
+                    neighbor_seg_id,
+                    path + [neighbor_seg_id],
+                    new_visited
+                ))
+                tiebreak += 1
 
         # Fallback if no path is found
         if start_id in self.nodes and end_id in self.nodes:
