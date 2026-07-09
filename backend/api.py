@@ -318,7 +318,20 @@ def get_safest_route(
         use_hazard=False
     )
 
-    # Helper to calculate an absolute-scaled danger percentage (1% to 99%)
+    # Compute min and max baseline risks in the active graph
+    all_risks = []
+    for n in nodes:
+        r = getattr(n, "predicted_risk", None)
+        if r is None:
+            r = n.calculate_risk(target_year, rain_active, target_hour)
+        all_risks.append(r)
+    min_graph_risk = min(all_risks) if all_risks else 0.0
+    max_graph_risk = max(all_risks) if all_risks else 1.0
+    risk_range = max_graph_risk - min_graph_risk
+    if risk_range <= 0.001:
+        risk_range = 1.0
+
+    # Helper to calculate a probabilistic danger percentage (1% to 99%)
     def get_path_danger_percent(path_coords):
         if not path_coords:
             return 1
@@ -328,25 +341,22 @@ def get_safest_route(
             node = coord_to_node.get((lat, lng))
             if node:
                 risk = getattr(node, "predicted_risk", None)
-                # Homogenize scales: predicted_risk (0-2.8) is scaled by 4.0;
-                # calculate_risk() (0-15+) is used directly.
-                if risk is not None:
-                    risk_val = risk * 4.0
-                else:
-                    risk_val = node.calculate_risk(target_year, rain_active, target_hour)
-                node_risks.append(risk_val)
+                if risk is None:
+                    risk = node.calculate_risk(target_year, rain_active, target_hour)
+                node_risks.append(risk)
         
         if not node_risks:
             return 1
 
-        # Danger scale: risk_val / 10.0 (where 10.0 represents a very high risk baseline)
-        normalized_risks = [min(1.0, r / 10.0) for r in node_risks]
-        
-        # Route danger index is 30% worst-spot risk and 70% average route risk
-        max_risk = max(normalized_risks) if normalized_risks else 0.0
-        avg_risk = sum(normalized_risks) / len(normalized_risks) if normalized_risks else 0.0
-        
-        combined_index = 0.3 * max_risk + 0.7 * avg_risk
+        # Map each node risk to an accident probability P_i in [0.02, 0.42] comparative to the city
+        survival_product = 1.0
+        for r in node_risks:
+            # Normalized risk between 0.0 and 1.0
+            norm_r = (r - min_graph_risk) / risk_range
+            p_i = 0.02 + 0.40 * min(1.0, max(0.0, norm_r))
+            survival_product *= (1.0 - p_i)
+
+        combined_index = 1.0 - survival_product
         return min(99, max(1, int(round(combined_index * 100))))
 
     # Old sum-based hazard scores for compatibility/dijkstra logic

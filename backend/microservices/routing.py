@@ -133,17 +133,42 @@ class RouteOptimizer:
 
         node_ids = list(G.nodes)
 
-        # Add directed edges for proximate nodes (< 0.005° ≈ 500 m)
+        # Add directed edges using k-Nearest Neighbors (k=4) to mimic street grids
         PROXIMITY = 0.005
-        for i, aid in enumerate(node_ids):
+        k_neighbors = 4
+        for aid in node_ids:
             a = self.node_map[aid]
-            for bid in node_ids[i + 1:]:
+            candidates = []
+            for bid in node_ids:
+                if aid == bid:
+                    continue
                 b = self.node_map[bid]
                 if abs(a.lat - b.lat) > PROXIMITY or abs(a.lng - b.lng) > PROXIMITY:
                     continue
-
                 dist = self._euclidean(a.lat, a.lng, b.lat, b.lng)
-                hier = (self._hierarchy_factor(a.label) + self._hierarchy_factor(b.label)) / 2.0
+                candidates.append((dist, bid, b))
+
+            # Sort by distance and connect only to the nearest neighbors
+            candidates.sort(key=lambda x: x[0])
+            for dist, bid, b in candidates[:k_neighbors]:
+                # Convert Euclidean degrees to kilometers (~111.0 km per degree)
+                dist_km = dist * 111.0
+                
+                # Determine speed based on road hierarchy
+                def get_speed(label: str) -> float:
+                    lbl = label.lower()
+                    if any(k in lbl for k in ["avenida", "autopista", "viaducto", "carrera 27", "carrera 33", "diagonal 15", "boulevard"]):
+                        return 50.0  # km/h
+                    elif "calle" in lbl or "carrera" in lbl or "transversal" in lbl or "diagonal" in lbl:
+                        return 30.0  # km/h
+                    return 18.0  # km/h
+
+                speed_a = get_speed(a.label)
+                speed_b = get_speed(b.label)
+                avg_speed = (speed_a + speed_b) / 2.0
+                
+                # Base travel time in seconds
+                time_base_seconds = (dist_km / avg_speed) * 3600.0
 
                 # Forward A→B: weight penalises risk at destination node B
                 risk_b = getattr(b, "predicted_risk", None)
@@ -151,7 +176,11 @@ class RouteOptimizer:
                     risk_b = b.calculate_risk(target_year, rain_active, target_hour)
                 if not use_hazard:
                     risk_b = 0.0
-                G.add_edge(aid, bid, weight=dist * hier * (1.0 + risk_b * 3.0))
+                
+                density_b = len(b.accidents)
+                # Each unit of risk (scaled by density) adds 90 virtual seconds of delay
+                delay_b = risk_b * (1.0 + density_b * 1.5) * 90.0
+                G.add_edge(aid, bid, weight=time_base_seconds + delay_b)
 
                 # Reverse B→A: weight penalises risk at destination node A
                 risk_a = getattr(a, "predicted_risk", None)
@@ -159,7 +188,11 @@ class RouteOptimizer:
                     risk_a = a.calculate_risk(target_year, rain_active, target_hour)
                 if not use_hazard:
                     risk_a = 0.0
-                G.add_edge(bid, aid, weight=dist * hier * (1.0 + risk_a * 3.0))
+                
+                density_a = len(a.accidents)
+                # Each unit of risk (scaled by density) adds 90 virtual seconds of delay
+                delay_a = risk_a * (1.0 + density_a * 1.5) * 90.0
+                G.add_edge(bid, aid, weight=time_base_seconds + delay_a)
 
         return G
 
