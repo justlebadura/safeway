@@ -783,20 +783,30 @@
                 routeNodesMarkerGroup.clearLayers();
 
                 if (data.safest && data.safest.path.length > 0) {
-                    let safestCoords = [...data.safest.path];
-                    let fastestCoords = [...data.fastest.path];
+                    // Fastest route is direct from start to end in OSRM, preventing arbitrary detours
+                    let fastestCoords = [startPointCoords, endPointCoords];
 
+                    // Safest route uses a simplified set of max 5 waypoints to avoid local looping
+                    let safestCoords = [...data.safest.path];
                     safestCoords.unshift(startPointCoords);
-                    fastestCoords.unshift(startPointCoords);
                     safestCoords.push(endPointCoords);
-                    fastestCoords.push(endPointCoords);
+
+                    if (safestCoords.length > 5) {
+                        const step = Math.ceil(safestCoords.length / 4);
+                        const simplified = [safestCoords[0]];
+                        for (let i = step; i < safestCoords.length - 1; i += step) {
+                            simplified.push(safestCoords[i]);
+                        }
+                        simplified.push(safestCoords[safestCoords.length - 1]);
+                        safestCoords = simplified;
+                    }
 
                     showLoading("Ajustando trazados a calles reales...");
                     roadCoordinates = await fetchOSRMRoute(safestCoords);
-                    if (roadCoordinates.length === 0) roadCoordinates = safestCoords;
+                    if (roadCoordinates.length === 0) roadCoordinates = data.safest.path;
 
                     let fastestRoadCoords = await fetchOSRMRoute(fastestCoords);
-                    if (fastestRoadCoords.length === 0) fastestRoadCoords = fastestCoords;
+                    if (fastestRoadCoords.length === 0) fastestRoadCoords = data.fastest.path;
                     hideLoading();
 
                     // Render Standard Path
