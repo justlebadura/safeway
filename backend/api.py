@@ -3,9 +3,14 @@ from pathlib import Path
 from typing import Any
 import sys, os
 
-# Ensure backend/ is in the path so local microservices and model imports
-# resolve correctly both locally (PYTHONPATH=.:backend) and on Vercel.
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+# Ensure both the repo root AND backend/ are in the path.
+# - Repo root: so 'from backend.external.*' imports resolve (used inside microservices/)
+# - backend/: so 'from microservices.*' short imports resolve (used in api.py itself)
+_repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_backend_dir = os.path.dirname(os.path.abspath(__file__))
+for _p in [_repo_root, _backend_dir]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from fastapi import FastAPI, Query, Response
 from fastapi.responses import HTMLResponse

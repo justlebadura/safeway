@@ -3,10 +3,6 @@ import re
 from collections import Counter
 from typing import Any
 
-import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend
-import matplotlib.pyplot as plt
-
 def get_filtered_accidents(
     accidents: list[dict[str, Any]],
     start_year: int | None = None,
@@ -125,7 +121,10 @@ def generate_report_chart(accidents: list[dict[str, Any]]) -> bytes:
                     part_cleaned = part_cleaned.split(":")[-1].strip()
                 vehicles_list.append(part_cleaned)
 
-    # Plot figure setup
+    # Plot figure setup (lazy import so Vercel doesn't need matplotlib at startup)
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
     fig, axs = plt.subplots(2, 2, figsize=(12, 10))
     fig.patch.set_facecolor('#1e1e2e')  # Sleek dark blue-grey theme background
 
