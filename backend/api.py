@@ -1,6 +1,11 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Any
+import sys, os
+
+# Ensure backend/ is in the path so local microservices and model imports
+# resolve correctly both locally (PYTHONPATH=.:backend) and on Vercel.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, Query, Response
 from fastapi.responses import HTMLResponse
@@ -15,6 +20,7 @@ from microservices.api_soda_cleaner import (
 from microservices.routing import RouteOptimizer
 from microservices.grapher import MapGrapher
 from microservices.reporter import get_filtered_accidents, generate_report_chart
+
 
 app = FastAPI(title="Safeway API", version="1.0.0")
 

@@ -1,12 +1,15 @@
 [project]
-name = "safeway-api"
-version = "0.1.0"
-description = "Backend de SafeWay con fórmulas destiladas"
-requires-python = ">=3.10"
+name = "safeway"
+version = "1.0.0"
+description = "SafeWay Routing API"
+requires-python = ">=3.11"
 dependencies = [
-    # Deja esto vacío si tus dependencias están en un requirements.txt, 
-    # o lístalas aquí si no usas requirements.txt:
-    "Flask>=3.0.0", 
+    "requests>=2.32.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "torch>=2.4.0",
+    "torchdiffeq>=0.2.4",
+    "numpy>=1.26.0"
 ]
 
 [tool.vercel]
