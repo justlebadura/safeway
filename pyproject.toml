@@ -8,3 +8,6 @@ dependencies = [
     # o lístalas aquí si no usas requirements.txt:
     "Flask>=3.0.0", 
 ]
+
+[tool.vercel]
+entrypoint = "backend.api:app"
