@@ -331,7 +331,7 @@ def get_safest_route(
     if risk_range <= 0.001:
         risk_range = 1.0
 
-    # Helper to calculate a probabilistic danger percentage (1% to 99%)
+    # Helper to calculate a comparative danger percentage (1% to 99%)
     def get_path_danger_percent(path_coords):
         if not path_coords:
             return 1
@@ -348,15 +348,17 @@ def get_safest_route(
         if not node_risks:
             return 1
 
-        # Map each node risk to an accident probability P_i in [0.02, 0.42] comparative to the city
-        survival_product = 1.0
+        # Map each node risk to comparative danger: 10% (min in city) to 90% (max in city)
+        normalized_risks = []
         for r in node_risks:
-            # Normalized risk between 0.0 and 1.0
-            norm_r = (r - min_graph_risk) / risk_range
-            p_i = 0.02 + 0.40 * min(1.0, max(0.0, norm_r))
-            survival_product *= (1.0 - p_i)
+            p = 0.1 + 0.8 * ((r - min_graph_risk) / risk_range)
+            normalized_risks.append(p)
 
-        combined_index = 1.0 - survival_product
+        max_risk = max(normalized_risks) if normalized_risks else 0.0
+        avg_risk = sum(normalized_risks) / len(normalized_risks) if normalized_risks else 0.0
+        
+        # Route index is 50% worst-spot danger and 50% average path danger
+        combined_index = 0.5 * max_risk + 0.5 * avg_risk
         return min(99, max(1, int(round(combined_index * 100))))
 
     # Old sum-based hazard scores for compatibility/dijkstra logic
