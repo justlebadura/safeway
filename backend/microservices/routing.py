@@ -11,6 +11,7 @@ class GraphNode:
         self.lng = lng
         self.label = label
         self.accidents: List[Dict[str, Any]] = []
+        self.predicted_risk: float | None = None
 
     def add_accident(self, accident: Dict[str, Any]):
         self.accidents.append(accident)
@@ -49,7 +50,6 @@ class GraphNode:
                     except ValueError:
                         pass
                 if acc_hour is not None:
-                    # Risk is maximum if target_hour matches accident hour +/- 2 hours
                     hour_diff = abs(target_hour - acc_hour)
                     if hour_diff <= 2:
                         time_weight = 1.4
@@ -61,7 +61,7 @@ class GraphNode:
             if rain_active:
                 orig = str(acc.get("data_original", {})).upper()
                 if "LLUVIA" in orig or "LLUVIOSO" in orig or "HUMEDO" in orig:
-                    weather_weight = 1.8  # High risk correlation under rain match
+                    weather_weight = 1.8
 
             risk += temporal_decay * brutality * time_weight * weather_weight
 
@@ -70,196 +70,172 @@ class GraphNode:
         return round(risk * density_mod, 2)
 
 
-class StreetSegmentNode:
-    """
-    Represents a directed street segment (an edge in the original graph).
-    In the Edge-Based Graph (Line Graph), this is our Node.
-    """
-    def __init__(self, seg_id: str, u: GraphNode, v: GraphNode):
-        self.id = seg_id
-        self.u = u  # start intersection
-        self.v = v  # end intersection
-        self.lat = (u.lat + v.lat) / 2.0
-        self.lng = (u.lng + v.lng) / 2.0
-        self.distance = math.sqrt((u.lat - v.lat)**2 + (u.lng - v.lng)**2)
-        # Combine labels to describe the segment
-        self.label = f"{u.label} -> {v.label}"
-
-
 class RouteOptimizer:
     """
-    Uses an Edge-Based Graph (Line Graph / Dual Graph) and Dijkstra to compute safest routes,
-    natively supporting turn penalties and road hierarchy factor weights just like Google Maps/Waze.
+    Uses NetworkX A* with a Euclidean heuristic and safety-weighted edges to compute
+    safest and fastest routes. Implements bounding-box pruning to eliminate nodes
+    outside the origin-destination corridor before running the search.
+
+    Edge weight formula:
+        peso = distancia × jerarquía × (1.0 + riesgo × 0.5)
+
+    Where riesgo comes from GraphNode.calculate_risk() — a time/weather/severity
+    heuristic with real variance across the city — ensuring meaningful route differences.
     """
+
+    _HIERARCHY: List[Tuple[List[str], float]] = [
+        (["avenida", "autopista", "viaducto", "carrera 27", "carrera 33", "diagonal 15", "boulevard"], 1.0),
+        (["calle", "carrera", "transversal", "diagonal"], 1.3),
+    ]
+    _HIERARCHY_DEFAULT = 1.9
+
     def __init__(self, nodes: List[GraphNode]):
-        self.nodes = {n.id: n for n in nodes}
-        self.segments: Dict[str, StreetSegmentNode] = {}
-        self.adjacency: Dict[str, List[str]] = {}  # Adjacency between segments (maneuvers)
-        self._build_edge_based_graph()
+        self.node_map: Dict[str, GraphNode] = {n.id: n for n in nodes}
 
-    def _build_edge_based_graph(self):
-        """Builds the dual line graph where original connections are nodes, and turn maneuvers are edges."""
-        node_list = list(self.nodes.values())
-        connections = []
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
 
-        # Find original intersection connections (within 500m proximity or sharing name)
-        for i in range(len(node_list)):
-            node_a = node_list[i]
-            for j in range(i + 1, len(node_list)):
-                node_b = node_list[j]
-                dist = math.sqrt((node_a.lat - node_b.lat)**2 + (node_a.lng - node_b.lng)**2)
+    @staticmethod
+    def _euclidean(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+        return math.sqrt((lat1 - lat2) ** 2 + (lng1 - lng2) ** 2)
 
-                name_a = node_a.label.lower()
-                name_b = node_b.label.lower()
-                share_street = False
-                if "esquina" not in name_a and "esquina" not in name_b:
-                    words_a = set(name_a.split())
-                    words_b = set(name_b.split())
-                    common = words_a.intersection(words_b) - {"calle", "carrera", "avenida", "diagonal", "transversal", "via", "nro", "#"}
-                    if common:
-                        share_street = True
+    def _hierarchy_factor(self, label: str) -> float:
+        lbl = label.lower()
+        for keywords, factor in self._HIERARCHY:
+            if any(k in lbl for k in keywords):
+                return factor
+        return self._HIERARCHY_DEFAULT
 
-                if share_street or dist < 0.005:
-                    # Directed segments (both directions)
-                    connections.append((node_a, node_b))
-                    connections.append((node_b, node_a))
+    def _build_graph(
+        self,
+        target_year: int,
+        rain_active: bool,
+        target_hour: int | None,
+        use_hazard: bool,
+        bbox: Tuple[float, float, float, float] | None,
+    ):
+        """Build a directed NetworkX DiGraph with safety-weighted edges.
 
-        # Create Line Graph vertices (StreetSegmentNode)
-        for u, v in connections:
-            seg_id = f"seg_{u.id}_{v.id}"
-            self.segments[seg_id] = StreetSegmentNode(seg_id, u, v)
+        bbox = (lat_min, lat_max, lng_min, lng_max) — nodes outside are pruned.
+        """
+        import networkx as nx
 
-        # Create Line Graph edges (Transitions / Turn maneuvers)
-        # seg_1 = (A, B) connects to seg_2 = (B, C) if seg_1.v == seg_2.u
-        for seg_id in self.segments:
-            self.adjacency[seg_id] = []
+        G = nx.DiGraph()
 
-        for seg_id_1, seg_1 in self.segments.items():
-            for seg_id_2, seg_2 in self.segments.items():
-                # Avoid immediate U-turns (e.g. A -> B -> A)
-                if seg_1.v.id == seg_2.u.id and seg_1.u.id != seg_2.v.id:
-                    self.adjacency[seg_id_1].append(seg_id_2)
+        # Add nodes inside bounding box
+        for nid, node in self.node_map.items():
+            if bbox:
+                lat_min, lat_max, lng_min, lng_max = bbox
+                if not (lat_min <= node.lat <= lat_max and lng_min <= node.lng <= lng_max):
+                    continue
+            G.add_node(nid, lat=node.lat, lng=node.lng)
+
+        node_ids = list(G.nodes)
+
+        # Add directed edges for proximate nodes (< 0.005° ≈ 500 m)
+        PROXIMITY = 0.005
+        for i, aid in enumerate(node_ids):
+            a = self.node_map[aid]
+            for bid in node_ids[i + 1:]:
+                b = self.node_map[bid]
+                if abs(a.lat - b.lat) > PROXIMITY or abs(a.lng - b.lng) > PROXIMITY:
+                    continue
+
+                dist = self._euclidean(a.lat, a.lng, b.lat, b.lng)
+                hier = (self._hierarchy_factor(a.label) + self._hierarchy_factor(b.label)) / 2.0
+
+                # Forward A→B: weight penalises risk at destination node B
+                risk_b = getattr(b, "predicted_risk", None)
+                if risk_b is None:
+                    risk_b = b.calculate_risk(target_year, rain_active, target_hour)
+                if not use_hazard:
+                    risk_b = 0.0
+                G.add_edge(aid, bid, weight=dist * hier * (1.0 + risk_b * 3.0))
+
+                # Reverse B→A: weight penalises risk at destination node A
+                risk_a = getattr(a, "predicted_risk", None)
+                if risk_a is None:
+                    risk_a = a.calculate_risk(target_year, rain_active, target_hour)
+                if not use_hazard:
+                    risk_a = 0.0
+                G.add_edge(bid, aid, weight=dist * hier * (1.0 + risk_a * 3.0))
+
+        return G
+
+    def _bounding_box(
+        self, start_id: str, end_id: str, margin_factor: float = 0.35
+    ) -> Tuple[float, float, float, float] | None:
+        """Compute a generous bounding box around origin and destination."""
+        if start_id not in self.node_map or end_id not in self.node_map:
+            return None
+        s = self.node_map[start_id]
+        e = self.node_map[end_id]
+        lat_span = abs(s.lat - e.lat)
+        lng_span = abs(s.lng - e.lng)
+        margin_lat = max(lat_span * margin_factor, 0.01)
+        margin_lng = max(lng_span * margin_factor, 0.01)
+        return (
+            min(s.lat, e.lat) - margin_lat,
+            max(s.lat, e.lat) + margin_lat,
+            min(s.lng, e.lng) - margin_lng,
+            max(s.lng, e.lng) + margin_lng,
+        )
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
     def find_safest_route(
-        self, 
-        start_id: str, 
-        end_id: str, 
-        target_year: int = 2026, 
-        rain_active: bool = False, 
+        self,
+        start_id: str,
+        end_id: str,
+        target_year: int = 2026,
+        rain_active: bool = False,
         target_hour: int | None = None,
-        use_hazard: bool = True
+        use_hazard: bool = True,
     ) -> Tuple[List[Tuple[float, float]], float]:
-        """Runs Dijkstra on the Edge-Based Graph (Street Segments) to find safest paths."""
-        # Find all segments that originate from start_id
-        start_segs = [s_id for s_id, seg in self.segments.items() if seg.u.id == start_id]
-        if not start_segs:
-            # Fallback if graph is empty or node is isolated
-            if start_id in self.nodes and end_id in self.nodes:
-                return [
-                    (self.nodes[start_id].lat, self.nodes[start_id].lng),
-                    (self.nodes[end_id].lat, self.nodes[end_id].lng)
-                ], 0.0
+        """Find a route using A* with SafeWay risk weights and bounding-box pruning."""
+        import networkx as nx
+
+        if start_id not in self.node_map or end_id not in self.node_map:
             return [], 0.0
 
-        def get_road_hierarchy_factor(label: str) -> float:
-            lbl = label.lower()
-            if any(k in lbl for k in ["avenida", "autopista", "viaducto", "carrera 27", "carrera 33", "diagonal 15", "boulevard"]):
-                return 1.0
-            elif "calle" in lbl or "carrera" in lbl:
-                return 1.3
-            else:
-                return 1.9
+        bbox = self._bounding_box(start_id, end_id)
+        G = self._build_graph(target_year, rain_active, target_hour, use_hazard, bbox)
 
-        def node_risk(node) -> float:
-            """Use the heuristic calculate_risk for Dijkstra cost (has real variance),
-            keep predicted_risk only for the final hazard display score."""
-            return node.calculate_risk(target_year, rain_active, target_hour)
+        # Guarantee start and end are always in the graph
+        for nid in (start_id, end_id):
+            if nid not in G:
+                node = self.node_map[nid]
+                G.add_node(nid, lat=node.lat, lng=node.lng)
 
-        # Dijkstra queue: (total_cost, tiebreak, current_segment_id, path_taken, visited_set)
-        # visited_nodes is now a frozenset for O(1) lookup and correct immutability
-        queue = []
-        tiebreak = 0
-        for s_id in start_segs:
-            seg = self.segments[s_id]
-            h_factor = get_road_hierarchy_factor(seg.label)
-            init_cost = seg.distance * h_factor
-            if use_hazard:
-                init_cost += ((node_risk(seg.u) + node_risk(seg.v)) / 2.0 * 0.01)
-            heapq.heappush(queue, (init_cost, tiebreak, s_id, [s_id], frozenset([seg.u.id, seg.v.id])))
-            tiebreak += 1
+        if not nx.has_path(G, start_id, end_id):
+            # Retry without bounding box
+            G = self._build_graph(target_year, rain_active, target_hour, use_hazard, bbox=None)
+            for nid in (start_id, end_id):
+                if nid not in G:
+                    node = self.node_map[nid]
+                    G.add_node(nid, lat=node.lat, lng=node.lng)
 
-        visited_segs = set()
+        if not nx.has_path(G, start_id, end_id):
+            s, e = self.node_map[start_id], self.node_map[end_id]
+            return [(s.lat, s.lng), (e.lat, e.lng)], 0.0
 
-        while queue:
-            (weight, _, curr_seg_id, path, visited_nodes) = heapq.heappop(queue)
+        end_node = self.node_map[end_id]
 
-            if curr_seg_id in visited_segs:
-                continue
-            visited_segs.add(curr_seg_id)
+        def heuristic(u: str, _v: str) -> float:
+            nu = self.node_map.get(u)
+            if nu is None:
+                return 0.0
+            return self._euclidean(nu.lat, nu.lng, end_node.lat, end_node.lng)
 
-            curr_seg = self.segments[curr_seg_id]
+        try:
+            path_ids = nx.astar_path(G, start_id, end_id, heuristic=heuristic, weight="weight")
+            total_cost = nx.astar_path_length(G, start_id, end_id, heuristic=heuristic, weight="weight")
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            s, e = self.node_map[start_id], self.node_map[end_id]
+            return [(s.lat, s.lng), (e.lat, e.lng)], 0.0
 
-            # Reached destination intersection
-            if curr_seg.v.id == end_id:
-                coords_path = [(self.segments[path[0]].u.lat, self.segments[path[0]].u.lng)]
-                for s_id in path:
-                    coords_path.append((self.segments[s_id].v.lat, self.segments[s_id].v.lng))
-                return coords_path, weight
-
-            for neighbor_seg_id in self.adjacency[curr_seg_id]:
-                if neighbor_seg_id in visited_segs:
-                    continue
-
-                neighbor_seg = self.segments[neighbor_seg_id]
-
-                # Hard block: don't revisit any intersection already in path (eliminates loops/backtracking)
-                if neighbor_seg.v.id in visited_nodes:
-                    continue
-
-                # Hard block: U-turns and near-reversals (simulate one-way enforcement)
-                # Current vector: curr_seg.u -> curr_seg.v
-                v1_lat = curr_seg.v.lat - curr_seg.u.lat
-                v1_lng = curr_seg.v.lng - curr_seg.u.lng
-                # Neighbor vector: neighbor_seg.u -> neighbor_seg.v
-                v2_lat = neighbor_seg.v.lat - neighbor_seg.u.lat
-                v2_lng = neighbor_seg.v.lng - neighbor_seg.u.lng
-
-                turn_penalty = 0.0
-                m1 = math.sqrt(v1_lat**2 + v1_lng**2)
-                m2 = math.sqrt(v2_lat**2 + v2_lng**2)
-                if m1 > 0 and m2 > 0:
-                    cos_angle = max(-1.0, min(1.0, (v1_lat * v2_lat + v1_lng * v2_lng) / (m1 * m2)))
-                    angle_deg = math.degrees(math.acos(cos_angle))
-
-                    # Hard block near-reversals (>150°): enforces one-way streets
-                    if angle_deg > 150:
-                        continue
-
-                    # Soft penalty for significant turns (>45°)
-                    if angle_deg > 45:
-                        turn_penalty = 0.0015
-
-                # 1. Base segment distance
-                h_factor = get_road_hierarchy_factor(neighbor_seg.label)
-                edge_cost = neighbor_seg.distance * h_factor + turn_penalty
-
-                if use_hazard:
-                    edge_cost += (node_risk(neighbor_seg.v) * 0.01)
-
-                new_visited = visited_nodes | {neighbor_seg.v.id}
-                heapq.heappush(queue, (
-                    weight + edge_cost,
-                    tiebreak,
-                    neighbor_seg_id,
-                    path + [neighbor_seg_id],
-                    new_visited
-                ))
-                tiebreak += 1
-
-        # Fallback if no path is found
-        if start_id in self.nodes and end_id in self.nodes:
-            return [
-                (self.nodes[start_id].lat, self.nodes[start_id].lng),
-                (self.nodes[end_id].lat, self.nodes[end_id].lng)
-            ], 0.0
-        return [], 0.0
+        coords = [(self.node_map[nid].lat, self.node_map[nid].lng) for nid in path_ids]
+        return coords, round(total_cost, 4)

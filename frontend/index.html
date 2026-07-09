@@ -850,17 +850,8 @@
                     document.getElementById('lblETAExact').innerText = `Llegada: ${etaExactTime}`;
                     document.getElementById('lblSafestDist').innerText = `${safestDistance.toFixed(1)} km`;
 
-                    // Format risk scores as percentages (average danger index along the route)
-                    // hazard_score is sum of node risks (formula scale ~1.6-2.5 per node)
-                    const rawSafestRisk  = data.safest.hazard_score;
-                    const rawFastestRisk = data.fastest.hazard_score;
-
-                    const safestAvg  = data.safest.nodes_visited  > 0 ? rawSafestRisk  / data.safest.nodes_visited  : 0;
-                    const fastestAvg = data.fastest.nodes_visited > 0 ? rawFastestRisk / data.fastest.nodes_visited : 0;
-
-                    // Map formula range [0, 2.5] → display range [1%, 99%]
-                    const safestPercent  = Math.min(99, Math.max(1, Math.round((safestAvg  / 2.5) * 100)));
-                    const fastestPercent = Math.min(99, Math.max(1, Math.round((fastestAvg / 2.5) * 100)));
+                    const safestPercent = data.safest.danger_percent;
+                    const fastestPercent = data.fastest.danger_percent;
 
                     document.getElementById('routeScore').innerText = safestPercent + "%";
                     document.getElementById('fastestRouteScore').innerText = fastestPercent + "%";
@@ -868,11 +859,8 @@
                     document.getElementById('lblFastestETA').innerText = `${fastestETA} min`;
                     document.getElementById('lblFastestDist').innerText = `${fastestDistance.toFixed(1)} km`;
 
-                    // Safety improvement: how much safer the safest route is vs fastest
-                    let diffPercent = 0;
-                    if (rawFastestRisk > 0 && rawFastestRisk !== rawSafestRisk) {
-                        diffPercent = Math.round(((rawFastestRisk - rawSafestRisk) / rawFastestRisk) * 100);
-                    }
+                    // Safety improvement: difference in danger index percentage
+                    let diffPercent = fastestPercent - safestPercent;
                     if (diffPercent <= 0) {
                         diffPercent = Math.round(Math.max(5, (fastestDistance - safestDistance) * 10 + 5));
                     }

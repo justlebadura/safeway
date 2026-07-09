@@ -318,8 +318,43 @@ def get_safest_route(
         use_hazard=False
     )
 
-    # Helper to calculate the sum of node risks for comparative hazard index
-    def get_path_hazard(path_coords):
+    # Helper to calculate an auto-normalized danger percentage (1% to 99%)
+    def get_path_danger_percent(path_coords):
+        if not path_coords:
+            return 1
+        coord_to_node = {(n.lat, n.lng): n for n in nodes}
+        node_risks = []
+        for lat, lng in path_coords:
+            node = coord_to_node.get((lat, lng))
+            if node:
+                risk = getattr(node, "predicted_risk", None)
+                if risk is None:
+                    risk = node.calculate_risk(target_year, rain_active, target_hour)
+                node_risks.append(risk)
+        
+        if not node_risks:
+            return 1
+
+        # Detect the maximum risk present in the current graph to act as the baseline normalization factor
+        max_in_graph = max([
+            (getattr(n, "predicted_risk", None) if getattr(n, "predicted_risk", None) is not None else n.calculate_risk(target_year, rain_active, target_hour))
+            for n in nodes
+        ] or [1.0])
+        if max_in_graph <= 0.0:
+            max_in_graph = 1.0
+
+        # Normalise risks against graph maximum
+        normalized_risks = [min(1.0, r / max_in_graph) for r in node_risks]
+        
+        # Route danger index is 60% worst-spot risk and 40% average route risk
+        max_risk = max(normalized_risks) if normalized_risks else 0.0
+        avg_risk = sum(normalized_risks) / len(normalized_risks) if normalized_risks else 0.0
+        
+        combined_index = 0.6 * max_risk + 0.4 * avg_risk
+        return min(99, max(1, int(round(combined_index * 100))))
+
+    # Old sum-based hazard scores for compatibility/dijkstra logic
+    def get_path_hazard_sum(path_coords):
         total_hazard = 0.0
         coord_to_node = {(n.lat, n.lng): n for n in nodes}
         for lat, lng in path_coords:
@@ -331,18 +366,23 @@ def get_safest_route(
                 total_hazard += risk
         return round(total_hazard, 2)
 
-    safest_hazard_score = get_path_hazard(safest_path)
-    fastest_hazard_score = get_path_hazard(fastest_path)
+    safest_hazard_score = get_path_hazard_sum(safest_path)
+    fastest_hazard_score = get_path_hazard_sum(fastest_path)
+
+    safest_danger_percent = get_path_danger_percent(safest_path)
+    fastest_danger_percent = get_path_danger_percent(fastest_path)
 
     return {
         "safest": {
             "path": safest_path,
             "hazard_score": safest_hazard_score,
+            "danger_percent": safest_danger_percent,
             "nodes_visited": len(safest_path)
         },
         "fastest": {
             "path": fastest_path,
             "hazard_score": fastest_hazard_score,
+            "danger_percent": fastest_danger_percent,
             "nodes_visited": len(fastest_path)
         }
     }
