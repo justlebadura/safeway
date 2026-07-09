@@ -318,7 +318,7 @@ def get_safest_route(
         use_hazard=False
     )
 
-    # Helper to calculate an auto-normalized danger percentage (1% to 99%)
+    # Helper to calculate an absolute-scaled danger percentage (1% to 99%)
     def get_path_danger_percent(path_coords):
         if not path_coords:
             return 1
@@ -328,29 +328,25 @@ def get_safest_route(
             node = coord_to_node.get((lat, lng))
             if node:
                 risk = getattr(node, "predicted_risk", None)
-                if risk is None:
-                    risk = node.calculate_risk(target_year, rain_active, target_hour)
-                node_risks.append(risk)
+                # Homogenize scales: predicted_risk (0-2.8) is scaled by 4.0;
+                # calculate_risk() (0-15+) is used directly.
+                if risk is not None:
+                    risk_val = risk * 4.0
+                else:
+                    risk_val = node.calculate_risk(target_year, rain_active, target_hour)
+                node_risks.append(risk_val)
         
         if not node_risks:
             return 1
 
-        # Detect the maximum risk present in the current graph to act as the baseline normalization factor
-        max_in_graph = max([
-            (getattr(n, "predicted_risk", None) if getattr(n, "predicted_risk", None) is not None else n.calculate_risk(target_year, rain_active, target_hour))
-            for n in nodes
-        ] or [1.0])
-        if max_in_graph <= 0.0:
-            max_in_graph = 1.0
-
-        # Normalise risks against graph maximum
-        normalized_risks = [min(1.0, r / max_in_graph) for r in node_risks]
+        # Danger scale: risk_val / 10.0 (where 10.0 represents a very high risk baseline)
+        normalized_risks = [min(1.0, r / 10.0) for r in node_risks]
         
-        # Route danger index is 60% worst-spot risk and 40% average route risk
+        # Route danger index is 30% worst-spot risk and 70% average route risk
         max_risk = max(normalized_risks) if normalized_risks else 0.0
         avg_risk = sum(normalized_risks) / len(normalized_risks) if normalized_risks else 0.0
         
-        combined_index = 0.6 * max_risk + 0.4 * avg_risk
+        combined_index = 0.3 * max_risk + 0.7 * avg_risk
         return min(99, max(1, int(round(combined_index * 100))))
 
     # Old sum-based hazard scores for compatibility/dijkstra logic
