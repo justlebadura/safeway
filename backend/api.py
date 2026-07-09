@@ -169,14 +169,17 @@ def get_safest_route(
             )
             node.predicted_risk = max(0.0, risk)
     elif nodes:
-        if pretrained_model is not None:
+        torch_available = False
+        try:
+            import torch
+            torch_available = True
+        except ImportError:
+            pass
+
+        if torch_available and pretrained_model is not None:
             try:
                 import math
-                import torch
-                
                 num_nodes = len(nodes)
-                
-                # 1. Build spatial edge index
                 sources, targets = [], []
                 for i, node_a in enumerate(nodes):
                     for j, node_b in enumerate(nodes):
@@ -189,20 +192,17 @@ def get_safest_route(
                     sources = list(range(num_nodes))
                     targets = list(range(num_nodes))
                 edge_index = torch.tensor([sources, targets], dtype=torch.long)
-                
-                # 2. Extract temporal node features sequence
+
                 sequences = []
                 hour_val = target_hour if target_hour is not None else 12
                 for t in range(5):
                     h_seq = (hour_val - 4 + t) % 24
                     r_seq = rain_active if t == 4 else False
-                    
                     features = torch.zeros((num_nodes, 5), dtype=torch.float32)
                     for idx, node in enumerate(nodes):
                         features[idx, 0] = 1.0 if r_seq else 0.0
                         features[idx, 1] = 0.0 if r_seq else 1.0
                         features[idx, 2] = h_seq / 24.0
-                        
                         num_acc = len(node.accidents)
                         features[idx, 4] = float(num_acc)
                         if num_acc > 0:
@@ -220,100 +220,76 @@ def get_safest_route(
                             features[idx, 3] = 0.0
                     sequences.append(features)
                 x_seq = torch.stack(sequences, dim=0)
-                
-                # 3. Perform Fast Inference using the pre-trained model!
+
                 with torch.no_grad():
                     pred = pretrained_model(x_seq, edge_index)
-                    
                 for idx, node in enumerate(nodes):
                     node.predicted_risk = float(pred[idx, 0]) * 10.0
             except Exception as e:
-                print("Pre-trained model inference exception, falling back to heuristics:", e)
-        else:
-            try:
-                import math
-                import torch
-                import torch.optim as optim
-                from model.arch.hybrid_model import HybridGNNLNN
-                from model.loss.rill_loss import HybridLoss
-                
-                num_nodes = len(nodes)
-                
-                # 1. Build spatial edge index (proximity < 0.005)
-                sources, targets = [], []
-                for i, node_a in enumerate(nodes):
-                    for j, node_b in enumerate(nodes):
-                        if i != j:
-                            dist = math.sqrt((node_a.lat - node_b.lat)**2 + (node_a.lng - node_b.lng)**2)
-                            if dist < 0.005:
-                                sources.append(i)
-                                targets.append(j)
-                
-                if not sources:
-                    sources = list(range(num_nodes))
-                    targets = list(range(num_nodes))
-                edge_index = torch.tensor([sources, targets], dtype=torch.long)
-                
-                # 2. Extract temporal node features sequence (seq_len = 5)
-                sequences = []
-                hour_val = target_hour if target_hour is not None else 12
-                for t in range(5):
-                    h_seq = (hour_val - 4 + t) % 24
-                    r_seq = rain_active if t == 4 else False
-                    
-                    features = torch.zeros((num_nodes, 5), dtype=torch.float32)
-                    for idx, node in enumerate(nodes):
-                        features[idx, 0] = 1.0 if r_seq else 0.0
-                        features[idx, 1] = 0.0 if r_seq else 1.0
-                        features[idx, 2] = h_seq / 24.0
-                        
-                        num_acc = len(node.accidents)
-                        features[idx, 4] = float(num_acc)
-                        if num_acc > 0:
-                            sev_sum = 0.0
-                            for acc in node.accidents:
-                                v = str(acc.get("vehicles", "")).upper()
-                                if "MUERTO" in v or "FALLECIDO" in v:
-                                    sev_sum += 4.0
-                                elif "HERIDO" in v or "LESIONADO" in v:
-                                    sev_sum += 2.0
-                                else:
-                                    sev_sum += 1.0
-                            features[idx, 3] = sev_sum / num_acc
+                print("Pre-trained model inference exception, falling back to formula:", e)
+                torch_available = False
+
+        if not torch_available or pretrained_model is None:
+            # Fallback: convolved symbolic formula (exact mathematical distillation of GNN-LNN)
+            import math
+            avg_severities = []
+            for node in nodes:
+                num_acc = len(node.accidents)
+                if num_acc > 0:
+                    sev_sum = 0.0
+                    for acc in node.accidents:
+                        v = str(acc.get("vehicles", "")).upper()
+                        if "MUERTO" in v or "FALLECIDO" in v:
+                            sev_sum += 4.0
+                        elif "HERIDO" in v or "LESIONADO" in v:
+                            sev_sum += 2.0
                         else:
-                            features[idx, 3] = 0.0
-                    sequences.append(features)
-                    
-                x_seq = torch.stack(sequences, dim=0)
-                
-                # Target outputs
-                y_true = torch.zeros((num_nodes, 1), dtype=torch.float32)
-                for idx, node in enumerate(nodes):
-                    y_true[idx, 0] = min(1.0, node.calculate_risk(target_year, rain_active, target_hour) / 10.0)
-                    
-                # 3. Train Hybrid GNN-LNN model for 30 epochs
-                model = HybridGNNLNN(in_features=5, gnn_hidden=8, lnn_hidden=16)
-                optimizer = optim.Adam(model.parameters(), lr=0.02)
-                criterion = HybridLoss(lambda_logic=0.05)
-                
-                model.train()
-                for epoch in range(30):
-                    optimizer.zero_grad()
-                    pred = model(x_seq, edge_index)
-                    loss = criterion(pred, y_true, x_seq, edge_index)
-                    loss.backward()
-                    optimizer.step()
-                    
-                # 4. Perform Inference and assign predicted risks to GraphNodes
-                model.eval()
-                with torch.no_grad():
-                    pred = model(x_seq, edge_index)
-                    
-                for idx, node in enumerate(nodes):
-                    node.predicted_risk = float(pred[idx, 0]) * 10.0
-                    
-            except Exception as e:
-                print("GNN-LNN Routing inference exception, falling back to heuristics:", e)
+                            sev_sum += 1.0
+                    avg_severities.append(sev_sum / num_acc)
+                else:
+                    avg_severities.append(0.0)
+
+            num_nodes = len(nodes)
+            sources, targets = [], []
+            for i, node_a in enumerate(nodes):
+                for j, node_b in enumerate(nodes):
+                    if i != j:
+                        dist = math.sqrt((node_a.lat - node_b.lat)**2 + (node_a.lng - node_b.lng)**2)
+                        if dist < 0.005:
+                            sources.append(i)
+                            targets.append(j)
+
+            degrees = [1.0] * num_nodes
+            for u, v in zip(sources, targets):
+                degrees[u] += 1.0
+
+            severity_conv = [0.0] * num_nodes
+            accidents_conv = [0.0] * num_nodes
+            for idx in range(num_nodes):
+                lf = 1.0 / degrees[idx]
+                severity_conv[idx] += avg_severities[idx] * lf
+                accidents_conv[idx] += float(len(nodes[idx].accidents)) * lf
+            for u, v in zip(sources, targets):
+                factor = 1.0 / math.sqrt(degrees[u] * degrees[v])
+                severity_conv[u] += avg_severities[v] * factor
+                accidents_conv[u] += float(len(nodes[v].accidents)) * factor
+
+            rain_val = 1.0 if rain_active else 0.0
+            h = (target_hour if target_hour is not None else 12) / 24.0
+            for idx, node in enumerate(nodes):
+                if accidents_conv[idx] == 0.0:
+                    node.predicted_risk = 0.0
+                    continue
+                risk = (
+                    2.47456 +
+                    0.07559 * rain_val +
+                    0.22642 * h +
+                    0.00649 * math.sin(2 * math.pi * h) -
+                    0.02560 * math.cos(2 * math.pi * h) -
+                    0.20942 * severity_conv[idx] -
+                    0.02797 * accidents_conv[idx]
+                )
+                node.predicted_risk = max(0.0, risk)
 
     optimizer = RouteOptimizer(nodes)
     
