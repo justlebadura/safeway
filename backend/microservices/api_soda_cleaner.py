@@ -451,7 +451,7 @@ class DatasetCacheService:
                     row_id,
                     row.get("latitude"),
                     row.get("longitude"),
-                    row.get("extraccion"),
+                    row,
                     dataset_id
                 )
                 row["latitude"] = lat_res

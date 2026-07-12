@@ -24,23 +24,43 @@
       "norm_label": "api.py"
     },
     {
+      "label": "calculate_symbolic_risk()",
+      "file_type": "code",
+      "source_file": "backend/api.py",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "backend_api_calculate_symbolic_risk",
+      "community": 4,
+      "norm_label": "calculate_symbolic_risk()"
+    },
+    {
       "label": "health()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L23",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "backend_api_health",
       "community": 4,
       "norm_label": "health()"
     },
     {
+      "label": "get_routing_graph_nodes()",
+      "file_type": "code",
+      "source_file": "backend/api.py",
+      "source_location": "L85",
+      "_origin": "ast",
+      "id": "backend_api_get_routing_graph_nodes",
+      "community": 4,
+      "norm_label": "get_routing_graph_nodes()"
+    },
+    {
       "label": "get_safest_route()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L28",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "backend_api_get_safest_route",
-      "community": 0,
+      "community": 4,
       "norm_label": "get_safest_route()"
     },
     {
@@ -54,20 +74,30 @@
       "norm_label": "any"
     },
     {
+      "label": "get_graph_data()",
+      "file_type": "code",
+      "source_file": "backend/api.py",
+      "source_location": "L507",
+      "_origin": "ast",
+      "id": "backend_api_get_graph_data",
+      "community": 4,
+      "norm_label": "get_graph_data()"
+    },
+    {
       "label": "get_combined_datasets()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L192",
+      "source_location": "L715",
       "_origin": "ast",
       "id": "backend_api_get_combined_datasets",
-      "community": 4,
+      "community": 0,
       "norm_label": "get_combined_datasets()"
     },
     {
       "label": "export_dataset_records()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L201",
+      "source_location": "L724",
       "_origin": "ast",
       "id": "backend_api_export_dataset_records",
       "community": 4,
@@ -77,7 +107,7 @@
       "label": "get_chart_image()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L248",
+      "source_location": "L771",
       "_origin": "ast",
       "id": "backend_api_get_chart_image",
       "community": 4,
@@ -97,27 +127,27 @@
       "label": "get_dataset()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L274",
+      "source_location": "L797",
       "_origin": "ast",
       "id": "backend_api_get_dataset",
-      "community": 4,
+      "community": 3,
       "norm_label": "get_dataset()"
     },
     {
       "label": "poll_dataset_updates()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L292",
+      "source_location": "L815",
       "_origin": "ast",
       "id": "backend_api_poll_dataset_updates",
-      "community": 4,
+      "community": 3,
       "norm_label": "poll_dataset_updates()"
     },
     {
       "label": "index()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L320",
+      "source_location": "L843",
       "_origin": "ast",
       "id": "backend_api_index",
       "community": 4,
@@ -127,11 +157,21 @@
       "label": "update_node()",
       "file_type": "code",
       "source_file": "backend/api.py",
-      "source_location": "L331",
+      "source_location": "L854",
       "_origin": "ast",
       "id": "backend_api_update_node",
-      "community": 3,
+      "community": 4,
       "norm_label": "update_node()"
+    },
+    {
+      "label": "add_community_report()",
+      "file_type": "code",
+      "source_file": "backend/api.py",
+      "source_location": "L864",
+      "_origin": "ast",
+      "id": "backend_api_add_community_report",
+      "community": 4,
+      "norm_label": "add_community_report()"
     },
     {
       "label": "__init__.py",
@@ -350,7 +390,7 @@
       "source_location": "L311",
       "_origin": "ast",
       "id": "microservices_api_soda_cleaner_load_edits",
-      "community": 3,
+      "community": 1,
       "norm_label": "_load_edits()"
     },
     {
@@ -360,7 +400,7 @@
       "source_location": "L321",
       "_origin": "ast",
       "id": "microservices_api_soda_cleaner_save_edits",
-      "community": 3,
+      "community": 1,
       "norm_label": "_save_edits()"
     },
     {
@@ -460,7 +500,7 @@
       "source_location": "L514",
       "_origin": "ast",
       "id": "microservices_api_soda_cleaner_serialize_entry",
-      "community": 4,
+      "community": 3,
       "norm_label": "serialize_entry()"
     },
     {
@@ -470,7 +510,7 @@
       "source_location": "L586",
       "_origin": "ast",
       "id": "microservices_api_soda_cleaner_update_dataset_node",
-      "community": 3,
+      "community": 1,
       "norm_label": "update_dataset_node()"
     },
     {
@@ -480,7 +520,7 @@
       "source_location": "L605",
       "_origin": "ast",
       "id": "microservices_api_soda_cleaner_get_combined_datasets_snapshot",
-      "community": 4,
+      "community": 0,
       "norm_label": "get_combined_datasets_snapshot()"
     },
     {
@@ -510,7 +550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "microservices_grapher",
-      "community": 2,
+      "community": 4,
       "norm_label": "grapher.py"
     },
     {
@@ -520,7 +560,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "microservices_grapher_mapgrapher",
-      "community": 2,
+      "community": 4,
       "norm_label": "mapgrapher"
     },
     {
@@ -530,7 +570,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "microservices_grapher_mapgrapher_init",
-      "community": 2,
+      "community": 4,
       "norm_label": ".__init__()"
     },
     {
@@ -540,7 +580,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "microservices_grapher_mapgrapher_build_structural_graph",
-      "community": 2,
+      "community": 4,
       "norm_label": ".build_structural_graph()"
     },
     {
@@ -550,7 +590,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "microservices_grapher_rationale_6",
-      "community": 2,
+      "community": 4,
       "norm_label": "microservice responsible for organizing and snapping geocoded accidents onto str"
     },
     {
@@ -560,7 +600,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "microservices_grapher_rationale_11",
-      "community": 2,
+      "community": 4,
       "norm_label": "snaps geocoded accidents into structural intersection nodes and returns them."
     },
     {
@@ -577,7 +617,7 @@
       "label": "normalize_text()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L12",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "microservices_mapper_normalize_text",
       "community": 1,
@@ -587,7 +627,7 @@
       "label": "parse_coordinate()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L25",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "microservices_mapper_parse_coordinate",
       "community": 1,
@@ -597,7 +637,7 @@
       "label": "resolve_coordinates()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L54",
+      "source_location": "L90",
       "_origin": "ast",
       "id": "microservices_mapper_resolve_coordinates",
       "community": 1,
@@ -607,7 +647,7 @@
       "label": "_normalized_municipalities()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L150",
+      "source_location": "L218",
       "_origin": "ast",
       "id": "microservices_mapper_normalized_municipalities",
       "community": 1,
@@ -617,27 +657,17 @@
       "label": "build_nlp()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L193",
+      "source_location": "L261",
       "_origin": "ast",
       "id": "microservices_mapper_build_nlp",
-      "community": 10,
+      "community": 3,
       "norm_label": "build_nlp()"
-    },
-    {
-      "label": "Language",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "id": "language",
-      "community": 10,
-      "norm_label": "language"
     },
     {
       "label": "AddressExtractor",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L221",
+      "source_location": "L291",
       "_origin": "ast",
       "id": "microservices_mapper_addressextractor",
       "community": 3,
@@ -647,17 +677,17 @@
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L229",
+      "source_location": "L299",
       "_origin": "ast",
       "id": "microservices_mapper_addressextractor_init",
-      "community": 10,
+      "community": 3,
       "norm_label": ".__init__()"
     },
     {
       "label": ".extract()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L232",
+      "source_location": "L302",
       "_origin": "ast",
       "id": "microservices_mapper_addressextractor_extract",
       "community": 3,
@@ -667,7 +697,7 @@
       "label": "._extract_via()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L262",
+      "source_location": "L332",
       "_origin": "ast",
       "id": "microservices_mapper_addressextractor_extract_via",
       "community": 3,
@@ -677,7 +707,7 @@
       "label": "._extract_num_or_km()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L274",
+      "source_location": "L344",
       "_origin": "ast",
       "id": "microservices_mapper_addressextractor_extract_num_or_km",
       "community": 3,
@@ -687,7 +717,7 @@
       "label": "._extract_reference()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L291",
+      "source_location": "L361",
       "_origin": "ast",
       "id": "microservices_mapper_addressextractor_extract_reference",
       "community": 3,
@@ -697,7 +727,7 @@
       "label": "._extract_barrio_or_municipality()",
       "file_type": "code",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L300",
+      "source_location": "L370",
       "_origin": "ast",
       "id": "microservices_mapper_addressextractor_extract_barrio_or_municipality",
       "community": 3,
@@ -707,9 +737,9 @@
       "label": "Normaliza texto para facilitar reglas de extracci\u00f3n.",
       "file_type": "rationale",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L13",
+      "source_location": "L17",
       "_origin": "ast",
-      "id": "microservices_mapper_rationale_13",
+      "id": "microservices_mapper_rationale_17",
       "community": 1,
       "norm_label": "normaliza texto para facilitar reglas de extraccion."
     },
@@ -727,7 +757,7 @@
       "label": "get_filtered_accidents()",
       "file_type": "code",
       "source_file": "backend/microservices/reporter.py",
-      "source_location": "L10",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "microservices_reporter_get_filtered_accidents",
       "community": 4,
@@ -737,7 +767,7 @@
       "label": "generate_report_chart()",
       "file_type": "code",
       "source_file": "backend/microservices/reporter.py",
-      "source_location": "L78",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "microservices_reporter_generate_report_chart",
       "community": 4,
@@ -750,7 +780,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "microservices_routing",
-      "community": 2,
+      "community": 4,
       "norm_label": "routing.py"
     },
     {
@@ -760,7 +790,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "microservices_routing_graphnode",
-      "community": 2,
+      "community": 4,
       "norm_label": "graphnode"
     },
     {
@@ -770,54 +800,34 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "microservices_routing_graphnode_init",
-      "community": 2,
+      "community": 4,
       "norm_label": ".__init__()"
     },
     {
       "label": ".add_accident()",
       "file_type": "code",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L15",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "microservices_routing_graphnode_add_accident",
-      "community": 2,
+      "community": 4,
       "norm_label": ".add_accident()"
     },
     {
       "label": ".calculate_risk()",
       "file_type": "code",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "microservices_routing_graphnode_calculate_risk",
       "community": 2,
       "norm_label": ".calculate_risk()"
     },
     {
-      "label": "StreetSegmentNode",
-      "file_type": "code",
-      "source_file": "backend/microservices/routing.py",
-      "source_location": "L73",
-      "_origin": "ast",
-      "id": "microservices_routing_streetsegmentnode",
-      "community": 2,
-      "norm_label": "streetsegmentnode"
-    },
-    {
-      "label": ".__init__()",
-      "file_type": "code",
-      "source_file": "backend/microservices/routing.py",
-      "source_location": "L78",
-      "_origin": "ast",
-      "id": "microservices_routing_streetsegmentnode_init",
-      "community": 2,
-      "norm_label": ".__init__()"
-    },
-    {
       "label": "RouteOptimizer",
       "file_type": "code",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L89",
+      "source_location": "L73",
       "_origin": "ast",
       "id": "microservices_routing_routeoptimizer",
       "community": 2,
@@ -827,27 +837,57 @@
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L94",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "microservices_routing_routeoptimizer_init",
       "community": 2,
       "norm_label": ".__init__()"
     },
     {
-      "label": "._build_edge_based_graph()",
+      "label": "._euclidean()",
       "file_type": "code",
       "source_file": "backend/microservices/routing.py",
       "source_location": "L100",
       "_origin": "ast",
-      "id": "microservices_routing_routeoptimizer_build_edge_based_graph",
+      "id": "microservices_routing_routeoptimizer_euclidean",
       "community": 2,
-      "norm_label": "._build_edge_based_graph()"
+      "norm_label": "._euclidean()"
+    },
+    {
+      "label": "._hierarchy_factor()",
+      "file_type": "code",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L103",
+      "_origin": "ast",
+      "id": "microservices_routing_routeoptimizer_hierarchy_factor",
+      "community": 2,
+      "norm_label": "._hierarchy_factor()"
+    },
+    {
+      "label": "._build_graph()",
+      "file_type": "code",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L110",
+      "_origin": "ast",
+      "id": "microservices_routing_routeoptimizer_build_graph",
+      "community": 2,
+      "norm_label": "._build_graph()"
+    },
+    {
+      "label": "._bounding_box()",
+      "file_type": "code",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L252",
+      "_origin": "ast",
+      "id": "microservices_routing_routeoptimizer_bounding_box",
+      "community": 2,
+      "norm_label": "._bounding_box()"
     },
     {
       "label": ".find_safest_route()",
       "file_type": "code",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L143",
+      "source_location": "L275",
       "_origin": "ast",
       "id": "microservices_routing_routeoptimizer_find_safest_route",
       "community": 2,
@@ -860,58 +900,58 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "microservices_routing_rationale_7",
-      "community": 2,
+      "community": 4,
       "norm_label": "represents a structural street intersection node."
     },
     {
       "label": "Calculates a dynamic risk score for this intersection based on temporal decay,",
       "file_type": "rationale",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L19",
+      "source_location": "L20",
       "_origin": "ast",
-      "id": "microservices_routing_rationale_19",
+      "id": "microservices_routing_rationale_20",
       "community": 2,
       "norm_label": "calculates a dynamic risk score for this intersection based on temporal decay,"
     },
     {
-      "label": "Represents a directed street segment (an edge in the original graph).     In the",
+      "label": "Uses NetworkX A* with a Euclidean heuristic and safety-weighted edges to compute",
       "file_type": "rationale",
       "source_file": "backend/microservices/routing.py",
       "source_location": "L74",
       "_origin": "ast",
       "id": "microservices_routing_rationale_74",
       "community": 2,
-      "norm_label": "represents a directed street segment (an edge in the original graph).     in the"
+      "norm_label": "uses networkx a* with a euclidean heuristic and safety-weighted edges to compute"
     },
     {
-      "label": "Uses an Edge-Based Graph (Line Graph / Dual Graph) and Dijkstra to compute safes",
+      "label": "Build a directed NetworkX DiGraph with safety-weighted edges.          bbox = (l",
       "file_type": "rationale",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L90",
+      "source_location": "L120",
       "_origin": "ast",
-      "id": "microservices_routing_rationale_90",
+      "id": "microservices_routing_rationale_120",
       "community": 2,
-      "norm_label": "uses an edge-based graph (line graph / dual graph) and dijkstra to compute safes"
+      "norm_label": "build a directed networkx digraph with safety-weighted edges.          bbox = (l"
     },
     {
-      "label": "Builds the dual line graph where original connections are nodes, and turn maneuv",
+      "label": "Compute a generous bounding box around origin and destination.",
       "file_type": "rationale",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L101",
+      "source_location": "L255",
       "_origin": "ast",
-      "id": "microservices_routing_rationale_101",
+      "id": "microservices_routing_rationale_255",
       "community": 2,
-      "norm_label": "builds the dual line graph where original connections are nodes, and turn maneuv"
+      "norm_label": "compute a generous bounding box around origin and destination."
     },
     {
-      "label": "Runs Dijkstra on the Edge-Based Graph (Street Segments) to find safest paths.",
+      "label": "Runs Bidirectional Dijkstra with a dynamic Highway Hierarchy penalty system.",
       "file_type": "rationale",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L152",
+      "source_location": "L284",
       "_origin": "ast",
-      "id": "microservices_routing_rationale_152",
+      "id": "microservices_routing_rationale_284",
       "community": 2,
-      "norm_label": "runs dijkstra on the edge-based graph (street segments) to find safest paths."
+      "norm_label": "runs bidirectional dijkstra with a dynamic highway hierarchy penalty system."
     },
     {
       "label": "__init__.py",
@@ -1294,6 +1334,39 @@
       "norm_label": "train_model()"
     },
     {
+      "label": "train_model_offline.py",
+      "file_type": "code",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "model_train_model_offline",
+      "community": 0,
+      "norm_label": "train_model_offline.py"
+    },
+    {
+      "label": "train_offline()",
+      "file_type": "code",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "model_train_model_offline_train_offline",
+      "community": 0,
+      "norm_label": "train_offline()"
+    },
+    {
+      "label": "safeway",
+      "file_type": "code",
+      "type": "package",
+      "ecosystem": "python",
+      "source_file": "pyproject.toml",
+      "source_location": "L1",
+      "version": "1.0.0",
+      "_origin": "ast",
+      "id": "pkg_safeway",
+      "community": 18,
+      "norm_label": "safeway"
+    },
+    {
       "label": "test_api.py",
       "file_type": "code",
       "source_file": "tests/test_api.py",
@@ -1372,6 +1445,16 @@
       "id": "tests_test_api_test_long_poll_times_out_without_change",
       "community": 6,
       "norm_label": "test_long_poll_times_out_without_change()"
+    },
+    {
+      "label": "test_combined_route_with_use_symbolic()",
+      "file_type": "code",
+      "source_file": "tests/test_api.py",
+      "source_location": "L111",
+      "_origin": "ast",
+      "id": "tests_test_api_test_combined_route_with_use_symbolic",
+      "community": 6,
+      "norm_label": "test_combined_route_with_use_symbolic()"
     },
     {
       "label": "test_cleaning.py",
@@ -1504,6 +1587,26 @@
       "norm_label": "test_run_pipeline_generates_output_file()"
     },
     {
+      "label": "vercel.json",
+      "file_type": "code",
+      "source_file": "vercel.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "vercel",
+      "community": 10,
+      "norm_label": "vercel.json"
+    },
+    {
+      "label": "rewrites",
+      "file_type": "code",
+      "source_file": "vercel.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "vercel_rewrites",
+      "community": 10,
+      "norm_label": "rewrites"
+    },
+    {
       "label": "README.md",
       "file_type": "document",
       "source_file": "README.md",
@@ -1629,11 +1732,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/api.py",
+      "source_location": "L555",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api",
+      "target": "backend_api_add_community_report"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api",
+      "target": "backend_api_calculate_symbolic_risk"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
       "source_location": "L201",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_export_dataset_records",
-      "confidence_score": 1.0
+      "target": "backend_api_export_dataset_records"
     },
     {
       "relation": "contains",
@@ -1641,9 +1764,9 @@
       "source_file": "backend/api.py",
       "source_location": "L248",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_get_chart_image",
-      "confidence_score": 1.0
+      "target": "backend_api_get_chart_image"
     },
     {
       "relation": "contains",
@@ -1651,9 +1774,9 @@
       "source_file": "backend/api.py",
       "source_location": "L192",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_get_combined_datasets",
-      "confidence_score": 1.0
+      "target": "backend_api_get_combined_datasets"
     },
     {
       "relation": "contains",
@@ -1661,9 +1784,29 @@
       "source_file": "backend/api.py",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_get_dataset",
-      "confidence_score": 1.0
+      "target": "backend_api_get_dataset"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L371",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api",
+      "target": "backend_api_get_graph_data"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L85",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api",
+      "target": "backend_api_get_routing_graph_nodes"
     },
     {
       "relation": "contains",
@@ -1671,9 +1814,9 @@
       "source_file": "backend/api.py",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_get_safest_route",
-      "confidence_score": 1.0
+      "target": "backend_api_get_safest_route"
     },
     {
       "relation": "contains",
@@ -1681,9 +1824,9 @@
       "source_file": "backend/api.py",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_health",
-      "confidence_score": 1.0
+      "target": "backend_api_health"
     },
     {
       "relation": "contains",
@@ -1691,9 +1834,9 @@
       "source_file": "backend/api.py",
       "source_location": "L320",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_index",
-      "confidence_score": 1.0
+      "target": "backend_api_index"
     },
     {
       "relation": "contains",
@@ -1701,9 +1844,9 @@
       "source_file": "backend/api.py",
       "source_location": "L292",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_poll_dataset_updates",
-      "confidence_score": 1.0
+      "target": "backend_api_poll_dataset_updates"
     },
     {
       "relation": "contains",
@@ -1711,9 +1854,9 @@
       "source_file": "backend/api.py",
       "source_location": "L331",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "backend_api_update_node",
-      "confidence_score": 1.0
+      "target": "backend_api_update_node"
     },
     {
       "relation": "imports_from",
@@ -1722,9 +1865,9 @@
       "source_file": "backend/api.py",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "microservices_api_soda_cleaner",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner"
     },
     {
       "relation": "imports_from",
@@ -1733,9 +1876,9 @@
       "source_file": "backend/api.py",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "microservices_grapher",
-      "confidence_score": 1.0
+      "target": "microservices_grapher"
     },
     {
       "relation": "imports_from",
@@ -1744,9 +1887,9 @@
       "source_file": "backend/api.py",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "microservices_reporter",
-      "confidence_score": 1.0
+      "target": "microservices_reporter"
     },
     {
       "relation": "imports_from",
@@ -1755,9 +1898,64 @@
       "source_file": "backend/api.py",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api",
-      "target": "microservices_routing",
-      "confidence_score": 1.0
+      "target": "microservices_routing"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L83",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api",
+      "target": "microservices_routing_graphnode"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L434",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api_get_graph_data",
+      "target": "backend_api_get_routing_graph_nodes"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/api.py",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "backend_api_get_routing_graph_nodes",
+      "target": "microservices_grapher_mapgrapher"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L117",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api_get_routing_graph_nodes",
+      "target": "microservices_routing_graphnode"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L152",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api_get_safest_route",
+      "target": "backend_api_get_routing_graph_nodes"
     },
     {
       "relation": "references",
@@ -1766,9 +1964,9 @@
       "source_file": "backend/api.py",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api_get_safest_route",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "calls",
@@ -1816,14 +2014,25 @@
     },
     {
       "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L555",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api_add_community_report",
+      "target": "any"
+    },
+    {
+      "relation": "references",
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "backend/api.py",
       "source_location": "L201",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api_export_dataset_records",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1832,9 +2041,9 @@
       "source_file": "backend/api.py",
       "source_location": "L192",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api_get_combined_datasets",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1843,9 +2052,20 @@
       "source_file": "backend/api.py",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api_get_dataset",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
+    },
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api.py",
+      "source_location": "L371",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "backend_api_get_graph_data",
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1854,9 +2074,9 @@
       "source_file": "backend/api.py",
       "source_location": "L292",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api_poll_dataset_updates",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1865,9 +2085,9 @@
       "source_file": "backend/api.py",
       "source_location": "L331",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api_update_node",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1876,9 +2096,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_process_rows",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1887,9 +2107,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_run_pipeline",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1898,9 +2118,9 @@
       "source_file": "backend/external/soda_client.py",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_soda_client_sodaclient_fetch_rows",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1909,9 +2129,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L145",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_clean_soda_row",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1920,9 +2140,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_clean_soda_value",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1931,9 +2151,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L356",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_build_version",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1942,9 +2162,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L605",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_get_combined_datasets_snapshot",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1953,9 +2173,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L311",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_load_edits",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1964,9 +2184,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_normalize_row_features",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1975,9 +2195,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L321",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_save_edits",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1986,9 +2206,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L514",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_serialize_entry",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -1997,9 +2217,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L586",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_update_dataset_node",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2008,9 +2228,9 @@
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_grapher_mapgrapher_build_structural_graph",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2019,9 +2239,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L232",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2030,9 +2250,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L300",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract_barrio_or_municipality",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2041,9 +2261,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract_num_or_km",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2052,9 +2272,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L291",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract_reference",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2063,9 +2283,20 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L262",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract_via",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/microservices/mapper.py",
+      "source_location": "L197",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "microservices_mapper_build_nlp",
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2074,9 +2305,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_parse_coordinate",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2085,9 +2316,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_resolve_coordinates",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2096,9 +2327,9 @@
       "source_file": "backend/microservices/reporter.py",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_reporter_generate_report_chart",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2107,9 +2338,9 @@
       "source_file": "backend/microservices/reporter.py",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_reporter_get_filtered_accidents",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
     },
     {
       "relation": "references",
@@ -2118,9 +2349,20 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_graphnode_add_accident",
-      "target": "any",
-      "confidence_score": 1.0
+      "target": "any"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/api.py",
+      "source_location": "L395",
+      "weight": 1.0,
+      "source": "backend_api_get_graph_data",
+      "target": "microservices_grapher_mapgrapher"
     },
     {
       "relation": "calls",
@@ -2195,9 +2437,9 @@
       "source_file": "backend/api.py",
       "source_location": "L248",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "backend_api_get_chart_image",
-      "target": "response",
-      "confidence_score": 1.0
+      "target": "response"
     },
     {
       "relation": "calls",
@@ -2238,9 +2480,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline",
-      "target": "external_pipeline_main",
-      "confidence_score": 1.0
+      "target": "external_pipeline_main"
     },
     {
       "relation": "contains",
@@ -2248,9 +2490,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline",
-      "target": "external_pipeline_parse_args",
-      "confidence_score": 1.0
+      "target": "external_pipeline_parse_args"
     },
     {
       "relation": "contains",
@@ -2258,9 +2500,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline",
-      "target": "external_pipeline_process_rows",
-      "confidence_score": 1.0
+      "target": "external_pipeline_process_rows"
     },
     {
       "relation": "contains",
@@ -2268,9 +2510,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline",
-      "target": "external_pipeline_run_pipeline",
-      "confidence_score": 1.0
+      "target": "external_pipeline_run_pipeline"
     },
     {
       "relation": "imports",
@@ -2279,9 +2521,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline",
-      "target": "external_soda_client_sodaclient",
-      "confidence_score": 1.0
+      "target": "external_soda_client_sodaclient"
     },
     {
       "relation": "imports",
@@ -2290,9 +2532,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline",
-      "target": "microservices_api_soda_cleaner_clean_soda_row",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_soda_row"
     },
     {
       "relation": "imports",
@@ -2301,9 +2543,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline",
-      "target": "microservices_mapper_addressextractor",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor"
     },
     {
       "relation": "calls",
@@ -2312,9 +2554,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_process_rows",
-      "target": "microservices_api_soda_cleaner_clean_soda_row",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_soda_row"
     },
     {
       "relation": "references",
@@ -2323,9 +2565,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_process_rows",
-      "target": "microservices_mapper_addressextractor",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor"
     },
     {
       "relation": "calls",
@@ -2334,9 +2576,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_run_pipeline",
-      "target": "external_pipeline_process_rows",
-      "confidence_score": 1.0
+      "target": "external_pipeline_process_rows"
     },
     {
       "relation": "imports",
@@ -2345,9 +2587,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L427",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "external_pipeline_process_rows",
-      "confidence_score": 1.0
+      "target": "external_pipeline_process_rows"
     },
     {
       "relation": "calls",
@@ -2367,9 +2609,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_main",
-      "target": "external_pipeline_run_pipeline",
-      "confidence_score": 1.0
+      "target": "external_pipeline_run_pipeline"
     },
     {
       "relation": "calls",
@@ -2378,9 +2620,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_run_pipeline",
-      "target": "external_soda_client_sodaclient",
-      "confidence_score": 1.0
+      "target": "external_soda_client_sodaclient"
     },
     {
       "relation": "calls",
@@ -2389,9 +2631,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_run_pipeline",
-      "target": "microservices_mapper_addressextractor",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor"
     },
     {
       "relation": "references",
@@ -2400,9 +2642,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_run_pipeline",
-      "target": "path",
-      "confidence_score": 1.0
+      "target": "path"
     },
     {
       "relation": "calls",
@@ -2411,9 +2653,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_main",
-      "target": "path",
-      "confidence_score": 1.0
+      "target": "path"
     },
     {
       "relation": "references",
@@ -2422,9 +2664,9 @@
       "source_file": "tests/test_pipeline.py",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_pipeline_test_run_pipeline_generates_output_file",
-      "target": "path",
-      "confidence_score": 1.0
+      "target": "path"
     },
     {
       "relation": "calls",
@@ -2433,9 +2675,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_main",
-      "target": "external_pipeline_parse_args",
-      "confidence_score": 1.0
+      "target": "external_pipeline_parse_args"
     },
     {
       "relation": "references",
@@ -2444,9 +2686,9 @@
       "source_file": "backend/external/pipeline.py",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_pipeline_parse_args",
-      "target": "namespace",
-      "confidence_score": 1.0
+      "target": "namespace"
     },
     {
       "relation": "contains",
@@ -2454,9 +2696,9 @@
       "source_file": "backend/external/soda_client.py",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_soda_client",
-      "target": "external_soda_client_sodaclient",
-      "confidence_score": 1.0
+      "target": "external_soda_client_sodaclient"
     },
     {
       "relation": "method",
@@ -2464,9 +2706,9 @@
       "source_file": "backend/external/soda_client.py",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_soda_client_sodaclient",
-      "target": "external_soda_client_sodaclient_fetch_rows",
-      "confidence_score": 1.0
+      "target": "external_soda_client_sodaclient_fetch_rows"
     },
     {
       "relation": "method",
@@ -2474,9 +2716,9 @@
       "source_file": "backend/external/soda_client.py",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "external_soda_client_sodaclient",
-      "target": "external_soda_client_sodaclient_init",
-      "confidence_score": 1.0
+      "target": "external_soda_client_sodaclient_init"
     },
     {
       "relation": "imports",
@@ -2485,9 +2727,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "external_soda_client_sodaclient",
-      "confidence_score": 1.0
+      "target": "external_soda_client_sodaclient"
     },
     {
       "relation": "uses",
@@ -2495,9 +2737,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L16",
       "weight": 0.8,
+      "confidence_score": 0.5,
       "source": "microservices_api_soda_cleaner_cacheentry",
-      "target": "external_soda_client_sodaclient",
-      "confidence_score": 0.5
+      "target": "external_soda_client_sodaclient"
     },
     {
       "relation": "uses",
@@ -2505,9 +2747,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L16",
       "weight": 0.8,
+      "confidence_score": 0.5,
       "source": "microservices_api_soda_cleaner_datasetcacheservice",
-      "target": "external_soda_client_sodaclient",
-      "confidence_score": 0.5
+      "target": "external_soda_client_sodaclient"
     },
     {
       "relation": "references",
@@ -2516,9 +2758,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L338",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_init",
-      "target": "external_soda_client_sodaclient",
-      "confidence_score": 1.0
+      "target": "external_soda_client_sodaclient"
     },
     {
       "relation": "re_exports",
@@ -2527,9 +2769,9 @@
       "source_file": "backend/microservices/__init__.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_init",
-      "target": "microservices_api_soda_cleaner",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner"
     },
     {
       "relation": "imports",
@@ -2538,9 +2780,9 @@
       "source_file": "backend/microservices/__init__.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_init",
-      "target": "microservices_api_soda_cleaner_clean_location_text",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_location_text"
     },
     {
       "relation": "imports",
@@ -2549,9 +2791,9 @@
       "source_file": "backend/microservices/__init__.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_init",
-      "target": "microservices_api_soda_cleaner_clean_soda_row",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_soda_row"
     },
     {
       "relation": "imports",
@@ -2560,9 +2802,9 @@
       "source_file": "backend/microservices/__init__.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_init",
-      "target": "microservices_api_soda_cleaner_normalize_text",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_text"
     },
     {
       "relation": "re_exports",
@@ -2571,9 +2813,9 @@
       "source_file": "backend/microservices/__init__.py",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_init",
-      "target": "microservices_mapper",
-      "confidence_score": 1.0
+      "target": "microservices_mapper"
     },
     {
       "relation": "imports",
@@ -2582,9 +2824,9 @@
       "source_file": "backend/microservices/__init__.py",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_init",
-      "target": "microservices_mapper_addressextractor",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor"
     },
     {
       "relation": "contains",
@@ -2592,9 +2834,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L328",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_cacheentry",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_cacheentry"
     },
     {
       "relation": "contains",
@@ -2602,9 +2844,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L97",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_clean_location_text",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_location_text"
     },
     {
       "relation": "contains",
@@ -2612,9 +2854,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L145",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_clean_soda_row",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_soda_row"
     },
     {
       "relation": "contains",
@@ -2622,9 +2864,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_clean_soda_value",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_soda_value"
     },
     {
       "relation": "contains",
@@ -2632,9 +2874,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L337",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice"
     },
     {
       "relation": "contains",
@@ -2642,9 +2884,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L605",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_get_combined_datasets_snapshot",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_get_combined_datasets_snapshot"
     },
     {
       "relation": "contains",
@@ -2652,9 +2894,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L311",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_load_edits",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_load_edits"
     },
     {
       "relation": "contains",
@@ -2662,9 +2904,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_normalize_date",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_date"
     },
     {
       "relation": "contains",
@@ -2672,9 +2914,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_normalize_row_features",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_row_features"
     },
     {
       "relation": "contains",
@@ -2682,9 +2924,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_normalize_text",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_text"
     },
     {
       "relation": "contains",
@@ -2692,9 +2934,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L106",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_normalize_whitespace",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_whitespace"
     },
     {
       "relation": "contains",
@@ -2702,9 +2944,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L321",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_save_edits",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_save_edits"
     },
     {
       "relation": "contains",
@@ -2712,9 +2954,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L514",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_serialize_entry",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_serialize_entry"
     },
     {
       "relation": "contains",
@@ -2722,9 +2964,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L586",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_api_soda_cleaner_update_dataset_node",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_update_dataset_node"
     },
     {
       "relation": "imports",
@@ -2733,9 +2975,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L169",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_mapper_parse_coordinate",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_parse_coordinate"
     },
     {
       "relation": "imports",
@@ -2744,9 +2986,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner",
-      "target": "microservices_mapper_resolve_coordinates",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_resolve_coordinates"
     },
     {
       "relation": "imports_from",
@@ -2755,9 +2997,9 @@
       "source_file": "tests/test_cleaning.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_cleaning",
-      "target": "microservices_api_soda_cleaner",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner"
     },
     {
       "relation": "imports_from",
@@ -2766,9 +3008,9 @@
       "source_file": "tests/test_extractor.py",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_extractor",
-      "target": "microservices_api_soda_cleaner",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner"
     },
     {
       "relation": "calls",
@@ -2777,9 +3019,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L98",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_clean_location_text",
-      "target": "microservices_api_soda_cleaner_normalize_text",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_text"
     },
     {
       "relation": "rationale_for",
@@ -2787,9 +3029,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_rationale_87",
-      "target": "microservices_api_soda_cleaner_normalize_text",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_text"
     },
     {
       "relation": "calls",
@@ -2798,9 +3040,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_clean_soda_value",
-      "target": "microservices_api_soda_cleaner_clean_location_text",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_location_text"
     },
     {
       "relation": "calls",
@@ -2875,9 +3117,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L129",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_clean_soda_value",
-      "target": "microservices_api_soda_cleaner_normalize_whitespace",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_whitespace"
     },
     {
       "relation": "calls",
@@ -2886,9 +3128,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L111",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_normalize_date",
-      "target": "microservices_api_soda_cleaner_normalize_whitespace",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_whitespace"
     },
     {
       "relation": "calls",
@@ -2897,9 +3139,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L140",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_clean_soda_value",
-      "target": "microservices_api_soda_cleaner_normalize_date",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_date"
     },
     {
       "relation": "calls",
@@ -2908,9 +3150,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L149",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_clean_soda_row",
-      "target": "microservices_api_soda_cleaner_clean_soda_value",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_clean_soda_value"
     },
     {
       "relation": "calls",
@@ -2919,9 +3161,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L420",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset",
-      "target": "microservices_api_soda_cleaner_normalize_row_features",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_row_features"
     },
     {
       "relation": "calls",
@@ -2930,9 +3172,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_normalize_row_features",
-      "target": "microservices_mapper_parse_coordinate",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_parse_coordinate"
     },
     {
       "relation": "rationale_for",
@@ -2940,9 +3182,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L157",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_rationale_157",
-      "target": "microservices_api_soda_cleaner_normalize_row_features",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_normalize_row_features"
     },
     {
       "relation": "calls",
@@ -2951,9 +3193,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L437",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset",
-      "target": "microservices_api_soda_cleaner_load_edits",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_load_edits"
     },
     {
       "relation": "calls",
@@ -2962,9 +3204,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L587",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_update_dataset_node",
-      "target": "microservices_api_soda_cleaner_load_edits",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_load_edits"
     },
     {
       "relation": "calls",
@@ -2973,9 +3215,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L594",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_update_dataset_node",
-      "target": "microservices_api_soda_cleaner_save_edits",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_save_edits"
     },
     {
       "relation": "references",
@@ -2984,9 +3226,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot",
-      "target": "microservices_api_soda_cleaner_cacheentry",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_cacheentry"
     },
     {
       "relation": "references",
@@ -2995,9 +3237,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L353",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_is_stale",
-      "target": "microservices_api_soda_cleaner_cacheentry",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_cacheentry"
     },
     {
       "relation": "references",
@@ -3006,9 +3248,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L360",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset",
-      "target": "microservices_api_soda_cleaner_cacheentry",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_cacheentry"
     },
     {
       "relation": "references",
@@ -3017,9 +3259,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L492",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_wait_for_update",
-      "target": "microservices_api_soda_cleaner_cacheentry",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_cacheentry"
     },
     {
       "relation": "references",
@@ -3028,9 +3270,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L514",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_serialize_entry",
-      "target": "microservices_api_soda_cleaner_cacheentry",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_cacheentry"
     },
     {
       "relation": "method",
@@ -3038,9 +3280,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L356",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_build_version",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_build_version"
     },
     {
       "relation": "method",
@@ -3048,9 +3290,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L350",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_cache_key",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_cache_key"
     },
     {
       "relation": "method",
@@ -3058,9 +3300,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot"
     },
     {
       "relation": "method",
@@ -3068,9 +3310,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L338",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_init",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_init"
     },
     {
       "relation": "method",
@@ -3078,9 +3320,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L353",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_is_stale",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_is_stale"
     },
     {
       "relation": "method",
@@ -3088,9 +3330,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L360",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset"
     },
     {
       "relation": "method",
@@ -3098,9 +3340,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L492",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_wait_for_update",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_wait_for_update"
     },
     {
       "relation": "references",
@@ -3109,9 +3351,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api_build_service",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice"
     },
     {
       "relation": "calls",
@@ -3120,9 +3362,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L483",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_cache_key",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_cache_key"
     },
     {
       "relation": "calls",
@@ -3131,9 +3373,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L471",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_cache_key",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_cache_key"
     },
     {
       "relation": "calls",
@@ -3142,9 +3384,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L487",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_is_stale",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_is_stale"
     },
     {
       "relation": "calls",
@@ -3153,9 +3395,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L464",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_build_version",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_build_version"
     },
     {
       "relation": "calls",
@@ -3164,9 +3406,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L488",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset"
     },
     {
       "relation": "calls",
@@ -3186,9 +3428,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L600",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_update_dataset_node",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_refresh_dataset"
     },
     {
       "relation": "calls",
@@ -3197,9 +3439,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L503",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_datasetcacheservice_wait_for_update",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot"
     },
     {
       "relation": "calls",
@@ -3208,9 +3450,9 @@
       "source_file": "backend/microservices/api_soda_cleaner.py",
       "source_location": "L619",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_api_soda_cleaner_get_combined_datasets_snapshot",
-      "target": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_datasetcacheservice_get_snapshot"
     },
     {
       "relation": "imports",
@@ -3219,9 +3461,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset",
-      "target": "microservices_api_soda_cleaner_get_combined_datasets_snapshot",
-      "confidence_score": 1.0
+      "target": "microservices_api_soda_cleaner_get_combined_datasets_snapshot"
     },
     {
       "relation": "calls",
@@ -3235,14 +3477,36 @@
       "target": "microservices_api_soda_cleaner_get_combined_datasets_snapshot"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline",
+      "target": "microservices_api_soda_cleaner_get_combined_datasets_snapshot"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline_train_offline",
+      "target": "microservices_api_soda_cleaner_get_combined_datasets_snapshot"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_grapher",
-      "target": "microservices_grapher_mapgrapher",
-      "confidence_score": 1.0
+      "target": "microservices_grapher_mapgrapher"
     },
     {
       "relation": "imports_from",
@@ -3251,9 +3515,9 @@
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_grapher",
-      "target": "microservices_routing",
-      "confidence_score": 1.0
+      "target": "microservices_routing"
     },
     {
       "relation": "method",
@@ -3261,9 +3525,9 @@
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_grapher_mapgrapher",
-      "target": "microservices_grapher_mapgrapher_build_structural_graph",
-      "confidence_score": 1.0
+      "target": "microservices_grapher_mapgrapher_build_structural_graph"
     },
     {
       "relation": "method",
@@ -3271,9 +3535,9 @@
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_grapher_mapgrapher",
-      "target": "microservices_grapher_mapgrapher_init",
-      "confidence_score": 1.0
+      "target": "microservices_grapher_mapgrapher_init"
     },
     {
       "relation": "uses",
@@ -3281,9 +3545,9 @@
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L2",
       "weight": 0.8,
+      "confidence_score": 0.5,
       "source": "microservices_grapher_mapgrapher",
-      "target": "microservices_routing_graphnode",
-      "confidence_score": 0.5
+      "target": "microservices_routing_graphnode"
     },
     {
       "relation": "rationale_for",
@@ -3291,9 +3555,31 @@
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_grapher_rationale_6",
-      "target": "microservices_grapher_mapgrapher",
-      "confidence_score": 1.0
+      "target": "microservices_grapher_mapgrapher"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline",
+      "target": "microservices_grapher_mapgrapher"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline_train_offline",
+      "target": "microservices_grapher_mapgrapher"
     },
     {
       "relation": "references",
@@ -3302,9 +3588,9 @@
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_grapher_mapgrapher_build_structural_graph",
-      "target": "microservices_routing_graphnode",
-      "confidence_score": 1.0
+      "target": "microservices_routing_graphnode"
     },
     {
       "relation": "rationale_for",
@@ -3312,9 +3598,9 @@
       "source_file": "backend/microservices/grapher.py",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_grapher_rationale_11",
-      "target": "microservices_grapher_mapgrapher_build_structural_graph",
-      "confidence_score": 1.0
+      "target": "microservices_grapher_mapgrapher_build_structural_graph"
     },
     {
       "relation": "contains",
@@ -3322,9 +3608,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L221",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper",
-      "target": "microservices_mapper_addressextractor",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor"
     },
     {
       "relation": "contains",
@@ -3332,9 +3618,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L193",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper",
-      "target": "microservices_mapper_build_nlp",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_build_nlp"
     },
     {
       "relation": "contains",
@@ -3342,9 +3628,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper",
-      "target": "microservices_mapper_normalize_text",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_normalize_text"
     },
     {
       "relation": "contains",
@@ -3352,9 +3638,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L150",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper",
-      "target": "microservices_mapper_normalized_municipalities",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_normalized_municipalities"
     },
     {
       "relation": "contains",
@@ -3362,9 +3648,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper",
-      "target": "microservices_mapper_parse_coordinate",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_parse_coordinate"
     },
     {
       "relation": "contains",
@@ -3372,9 +3658,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper",
-      "target": "microservices_mapper_resolve_coordinates",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_resolve_coordinates"
     },
     {
       "relation": "imports_from",
@@ -3383,9 +3669,9 @@
       "source_file": "tests/test_extractor.py",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_extractor",
-      "target": "microservices_mapper",
-      "confidence_score": 1.0
+      "target": "microservices_mapper"
     },
     {
       "relation": "calls",
@@ -3394,9 +3680,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L309",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract_barrio_or_municipality",
-      "target": "microservices_mapper_normalize_text",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_normalize_text"
     },
     {
       "relation": "calls",
@@ -3405,19 +3691,19 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L152",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_normalized_municipalities",
-      "target": "microservices_mapper_normalize_text",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_normalize_text"
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "backend/microservices/mapper.py",
-      "source_location": "L13",
+      "source_location": "L17",
       "weight": 1.0,
-      "source": "microservices_mapper_rationale_13",
-      "target": "microservices_mapper_normalize_text",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "microservices_mapper_rationale_17",
+      "target": "microservices_mapper_normalize_text"
     },
     {
       "relation": "calls",
@@ -3426,20 +3712,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L230",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_init",
-      "target": "microservices_mapper_build_nlp",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "context": "return_type",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/microservices/mapper.py",
-      "source_location": "L193",
-      "weight": 1.0,
-      "source": "microservices_mapper_build_nlp",
-      "target": "language",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_build_nlp"
     },
     {
       "relation": "method",
@@ -3447,9 +3722,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L232",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor",
-      "target": "microservices_mapper_addressextractor_extract",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract"
     },
     {
       "relation": "method",
@@ -3457,9 +3732,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L300",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor",
-      "target": "microservices_mapper_addressextractor_extract_barrio_or_municipality",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract_barrio_or_municipality"
     },
     {
       "relation": "method",
@@ -3467,9 +3742,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor",
-      "target": "microservices_mapper_addressextractor_extract_num_or_km",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract_num_or_km"
     },
     {
       "relation": "method",
@@ -3477,9 +3752,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L291",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor",
-      "target": "microservices_mapper_addressextractor_extract_reference",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract_reference"
     },
     {
       "relation": "method",
@@ -3487,9 +3762,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L262",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor",
-      "target": "microservices_mapper_addressextractor_extract_via",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract_via"
     },
     {
       "relation": "method",
@@ -3497,9 +3772,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L229",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor",
-      "target": "microservices_mapper_addressextractor_init",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_init"
     },
     {
       "relation": "calls",
@@ -3508,9 +3783,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L241",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract",
-      "target": "microservices_mapper_addressextractor_extract_barrio_or_municipality",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract_barrio_or_municipality"
     },
     {
       "relation": "calls",
@@ -3519,9 +3794,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L239",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract",
-      "target": "microservices_mapper_addressextractor_extract_num_or_km",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract_num_or_km"
     },
     {
       "relation": "calls",
@@ -3530,9 +3805,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L240",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract",
-      "target": "microservices_mapper_addressextractor_extract_reference",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract_reference"
     },
     {
       "relation": "calls",
@@ -3541,9 +3816,9 @@
       "source_file": "backend/microservices/mapper.py",
       "source_location": "L238",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_mapper_addressextractor_extract",
-      "target": "microservices_mapper_addressextractor_extract_via",
-      "confidence_score": 1.0
+      "target": "microservices_mapper_addressextractor_extract_via"
     },
     {
       "relation": "contains",
@@ -3551,9 +3826,9 @@
       "source_file": "backend/microservices/reporter.py",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_reporter",
-      "target": "microservices_reporter_generate_report_chart",
-      "confidence_score": 1.0
+      "target": "microservices_reporter_generate_report_chart"
     },
     {
       "relation": "contains",
@@ -3561,9 +3836,9 @@
       "source_file": "backend/microservices/reporter.py",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_reporter",
-      "target": "microservices_reporter_get_filtered_accidents",
-      "confidence_score": 1.0
+      "target": "microservices_reporter_get_filtered_accidents"
     },
     {
       "relation": "contains",
@@ -3571,9 +3846,9 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing",
-      "target": "microservices_routing_graphnode",
-      "confidence_score": 1.0
+      "target": "microservices_routing_graphnode"
     },
     {
       "relation": "contains",
@@ -3581,19 +3856,9 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing",
-      "target": "microservices_routing_routeoptimizer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/microservices/routing.py",
-      "source_location": "L73",
-      "weight": 1.0,
-      "source": "microservices_routing",
-      "target": "microservices_routing_streetsegmentnode",
-      "confidence_score": 1.0
+      "target": "microservices_routing_routeoptimizer"
     },
     {
       "relation": "method",
@@ -3601,9 +3866,9 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_graphnode",
-      "target": "microservices_routing_graphnode_add_accident",
-      "confidence_score": 1.0
+      "target": "microservices_routing_graphnode_add_accident"
     },
     {
       "relation": "method",
@@ -3611,9 +3876,9 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_graphnode",
-      "target": "microservices_routing_graphnode_calculate_risk",
-      "confidence_score": 1.0
+      "target": "microservices_routing_graphnode_calculate_risk"
     },
     {
       "relation": "method",
@@ -3621,9 +3886,9 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_graphnode",
-      "target": "microservices_routing_graphnode_init",
-      "confidence_score": 1.0
+      "target": "microservices_routing_graphnode_init"
     },
     {
       "relation": "rationale_for",
@@ -3631,9 +3896,20 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_rationale_7",
-      "target": "microservices_routing_graphnode",
-      "confidence_score": 1.0
+      "target": "microservices_routing_graphnode"
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L110",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "microservices_routing_routeoptimizer_build_graph",
+      "target": "microservices_routing_graphnode"
     },
     {
       "relation": "references",
@@ -3642,30 +3918,52 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_routeoptimizer_init",
-      "target": "microservices_routing_graphnode",
-      "confidence_score": 1.0
+      "target": "microservices_routing_graphnode"
     },
     {
-      "relation": "references",
-      "context": "parameter_type",
+      "relation": "imports",
+      "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "backend/microservices/routing.py",
-      "source_location": "L78",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L15",
       "weight": 1.0,
-      "source": "microservices_routing_streetsegmentnode_init",
-      "target": "microservices_routing_graphnode",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline",
+      "target": "microservices_routing_graphnode"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L56",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline_train_offline",
+      "target": "microservices_routing_graphnode"
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0,
-      "source": "microservices_routing_rationale_19",
-      "target": "microservices_routing_graphnode_calculate_risk",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "microservices_routing_rationale_20",
+      "target": "microservices_routing_graphnode_calculate_risk"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L176",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "microservices_routing_routeoptimizer_build_graph",
+      "target": "microservices_routing_graphnode_calculate_risk"
     },
     {
       "relation": "calls",
@@ -3674,9 +3972,9 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L180",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_routeoptimizer_find_safest_route",
-      "target": "microservices_routing_graphnode_calculate_risk",
-      "confidence_score": 1.0
+      "target": "microservices_routing_graphnode_calculate_risk"
     },
     {
       "relation": "rationale_for",
@@ -3684,40 +3982,29 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_rationale_74",
-      "target": "microservices_routing_streetsegmentnode",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/microservices/routing.py",
-      "source_location": "L130",
-      "weight": 1.0,
-      "source": "microservices_routing_routeoptimizer_build_edge_based_graph",
-      "target": "microservices_routing_streetsegmentnode",
-      "confidence_score": 1.0
+      "target": "microservices_routing_routeoptimizer"
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L78",
+      "source_location": "L199",
       "weight": 1.0,
-      "source": "microservices_routing_streetsegmentnode",
-      "target": "microservices_routing_streetsegmentnode_init",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "microservices_routing_routeoptimizer",
+      "target": "microservices_routing_routeoptimizer_bounding_box"
     },
     {
-      "relation": "rationale_for",
+      "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L90",
+      "source_location": "L110",
       "weight": 1.0,
-      "source": "microservices_routing_rationale_90",
-      "target": "microservices_routing_routeoptimizer",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "microservices_routing_routeoptimizer",
+      "target": "microservices_routing_routeoptimizer_build_graph"
     },
     {
       "relation": "method",
@@ -3725,9 +4012,9 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L100",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_routeoptimizer",
-      "target": "microservices_routing_routeoptimizer_build_edge_based_graph",
-      "confidence_score": 1.0
+      "target": "microservices_routing_routeoptimizer_euclidean"
     },
     {
       "relation": "method",
@@ -3735,9 +4022,19 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_routeoptimizer",
-      "target": "microservices_routing_routeoptimizer_find_safest_route",
-      "confidence_score": 1.0
+      "target": "microservices_routing_routeoptimizer_find_safest_route"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "microservices_routing_routeoptimizer",
+      "target": "microservices_routing_routeoptimizer_hierarchy_factor"
     },
     {
       "relation": "method",
@@ -3745,40 +4042,72 @@
       "source_file": "backend/microservices/routing.py",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "microservices_routing_routeoptimizer",
-      "target": "microservices_routing_routeoptimizer_init",
-      "confidence_score": 1.0
+      "target": "microservices_routing_routeoptimizer_init"
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L98",
+      "source_location": "L148",
       "weight": 1.0,
-      "source": "microservices_routing_routeoptimizer_init",
-      "target": "microservices_routing_routeoptimizer_build_edge_based_graph",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "microservices_routing_routeoptimizer_build_graph",
+      "target": "microservices_routing_routeoptimizer_euclidean"
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L101",
+      "source_location": "L120",
       "weight": 1.0,
-      "source": "microservices_routing_rationale_101",
-      "target": "microservices_routing_routeoptimizer_build_edge_based_graph",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "microservices_routing_rationale_120",
+      "target": "microservices_routing_routeoptimizer_build_graph"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L237",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "microservices_routing_routeoptimizer_find_safest_route",
+      "target": "microservices_routing_routeoptimizer_build_graph"
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "backend/microservices/routing.py",
-      "source_location": "L152",
+      "source_location": "L255",
       "weight": 1.0,
-      "source": "microservices_routing_rationale_152",
-      "target": "microservices_routing_routeoptimizer_find_safest_route",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "microservices_routing_rationale_255",
+      "target": "microservices_routing_routeoptimizer_bounding_box"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L236",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "microservices_routing_routeoptimizer_find_safest_route",
+      "target": "microservices_routing_routeoptimizer_bounding_box"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/microservices/routing.py",
+      "source_location": "L284",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "microservices_routing_rationale_284",
+      "target": "microservices_routing_routeoptimizer_find_safest_route"
     },
     {
       "relation": "contains",
@@ -3786,9 +4115,9 @@
       "source_file": "backend/model/arch/hybrid_model.py",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_hybrid_model",
-      "target": "arch_hybrid_model_hybridgnnlnn",
-      "confidence_score": 1.0
+      "target": "arch_hybrid_model_hybridgnnlnn"
     },
     {
       "relation": "imports",
@@ -3797,9 +4126,9 @@
       "source_file": "backend/model/arch/hybrid_model.py",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_hybrid_model",
-      "target": "arch_lnn_core_cfccell",
-      "confidence_score": 1.0
+      "target": "arch_lnn_core_cfccell"
     },
     {
       "relation": "method",
@@ -3807,9 +4136,9 @@
       "source_file": "backend/model/arch/hybrid_model.py",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_hybrid_model_hybridgnnlnn",
-      "target": "arch_hybrid_model_hybridgnnlnn_forward",
-      "confidence_score": 1.0
+      "target": "arch_hybrid_model_hybridgnnlnn_forward"
     },
     {
       "relation": "method",
@@ -3817,9 +4146,9 @@
       "source_file": "backend/model/arch/hybrid_model.py",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_hybrid_model_hybridgnnlnn",
-      "target": "arch_hybrid_model_hybridgnnlnn_init",
-      "confidence_score": 1.0
+      "target": "arch_hybrid_model_hybridgnnlnn_init"
     },
     {
       "relation": "uses",
@@ -3827,9 +4156,9 @@
       "source_file": "backend/model/arch/hybrid_model.py",
       "source_location": "L4",
       "weight": 0.8,
+      "confidence_score": 0.5,
       "source": "arch_hybrid_model_hybridgnnlnn",
-      "target": "arch_lnn_core_cfccell",
-      "confidence_score": 0.5
+      "target": "arch_lnn_core_cfccell"
     },
     {
       "relation": "rationale_for",
@@ -3837,9 +4166,31 @@
       "source_file": "backend/model/arch/hybrid_model.py",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_hybrid_model_rationale_7",
-      "target": "arch_hybrid_model_hybridgnnlnn",
-      "confidence_score": 1.0
+      "target": "arch_hybrid_model_hybridgnnlnn"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline",
+      "target": "arch_hybrid_model_hybridgnnlnn"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline_train_offline",
+      "target": "arch_hybrid_model_hybridgnnlnn"
     },
     {
       "relation": "calls",
@@ -3859,9 +4210,9 @@
       "source_file": "backend/model/runner/experiment_runner.py",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runner_experiment_runner",
-      "target": "arch_hybrid_model_hybridgnnlnn",
-      "confidence_score": 1.0
+      "target": "arch_hybrid_model_hybridgnnlnn"
     },
     {
       "relation": "calls",
@@ -3870,9 +4221,9 @@
       "source_file": "backend/model/runner/experiment_runner.py",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runner_experiment_runner_run_real_evaluation",
-      "target": "arch_hybrid_model_hybridgnnlnn",
-      "confidence_score": 1.0
+      "target": "arch_hybrid_model_hybridgnnlnn"
     },
     {
       "relation": "calls",
@@ -3892,9 +4243,9 @@
       "source_file": "backend/model/arch/hybrid_model.py",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_hybrid_model_hybridgnnlnn_forward",
-      "target": "tensor",
-      "confidence_score": 1.0
+      "target": "tensor"
     },
     {
       "relation": "rationale_for",
@@ -3902,9 +4253,9 @@
       "source_file": "backend/model/arch/hybrid_model.py",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_hybrid_model_rationale_26",
-      "target": "arch_hybrid_model_hybridgnnlnn_forward",
-      "confidence_score": 1.0
+      "target": "arch_hybrid_model_hybridgnnlnn_forward"
     },
     {
       "relation": "references",
@@ -3913,9 +4264,9 @@
       "source_file": "backend/model/arch/lnn_core.py",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_lnn_core_cfccell_forward",
-      "target": "tensor",
-      "confidence_score": 1.0
+      "target": "tensor"
     },
     {
       "relation": "references",
@@ -3924,9 +4275,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_temporalgraphdataset_extract_node_features",
-      "target": "tensor",
-      "confidence_score": 1.0
+      "target": "tensor"
     },
     {
       "relation": "references",
@@ -3935,9 +4286,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_temporalgraphdataset_generate_temporal_sequence",
-      "target": "tensor",
-      "confidence_score": 1.0
+      "target": "tensor"
     },
     {
       "relation": "references",
@@ -3946,9 +4297,9 @@
       "source_file": "backend/model/loss/rill_loss.py",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loss_rill_loss_hybridloss_forward",
-      "target": "tensor",
-      "confidence_score": 1.0
+      "target": "tensor"
     },
     {
       "relation": "contains",
@@ -3956,9 +4307,9 @@
       "source_file": "backend/model/arch/lnn_core.py",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_lnn_core",
-      "target": "arch_lnn_core_cfccell",
-      "confidence_score": 1.0
+      "target": "arch_lnn_core_cfccell"
     },
     {
       "relation": "method",
@@ -3966,9 +4317,9 @@
       "source_file": "backend/model/arch/lnn_core.py",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_lnn_core_cfccell",
-      "target": "arch_lnn_core_cfccell_forward",
-      "confidence_score": 1.0
+      "target": "arch_lnn_core_cfccell_forward"
     },
     {
       "relation": "method",
@@ -3976,9 +4327,9 @@
       "source_file": "backend/model/arch/lnn_core.py",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_lnn_core_cfccell",
-      "target": "arch_lnn_core_cfccell_init",
-      "confidence_score": 1.0
+      "target": "arch_lnn_core_cfccell_init"
     },
     {
       "relation": "rationale_for",
@@ -3986,9 +4337,9 @@
       "source_file": "backend/model/arch/lnn_core.py",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_lnn_core_rationale_5",
-      "target": "arch_lnn_core_cfccell",
-      "confidence_score": 1.0
+      "target": "arch_lnn_core_cfccell"
     },
     {
       "relation": "rationale_for",
@@ -3996,9 +4347,9 @@
       "source_file": "backend/model/arch/lnn_core.py",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "arch_lnn_core_rationale_16",
-      "target": "arch_lnn_core_cfccell_forward",
-      "confidence_score": 1.0
+      "target": "arch_lnn_core_cfccell_forward"
     },
     {
       "relation": "contains",
@@ -4006,9 +4357,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset",
-      "target": "loader_dataset_temporalgraphdataset",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset"
     },
     {
       "relation": "rationale_for",
@@ -4016,9 +4367,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_rationale_7",
-      "target": "loader_dataset_temporalgraphdataset",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset"
     },
     {
       "relation": "method",
@@ -4026,9 +4377,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_temporalgraphdataset",
-      "target": "loader_dataset_temporalgraphdataset_extract_node_features",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset_extract_node_features"
     },
     {
       "relation": "method",
@@ -4036,9 +4387,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_temporalgraphdataset",
-      "target": "loader_dataset_temporalgraphdataset_generate_temporal_sequence",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset_generate_temporal_sequence"
     },
     {
       "relation": "method",
@@ -4046,9 +4397,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_temporalgraphdataset",
-      "target": "loader_dataset_temporalgraphdataset_init",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset_init"
     },
     {
       "relation": "method",
@@ -4056,9 +4407,20 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_temporalgraphdataset",
-      "target": "loader_dataset_temporalgraphdataset_load_from_json",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset_load_from_json"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline",
+      "target": "loader_dataset_temporalgraphdataset"
     },
     {
       "relation": "calls",
@@ -4077,9 +4439,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_rationale_18",
-      "target": "loader_dataset_temporalgraphdataset_load_from_json",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset_load_from_json"
     },
     {
       "relation": "rationale_for",
@@ -4087,9 +4449,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_rationale_53",
-      "target": "loader_dataset_temporalgraphdataset_extract_node_features",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset_extract_node_features"
     },
     {
       "relation": "calls",
@@ -4098,9 +4460,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_temporalgraphdataset_generate_temporal_sequence",
-      "target": "loader_dataset_temporalgraphdataset_extract_node_features",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset_extract_node_features"
     },
     {
       "relation": "rationale_for",
@@ -4108,9 +4470,9 @@
       "source_file": "backend/model/loader/dataset.py",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loader_dataset_rationale_80",
-      "target": "loader_dataset_temporalgraphdataset_generate_temporal_sequence",
-      "confidence_score": 1.0
+      "target": "loader_dataset_temporalgraphdataset_generate_temporal_sequence"
     },
     {
       "relation": "contains",
@@ -4118,9 +4480,9 @@
       "source_file": "backend/model/loss/rill_loss.py",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loss_rill_loss",
-      "target": "loss_rill_loss_hybridloss",
-      "confidence_score": 1.0
+      "target": "loss_rill_loss_hybridloss"
     },
     {
       "relation": "method",
@@ -4128,9 +4490,9 @@
       "source_file": "backend/model/loss/rill_loss.py",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loss_rill_loss_hybridloss",
-      "target": "loss_rill_loss_hybridloss_forward",
-      "confidence_score": 1.0
+      "target": "loss_rill_loss_hybridloss_forward"
     },
     {
       "relation": "method",
@@ -4138,9 +4500,9 @@
       "source_file": "backend/model/loss/rill_loss.py",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loss_rill_loss_hybridloss",
-      "target": "loss_rill_loss_hybridloss_init",
-      "confidence_score": 1.0
+      "target": "loss_rill_loss_hybridloss_init"
     },
     {
       "relation": "rationale_for",
@@ -4148,9 +4510,31 @@
       "source_file": "backend/model/loss/rill_loss.py",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loss_rill_loss_rationale_6",
-      "target": "loss_rill_loss_hybridloss",
-      "confidence_score": 1.0
+      "target": "loss_rill_loss_hybridloss"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline",
+      "target": "loss_rill_loss_hybridloss"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L84",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline_train_offline",
+      "target": "loss_rill_loss_hybridloss"
     },
     {
       "relation": "calls",
@@ -4170,9 +4554,9 @@
       "source_file": "backend/model/runner/experiment_runner.py",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runner_experiment_runner",
-      "target": "loss_rill_loss_hybridloss",
-      "confidence_score": 1.0
+      "target": "loss_rill_loss_hybridloss"
     },
     {
       "relation": "calls",
@@ -4181,9 +4565,9 @@
       "source_file": "backend/model/runner/experiment_runner.py",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runner_experiment_runner_run_real_evaluation",
-      "target": "loss_rill_loss_hybridloss",
-      "confidence_score": 1.0
+      "target": "loss_rill_loss_hybridloss"
     },
     {
       "relation": "rationale_for",
@@ -4191,9 +4575,9 @@
       "source_file": "backend/model/loss/rill_loss.py",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "loss_rill_loss_rationale_16",
-      "target": "loss_rill_loss_hybridloss_forward",
-      "confidence_score": 1.0
+      "target": "loss_rill_loss_hybridloss_forward"
     },
     {
       "relation": "contains",
@@ -4201,9 +4585,9 @@
       "source_file": "backend/model/runner/experiment_runner.py",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runner_experiment_runner",
-      "target": "runner_experiment_runner_run_real_evaluation",
-      "confidence_score": 1.0
+      "target": "runner_experiment_runner_run_real_evaluation"
     },
     {
       "relation": "contains",
@@ -4211,9 +4595,19 @@
       "source_file": "backend/model/train.py",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_train",
-      "target": "model_train_train_model",
-      "confidence_score": 1.0
+      "target": "model_train_train_model"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/model/train_model_offline.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "model_train_model_offline",
+      "target": "model_train_model_offline_train_offline"
     },
     {
       "relation": "contains",
@@ -4221,9 +4615,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api",
-      "target": "tests_test_api_build_service",
-      "confidence_score": 1.0
+      "target": "tests_test_api_build_service"
     },
     {
       "relation": "contains",
@@ -4231,9 +4625,19 @@
       "source_file": "tests/test_api.py",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api",
-      "target": "tests_test_api_sequencedsodaclient",
-      "confidence_score": 1.0
+      "target": "tests_test_api_sequencedsodaclient"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_api.py",
+      "source_location": "L111",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_test_api",
+      "target": "tests_test_api_test_combined_route_with_use_symbolic"
     },
     {
       "relation": "contains",
@@ -4241,9 +4645,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api",
-      "target": "tests_test_api_test_get_dataset_uses_cache_and_returns_processed_rows",
-      "confidence_score": 1.0
+      "target": "tests_test_api_test_get_dataset_uses_cache_and_returns_processed_rows"
     },
     {
       "relation": "contains",
@@ -4251,9 +4655,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api",
-      "target": "tests_test_api_test_long_poll_returns_updated_data_when_version_changes",
-      "confidence_score": 1.0
+      "target": "tests_test_api_test_long_poll_returns_updated_data_when_version_changes"
     },
     {
       "relation": "contains",
@@ -4261,9 +4665,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api",
-      "target": "tests_test_api_test_long_poll_times_out_without_change",
-      "confidence_score": 1.0
+      "target": "tests_test_api_test_long_poll_times_out_without_change"
     },
     {
       "relation": "method",
@@ -4271,9 +4675,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api_sequencedsodaclient",
-      "target": "tests_test_api_sequencedsodaclient_fetch_rows",
-      "confidence_score": 1.0
+      "target": "tests_test_api_sequencedsodaclient_fetch_rows"
     },
     {
       "relation": "method",
@@ -4281,9 +4685,20 @@
       "source_file": "tests/test_api.py",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api_sequencedsodaclient",
-      "target": "tests_test_api_sequencedsodaclient_init",
-      "confidence_score": 1.0
+      "target": "tests_test_api_sequencedsodaclient_init"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_api.py",
+      "source_location": "L134",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_test_api_test_combined_route_with_use_symbolic",
+      "target": "tests_test_api_build_service"
     },
     {
       "relation": "calls",
@@ -4292,9 +4707,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api_test_get_dataset_uses_cache_and_returns_processed_rows",
-      "target": "tests_test_api_build_service",
-      "confidence_score": 1.0
+      "target": "tests_test_api_build_service"
     },
     {
       "relation": "calls",
@@ -4303,9 +4718,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api_test_long_poll_returns_updated_data_when_version_changes",
-      "target": "tests_test_api_build_service",
-      "confidence_score": 1.0
+      "target": "tests_test_api_build_service"
     },
     {
       "relation": "calls",
@@ -4314,9 +4729,9 @@
       "source_file": "tests/test_api.py",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_api_test_long_poll_times_out_without_change",
-      "target": "tests_test_api_build_service",
-      "confidence_score": 1.0
+      "target": "tests_test_api_build_service"
     },
     {
       "relation": "contains",
@@ -4324,9 +4739,9 @@
       "source_file": "tests/test_cleaning.py",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_cleaning",
-      "target": "tests_test_cleaning_test_clean_location_text_normalizes_case_accents_and_spaces",
-      "confidence_score": 1.0
+      "target": "tests_test_cleaning_test_clean_location_text_normalizes_case_accents_and_spaces"
     },
     {
       "relation": "contains",
@@ -4334,9 +4749,9 @@
       "source_file": "tests/test_cleaning.py",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_cleaning",
-      "target": "tests_test_cleaning_test_clean_location_text_replaces_no_token_with_hash",
-      "confidence_score": 1.0
+      "target": "tests_test_cleaning_test_clean_location_text_replaces_no_token_with_hash"
     },
     {
       "relation": "contains",
@@ -4344,9 +4759,9 @@
       "source_file": "tests/test_extractor.py",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_extractor",
-      "target": "tests_test_extractor_test_extract_detects_la_playa_alias",
-      "confidence_score": 1.0
+      "target": "tests_test_extractor_test_extract_detects_la_playa_alias"
     },
     {
       "relation": "contains",
@@ -4354,9 +4769,9 @@
       "source_file": "tests/test_extractor.py",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_extractor",
-      "target": "tests_test_extractor_test_extract_detects_ocana_without_accent",
-      "confidence_score": 1.0
+      "target": "tests_test_extractor_test_extract_detects_ocana_without_accent"
     },
     {
       "relation": "contains",
@@ -4364,9 +4779,9 @@
       "source_file": "tests/test_extractor.py",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_extractor",
-      "target": "tests_test_extractor_test_extract_returns_required_keys_with_confidence",
-      "confidence_score": 1.0
+      "target": "tests_test_extractor_test_extract_returns_required_keys_with_confidence"
     },
     {
       "relation": "contains",
@@ -4374,9 +4789,9 @@
       "source_file": "tests/test_extractor.py",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_extractor",
-      "target": "tests_test_extractor_test_extract_returns_unknown_when_no_spatial_signal",
-      "confidence_score": 1.0
+      "target": "tests_test_extractor_test_extract_returns_unknown_when_no_spatial_signal"
     },
     {
       "relation": "contains",
@@ -4384,9 +4799,9 @@
       "source_file": "tests/test_pipeline.py",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_pipeline",
-      "target": "tests_test_pipeline_dummysodaclient",
-      "confidence_score": 1.0
+      "target": "tests_test_pipeline_dummysodaclient"
     },
     {
       "relation": "contains",
@@ -4394,9 +4809,9 @@
       "source_file": "tests/test_pipeline.py",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_pipeline",
-      "target": "tests_test_pipeline_test_run_pipeline_generates_output_file",
-      "confidence_score": 1.0
+      "target": "tests_test_pipeline_test_run_pipeline_generates_output_file"
     },
     {
       "relation": "method",
@@ -4404,9 +4819,9 @@
       "source_file": "tests/test_pipeline.py",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_pipeline_dummysodaclient",
-      "target": "tests_test_pipeline_dummysodaclient_fetch_rows",
-      "confidence_score": 1.0
+      "target": "tests_test_pipeline_dummysodaclient_fetch_rows"
     },
     {
       "relation": "method",
@@ -4414,9 +4829,19 @@
       "source_file": "tests/test_pipeline.py",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_pipeline_dummysodaclient",
-      "target": "tests_test_pipeline_dummysodaclient_init",
-      "confidence_score": 1.0
+      "target": "tests_test_pipeline_dummysodaclient_init"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "vercel.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "vercel",
+      "target": "vercel_rewrites"
     },
     {
       "relation": "contains",
@@ -4424,9 +4849,9 @@
       "source_file": "README.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme",
-      "target": "readme_safeway_backend",
-      "confidence_score": 1.0
+      "target": "readme_safeway_backend"
     },
     {
       "relation": "contains",
@@ -4434,9 +4859,9 @@
       "source_file": "README.md",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_safeway_backend",
-      "target": "readme_api_y_funcionalidades",
-      "confidence_score": 1.0
+      "target": "readme_api_y_funcionalidades"
     },
     {
       "relation": "contains",
@@ -4444,9 +4869,9 @@
       "source_file": "README.md",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_safeway_backend",
-      "target": "readme_configuraci\u00f3n_del_entorno_de_desarrollo",
-      "confidence_score": 1.0
+      "target": "readme_configuraci\u00f3n_del_entorno_de_desarrollo"
     },
     {
       "relation": "contains",
@@ -4454,9 +4879,9 @@
       "source_file": "README.md",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_safeway_backend",
-      "target": "readme_desarrollo_y_ml",
-      "confidence_score": 1.0
+      "target": "readme_desarrollo_y_ml"
     },
     {
       "relation": "contains",
@@ -4464,9 +4889,9 @@
       "source_file": "README.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_safeway_backend",
-      "target": "readme_estructura_del_proyecto",
-      "confidence_score": 1.0
+      "target": "readme_estructura_del_proyecto"
     },
     {
       "relation": "contains",
@@ -4474,9 +4899,9 @@
       "source_file": "README.md",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_safeway_backend",
-      "target": "readme_iniciando_el_sistema",
-      "confidence_score": 1.0
+      "target": "readme_iniciando_el_sistema"
     },
     {
       "relation": "contains",
@@ -4484,9 +4909,9 @@
       "source_file": "backend/model/README.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_readme",
-      "target": "model_readme_modelo_de_riesgo_safeway_ml",
-      "confidence_score": 1.0
+      "target": "model_readme_modelo_de_riesgo_safeway_ml"
     },
     {
       "relation": "contains",
@@ -4494,9 +4919,9 @@
       "source_file": "backend/model/README.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_readme_modelo_de_riesgo_safeway_ml",
-      "target": "model_readme_datos_utilizados",
-      "confidence_score": 1.0
+      "target": "model_readme_datos_utilizados"
     },
     {
       "relation": "contains",
@@ -4504,9 +4929,9 @@
       "source_file": "backend/model/README.md",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_readme_modelo_de_riesgo_safeway_ml",
-      "target": "model_readme_estructura_de_archivos",
-      "confidence_score": 1.0
+      "target": "model_readme_estructura_de_archivos"
     },
     {
       "relation": "contains",
@@ -4514,11 +4939,11 @@
       "source_file": "backend/model/README.md",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "model_readme_modelo_de_riesgo_safeway_ml",
-      "target": "model_readme_implementaci\u00f3n_de_arquitecturas",
-      "confidence_score": 1.0
+      "target": "model_readme_implementaci\u00f3n_de_arquitecturas"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0828e0a977b643f62ace91dbf3516288725b4455"
+  "built_at_commit": "9b44c52d49072c309664a20b2f4e496781e27619"
 }

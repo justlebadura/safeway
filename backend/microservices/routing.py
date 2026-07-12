@@ -114,6 +114,8 @@ class RouteOptimizer:
         target_hour: int | None,
         use_hazard: bool,
         bbox: Tuple[float, float, float, float] | None,
+        start_node: GraphNode,
+        end_node: GraphNode,
     ):
         """Build a directed NetworkX DiGraph with safety-weighted edges.
 
@@ -178,9 +180,22 @@ class RouteOptimizer:
                     risk_b = 0.0
                 
                 density_b = len(b.accidents)
-                # Each unit of risk (scaled by density) adds 90 virtual seconds of delay
-                delay_b = risk_b * (1.0 + density_b * 1.5) * 90.0
-                G.add_edge(aid, bid, weight=time_base_seconds + delay_b)
+                # Balanced delay: 25 seconds per risk unit, flattened density multiplier (0.15 per accident)
+                delay_b = risk_b * (1.0 + density_b * 0.15) * 25.0
+                weight_fw = time_base_seconds + delay_b
+
+                # Apply Highway Hierarchy Penalty symmetrically based on destination node B (only for fastest routing)
+                d_start_b = self._euclidean(b.lat, b.lng, start_node.lat, start_node.lng)
+                d_end_b = self._euclidean(b.lat, b.lng, end_node.lat, end_node.lng)
+                min_dist_b = min(d_start_b, d_end_b)
+                
+                lbl_b = b.label.lower()
+                is_main_b = any(k in lbl_b for k in ["avenida", "autopista", "viaducto", "carrera 27", "carrera 33", "diagonal 15", "boulevard"])
+                if not use_hazard and not is_main_b and min_dist_b > 0.002:
+                    hierarchy_multiplier = min(3.5, 1.0 + (min_dist_b - 0.002) * 500.0)
+                    weight_fw *= hierarchy_multiplier
+
+                G.add_edge(aid, bid, weight=weight_fw)
 
                 # Reverse B→A: weight penalises risk at destination node A
                 risk_a = getattr(a, "predicted_risk", None)
@@ -190,9 +205,47 @@ class RouteOptimizer:
                     risk_a = 0.0
                 
                 density_a = len(a.accidents)
-                # Each unit of risk (scaled by density) adds 90 virtual seconds of delay
-                delay_a = risk_a * (1.0 + density_a * 1.5) * 90.0
-                G.add_edge(bid, aid, weight=time_base_seconds + delay_a)
+                # Balanced delay: 25 seconds per risk unit, flattened density multiplier (0.15 per accident)
+                delay_a = risk_a * (1.0 + density_a * 0.15) * 25.0
+                weight_bw = time_base_seconds + delay_a
+
+                # Apply Highway Hierarchy Penalty symmetrically based on destination node A (only for fastest routing)
+                d_start_a = self._euclidean(a.lat, a.lng, start_node.lat, start_node.lng)
+                d_end_a = self._euclidean(a.lat, a.lng, end_node.lat, end_node.lng)
+                min_dist_a = min(d_start_a, d_end_a)
+                
+                lbl_a = a.label.lower()
+                is_main_a = any(k in lbl_a for k in ["avenida", "autopista", "viaducto", "carrera 27", "carrera 33", "diagonal 15", "boulevard"])
+                if not use_hazard and not is_main_a and min_dist_a > 0.002:
+                    hierarchy_multiplier = min(3.5, 1.0 + (min_dist_a - 0.002) * 500.0)
+                    weight_bw *= hierarchy_multiplier
+
+                G.add_edge(bid, aid, weight=weight_bw)
+
+        # Bridge disconnected components to guarantee 100% connectivity
+        undirected_G = G.to_undirected()
+        components = list(nx.connected_components(undirected_G))
+        if len(components) > 1:
+            # Sort components by size (connect smaller components to the largest one)
+            components.sort(key=len, reverse=True)
+            main_comp = components[0]
+            for other_comp in components[1:]:
+                min_dist = float('inf')
+                best_pair = None
+                for u in main_comp:
+                    node_u = self.node_map[u]
+                    for v in other_comp:
+                        node_v = self.node_map[v]
+                        dist = self._euclidean(node_u.lat, node_u.lng, node_v.lat, node_v.lng)
+                        if dist < min_dist:
+                            min_dist = dist
+                            best_pair = (u, v)
+                if best_pair:
+                    u, v = best_pair
+                    dist_km = min_dist * 111.0
+                    time_base = (dist_km / 30.0) * 3600.0
+                    G.add_edge(u, v, weight=time_base)
+                    G.add_edge(v, u, weight=time_base)
 
         return G
 
@@ -228,14 +281,15 @@ class RouteOptimizer:
         target_hour: int | None = None,
         use_hazard: bool = True,
     ) -> Tuple[List[Tuple[float, float]], float]:
-        """Find a route using A* with SafeWay risk weights and bounding-box pruning."""
-        import networkx as nx
-
+        """Runs Bidirectional Dijkstra with a dynamic Highway Hierarchy penalty system."""
         if start_id not in self.node_map or end_id not in self.node_map:
             return [], 0.0
 
-        bbox = self._bounding_box(start_id, end_id)
-        G = self._build_graph(target_year, rain_active, target_hour, use_hazard, bbox)
+        start_node = self.node_map[start_id]
+        end_node = self.node_map[end_id]
+
+        # Build graph on the entire node set (no bounding box corridor pruning)
+        G = self._build_graph(target_year, rain_active, target_hour, use_hazard, bbox=None, start_node=start_node, end_node=end_node)
 
         # Guarantee start and end are always in the graph
         for nid in (start_id, end_id):
@@ -243,32 +297,109 @@ class RouteOptimizer:
                 node = self.node_map[nid]
                 G.add_node(nid, lat=node.lat, lng=node.lng)
 
-        if not nx.has_path(G, start_id, end_id):
-            # Retry without bounding box
-            G = self._build_graph(target_year, rain_active, target_hour, use_hazard, bbox=None)
-            for nid in (start_id, end_id):
-                if nid not in G:
-                    node = self.node_map[nid]
-                    G.add_node(nid, lat=node.lat, lng=node.lng)
+        # Helper function for Bidirectional Dijkstra search
+        def run_bidirectional_dijkstra(graph) -> Tuple[List[str] | None, float]:
+            if start_id == end_id:
+                return [start_id], 0.0
 
-        if not nx.has_path(G, start_id, end_id):
-            s, e = self.node_map[start_id], self.node_map[end_id]
-            return [(s.lat, s.lng), (e.lat, e.lng)], 0.0
+            queue_fw = [(0.0, start_id)]
+            queue_bw = [(0.0, end_id)]
 
-        end_node = self.node_map[end_id]
+            dist_fw = {start_id: 0.0}
+            dist_bw = {end_id: 0.0}
 
-        def heuristic(u: str, _v: str) -> float:
-            nu = self.node_map.get(u)
-            if nu is None:
-                return 0.0
-            return self._euclidean(nu.lat, nu.lng, end_node.lat, end_node.lng)
+            visited_fw = set()
+            visited_bw = set()
 
-        try:
-            path_ids = nx.astar_path(G, start_id, end_id, heuristic=heuristic, weight="weight")
-            total_cost = nx.astar_path_length(G, start_id, end_id, heuristic=heuristic, weight="weight")
-        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            parent_fw = {start_id: None}
+            parent_bw = {end_id: None}
+
+            best_cost = float('inf')
+            meeting_node = None
+
+            while queue_fw and queue_bw:
+                # Early termination condition
+                if queue_fw[0][0] + queue_bw[0][0] >= best_cost:
+                    break
+
+                # Alternate based on queue sizes
+                if len(queue_fw) <= len(queue_bw):
+                    # Forward step
+                    d, u = heapq.heappop(queue_fw)
+                    if d > dist_fw.get(u, float('inf')):
+                        continue
+                    if u in visited_fw:
+                        continue
+                    visited_fw.add(u)
+
+                    # Check if searches meet
+                    if u in dist_bw:
+                        total_cost = dist_fw[u] + dist_bw[u]
+                        if total_cost < best_cost:
+                            best_cost = total_cost
+                            meeting_node = u
+
+                    # Expand successors
+                    if u in graph:
+                        for v in graph.successors(u):
+                            weight = graph[u][v].get('weight', 1.0)
+                            new_dist = dist_fw[u] + weight
+                            if new_dist < dist_fw.get(v, float('inf')):
+                                dist_fw[v] = new_dist
+                                parent_fw[v] = u
+                                heapq.heappush(queue_fw, (new_dist, v))
+                else:
+                    # Backward step
+                    d, u = heapq.heappop(queue_bw)
+                    if d > dist_bw.get(u, float('inf')):
+                        continue
+                    if u in visited_bw:
+                        continue
+                    visited_bw.add(u)
+
+                    # Check if searches meet
+                    if u in dist_fw:
+                        total_cost = dist_fw[u] + dist_bw[u]
+                        if total_cost < best_cost:
+                            best_cost = total_cost
+                            meeting_node = u
+
+                    # Expand predecessors (backward edges)
+                    if u in graph:
+                        for v in graph.predecessors(u):
+                            weight = graph[v][u].get('weight', 1.0)
+                            new_dist = dist_bw[u] + weight
+                            if new_dist < dist_bw.get(v, float('inf')):
+                                dist_bw[v] = new_dist
+                                parent_bw[v] = u
+                                heapq.heappush(queue_bw, (new_dist, v))
+
+            if meeting_node is None:
+                return None, float('inf')
+
+            # Reconstruct path
+            path = []
+            curr = meeting_node
+            while curr is not None:
+                path.append(curr)
+                curr = parent_fw[curr]
+            path.reverse()
+
+            curr = parent_bw.get(meeting_node)
+            while curr is not None:
+                path.append(curr)
+                curr = parent_bw.get(curr)
+
+            return path, best_cost
+
+        # Run search on entire graph
+        path_ids, total_cost = run_bidirectional_dijkstra(G)
+
+        if path_ids is None:
             s, e = self.node_map[start_id], self.node_map[end_id]
             return [(s.lat, s.lng), (e.lat, e.lng)], 0.0
 
         coords = [(self.node_map[nid].lat, self.node_map[nid].lng) for nid in path_ids]
         return coords, round(total_cost, 4)
+
+

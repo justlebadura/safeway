@@ -12,6 +12,7 @@ from backend.microservices.grapher import MapGrapher
 from backend.microservices.api_soda_cleaner import get_combined_datasets_snapshot
 from backend.model.arch.hybrid_model import HybridGNNLNN
 from backend.model.loss.rill_loss import HybridLoss
+from backend.microservices.routing import GraphNode
 
 def train_offline():
     print("Loading real dataset for offline training...")
@@ -21,7 +22,43 @@ def train_offline():
     grapher = MapGrapher()
     nodes = grapher.build_structural_graph(records)
     num_nodes = len(nodes)
-    print(f"Loaded {num_nodes} nodes.")
+    print(f"Loaded {num_nodes} positive nodes.")
+    
+    # --- Spatial Negative Sampling (Positive-Only Learning Correction) ---
+    import random
+    lats = [n.lat for n in nodes]
+    lngs = [n.lng for n in nodes]
+    lat_min, lat_max = min(lats), max(lats)
+    lng_min, lng_max = min(lngs), max(lngs)
+    
+    num_negatives = len(nodes)  # 1:1 Positive-to-Negative ratio
+    neg_nodes = []
+    neg_counter = 1
+    
+    random.seed(42)
+    attempts = 0
+    while len(neg_nodes) < num_negatives and attempts < 2000:
+        attempts += 1
+        rand_lat = random.uniform(lat_min, lat_max)
+        rand_lng = random.uniform(lng_min, lng_max)
+        
+        # Check distance to all positive nodes (at least 150m / 0.0013 degrees away)
+        too_close = False
+        for n in nodes:
+            if abs(n.lat - rand_lat) < 0.0013 and abs(n.lng - rand_lng) < 0.0013:
+                too_close = True
+                break
+        
+        if not too_close:
+            node_id = f"node_neg_{neg_counter}"
+            neg_counter += 1
+            # Negative node has 0 accidents
+            node = GraphNode(node_id, rand_lat, rand_lng, label="Zona Residencial Segura")
+            neg_nodes.append(node)
+            
+    nodes.extend(neg_nodes)
+    num_nodes = len(nodes)
+    print(f"Added {len(neg_nodes)} negative control nodes. Total nodes for GNN training: {num_nodes}")
     
     # Build edge index
     sources, targets = [], []
@@ -40,7 +77,7 @@ def train_offline():
     # We will generate a list of training pairs (x_seq, y_true) for different conditions
     training_data = []
     for rain_active in [False, True]:
-        for hour in [0, 4, 8, 12, 16, 20]:
+        for hour in range(24):
             # Generate features sequence
             sequences = []
             for t in range(5):
@@ -54,7 +91,7 @@ def train_offline():
                     features[idx, 2] = h_seq / 24.0
                     
                     num_acc = len(node.accidents)
-                    features[idx, 4] = float(num_acc)
+                    features[idx, 4] = float(num_acc) / 50.0  # Normalize count
                     if num_acc > 0:
                         sev_sum = 0.0
                         for acc in node.accidents:
@@ -65,7 +102,7 @@ def train_offline():
                                 sev_sum += 2.0
                             else:
                                 sev_sum += 1.0
-                        features[idx, 3] = sev_sum / num_acc
+                        features[idx, 3] = (sev_sum / num_acc) / 4.0  # Normalize severity
                     else:
                         features[idx, 3] = 0.0
                 sequences.append(features)
@@ -80,11 +117,11 @@ def train_offline():
             
     # Initialize model
     model = HybridGNNLNN(in_features=5, gnn_hidden=8, lnn_hidden=16)
-    optimizer = optim.Adam(model.parameters(), lr=0.005)
+    optimizer = optim.Adam(model.parameters(), lr=0.005, weight_decay=1e-4)
     criterion = HybridLoss(lambda_logic=0.05)
     
     # Offline training loop
-    epochs = 1500
+    epochs = 150
     print(f"Starting offline training for {epochs} epochs...")
     for epoch in range(1, epochs + 1):
         total_loss = 0.0

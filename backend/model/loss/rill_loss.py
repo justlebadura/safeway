@@ -33,7 +33,7 @@ class HybridLoss(nn.Module):
         u = edge_index[0]
         v = edge_index[1]
         
-        # Calculate squared differences in parallel using prediction tensor
-        smoothness_loss = torch.sum((pred[u] - pred[v]) ** 2)
+        # Calculate mean squared differences in parallel using prediction tensor
+        smoothness_loss = torch.mean((pred[u] - pred[v]) ** 2)
         
         return data_loss + self.lambda_logic * smoothness_loss

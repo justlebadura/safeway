@@ -55,20 +55,68 @@ FALLBACK_COORDINATES = {
 }
 
 
+BUCARAMANGA_BARRIOS = {
+    "CENTRO": (7.1194, -73.1226),
+    "CABECERA DEL LLANO": (7.1218, -73.1118),
+    "SAN FRANCISCO": (7.1322, -73.1216),
+    "RIO DE ORO I": (7.1430, -73.1310),
+    "PROVENZA": (7.0980, -73.1110),
+    "ALARCON": (7.1264, -73.1212),
+    "LA CONCORDIA": (7.1180, -73.1250),
+    "RICAURTE": (7.1140, -73.1260),
+    "SOTOMAYOR": (7.1200, -73.1158),
+    "LA AURORA": (7.1268, -73.1160),
+    "REAL DE MINAS": (7.1110, -73.1190),
+    "NUEVO SOTOMAYOR": (7.1170, -73.1180),
+    "GARCIA ROVIRA": (7.1205, -73.1260),
+    "DIAMANTE II": (7.0890, -73.1120),
+    "COMUNEROS": (7.1310, -73.1165),
+    "SAN ALONSO": (7.1292, -73.1140),
+    "CAMPO HERMOSO": (7.1230, -73.1320),
+    "ANTONIA SANTOS CENTRO": (7.1235, -73.1215),
+    "CONUCOS": (7.1115, -73.1122),
+    "PUERTA DEL SOL": (7.1080, -73.1128),
+    "LA PEDREGOSA": (7.0940, -73.1090),
+    "CAFE MADRID": (7.1650, -73.1280),
+    "ALVAREZ": (7.1250, -73.1110),
+    "UNIVERSIDAD": (7.1375, -73.1210),
+    "BOLARQUI": (7.1230, -73.1170),
+    "MEJORAS PUBLICAS": (7.1210, -73.1185),
+    "EL PRADO": (7.1265, -73.1125),
+    "MUTIS": (7.1090, -73.1280),
+}
+
+
 def resolve_coordinates(
     row_id: str,
     latitude: float | None,
     longitude: float | None,
-    extraccion: Any,
+    row: Any,
     dataset_id: str,
 ) -> tuple[float, float, bool]:
     if latitude is not None and longitude is not None:
         return latitude, longitude, False
 
-    muni_name = None
-    if isinstance(extraccion, dict) and extraccion.get("BARRIO_O_MUNICIPIO"):
-        muni_name = extraccion["BARRIO_O_MUNICIPIO"].get("value")
+    # Extract barrio name if present
+    barrio_name = None
+    if isinstance(row, dict):
+        # Try checking top-level first, then nested data_original
+        barrio_name = row.get("barrio") or row.get("barrios_corregimiento_via") or row.get("LOCALIDAD")
+        if not barrio_name and row.get("data_original"):
+            orig = row["data_original"]
+            if isinstance(orig, dict):
+                barrio_name = orig.get("barrio") or orig.get("barrios_corregimiento_via") or orig.get("LOCALIDAD")
+        
+        # Try extracting from extraccion if not found directly
+        if not barrio_name and row.get("extraccion"):
+            extr = row["extraccion"]
+            if isinstance(extr, dict) and extr.get("BARRIO_O_MUNICIPIO"):
+                barrio_name = extr["BARRIO_O_MUNICIPIO"].get("value")
 
+    # Normalize barrio name
+    barrio_key = str(barrio_name).strip().upper() if barrio_name else None
+
+    # Default coordinates
     if dataset_id == "7cci-nqqb":
         default_city = "BUCARAMANGA"
     elif dataset_id == "3v2w-chcq":
@@ -82,8 +130,23 @@ def resolve_coordinates(
     else:
         default_city = "CUCUTA"
 
-    city_key = (muni_name or default_city).upper()
+    coords = None
+    # Check if this is a known neighborhood in Bucaramanga
+    if dataset_id == "7cci-nqqb" and barrio_key:
+        for b_name, b_coords in BUCARAMANGA_BARRIOS.items():
+            if b_name in barrio_key:
+                coords = b_coords
+                break
 
+    if coords:
+        # Use a much smaller offset range (approx +/- 110m) for known neighborhoods
+        h = int(hashlib.md5(row_id.encode("utf-8")).hexdigest(), 16)
+        lat_off = ((h % 1000) / 1000.0 - 0.5) * 0.002
+        lng_off = (((h // 1000) % 1000) / 1000.0 - 0.5) * 0.002
+        return coords[0] + lat_off, coords[1] + lng_off, True
+    
+    # Otherwise check city coordinates
+    city_key = (barrio_key or default_city).upper()
     coords = FALLBACK_COORDINATES.get(city_key)
     if not coords:
         if city_key == "BOGOTA":
@@ -95,6 +158,7 @@ def resolve_coordinates(
     if not coords:
         coords = FALLBACK_COORDINATES.get("CUCUTA")
 
+    # Fallback offset for other records (approx +/- 800m)
     h = int(hashlib.md5(row_id.encode("utf-8")).hexdigest(), 16)
     lat_off = ((h % 1000) / 1000.0 - 0.5) * 0.015
     lng_off = (((h // 1000) % 1000) / 1000.0 - 0.5) * 0.015

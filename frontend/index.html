@@ -308,8 +308,8 @@
 
         <!-- Expandable Comparison Panel -->
         <div class="border-t border-slate-100 pt-2.5 flex items-center justify-between text-[11px] text-slate-500">
-            <span class="flex items-center gap-1.5"><i data-lucide="route" class="w-3.5 h-3.5 text-slate-400"></i> Ruta Corta: <strong id="lblFastestETA" class="text-slate-700 font-bold">0 min</strong> (<span id="lblFastestDist">0.0 km</span>)</span>
-            <span class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-500"></i> Riesgo IA: <strong id="routeScore" class="text-slate-700 font-bold">0.0</strong> vs <strong id="fastestRouteScore" class="text-slate-500">0.0</strong></span>
+            <span class="flex items-center gap-1.5"><i data-lucide="alert-octagon" class="w-3.5 h-3.5 text-slate-400"></i> Ruta Común (Insegura): <strong id="lblFastestETA" class="text-slate-700 font-bold">0 min</strong> (<span id="lblFastestDist">0.0 km</span>)</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-500"></i> Riesgo: <strong id="routeScore" class="text-slate-700 font-bold">0%</strong> vs <strong id="fastestRouteScore" class="text-slate-500">0%</strong></span>
         </div>
     </div>
 
@@ -580,7 +580,7 @@
         }
 
         // Community report helper
-        function submitWazeReport(type, lat, lng) {
+        async function submitWazeReport(type, lat, lng) {
             const iconHtml = type === 'lluvia' 
                 ? '<div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center shadow-lg"><i data-lucide="cloud-rain" class="w-4.5 h-4.5 text-white"></i></div>'
                 : (type === 'policia' 
@@ -604,6 +604,17 @@
             `).openPopup();
             
             lucide.createIcons();
+
+            try {
+                await fetch('/datasets/reports', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: type, latitude: lat, longitude: lng })
+                });
+                console.log("Community report synchronized with AI backend.");
+            } catch (err) {
+                console.error("Error synchronizing community report:", err);
+            }
         }
 
         // Geocoding helper for raw texts
@@ -756,13 +767,11 @@
                 }
             }
 
-            const startNode = document.getElementById('routeStart').dataset.nodeId;
-            const endNode = document.getElementById('routeEnd').dataset.nodeId;
             const rain = document.getElementById('routeRain').checked;
             const hour = document.getElementById('routeHour').value;
             const useSymbolic = document.getElementById('routeModel').checked;
 
-            if (!startCoords || !endCoords || !startNode || !endNode) {
+            if (!startCoords || !endCoords) {
                 hideLoading();
                 alert("No se pudo ubicar el origen o destino. Intente seleccionando en el mapa o escribiendo una dirección válida de Bucaramanga.");
                 return;
@@ -771,9 +780,14 @@
             startPointCoords = startCoords;
             endPointCoords = endCoords;
 
+            const startLat = Array.isArray(startCoords) ? startCoords[0] : (startCoords.lat || startCoords[0]);
+            const startLng = Array.isArray(startCoords) ? startCoords[1] : (startCoords.lng || startCoords[1]);
+            const endLat = Array.isArray(endCoords) ? endCoords[0] : (endCoords.lat || endCoords[0]);
+            const endLng = Array.isArray(endCoords) ? endCoords[1] : (endCoords.lng || endCoords[1]);
+
             showLoading(useSymbolic ? "Consultando SafeWay Simbólico..." : "Consultando SafeWay ML & Dijkstra...");
             try {
-                const url = `/datasets/combined/route?dataset_ids=7cci-nqqb&max_rows=1500&start_id=${startNode}&end_id=${endNode}&rain_active=${rain}&target_hour=${hour}&use_symbolic=${useSymbolic}`;
+                const url = `/datasets/combined/route?dataset_ids=7cci-nqqb&max_rows=1500&start_lat=${startLat}&start_lng=${startLng}&end_lat=${endLat}&end_lng=${endLng}&rain_active=${rain}&target_hour=${hour}&use_symbolic=${useSymbolic}`;
                 const res = await fetch(url);
                 const data = await res.json();
 
@@ -783,38 +797,17 @@
                 routeNodesMarkerGroup.clearLayers();
 
                 if (data.safest && data.safest.path.length > 0) {
-                    // Fastest route is direct from start to end in OSRM, preventing arbitrary detours
-                    let fastestCoords = [startPointCoords, endPointCoords];
+                    // Safest and fastest paths are already fully snapped OSRM paths from the backend!
+                    roadCoordinates = data.safest.path;
+                    let fastestRoadCoords = data.fastest.path;
 
-                    // Safest route uses a simplified set of max 5 waypoints to avoid local looping
-                    let safestCoords = [...data.safest.path];
-                    safestCoords.unshift(startPointCoords);
-                    safestCoords.push(endPointCoords);
-
-                    if (safestCoords.length > 5) {
-                        const step = Math.ceil(safestCoords.length / 4);
-                        const simplified = [safestCoords[0]];
-                        for (let i = step; i < safestCoords.length - 1; i += step) {
-                            simplified.push(safestCoords[i]);
-                        }
-                        simplified.push(safestCoords[safestCoords.length - 1]);
-                        safestCoords = simplified;
-                    }
-
-                    showLoading("Ajustando trazados a calles reales...");
-                    roadCoordinates = await fetchOSRMRoute(safestCoords);
-                    if (roadCoordinates.length === 0) roadCoordinates = data.safest.path;
-
-                    let fastestRoadCoords = await fetchOSRMRoute(fastestCoords);
-                    if (fastestRoadCoords.length === 0) fastestRoadCoords = data.fastest.path;
-                    hideLoading();
-
-                    // Render Standard Path
+                    // Render Standard Path (Greyish, representing common unsafe route)
                     fastestRoutePolyline = L.polyline(fastestRoadCoords, {
-                        color: colors.fastest,
-                        weight: 4,
-                        opacity: 0.8,
-                        dashArray: '8, 12'
+                        color: '#94a3b8',
+                        weight: 6,
+                        opacity: 0.7,
+                        lineCap: 'round',
+                        lineJoin: 'round'
                     }).addTo(map);
 
                     // Render Safest Path (Thick solid Waze Blue line)
@@ -959,71 +952,26 @@
             lucide.createIcons();
         }
 
-        // Build structural graph nodes (1500 records)
+        let streetEdges = [];
+
+        // Build structural graph nodes using GNN-LNN classified backend risks
         async function fetchNodesAndBuildGraph() {
-            showLoading("Analizando historial de accidentes...");
+            showLoading("Analizando historial de riesgos...");
             try {
-                const res = await fetch(`/datasets/combined?dataset_ids=7cci-nqqb&max_rows=1500`);
+                const rain = document.getElementById('routeRain').checked;
+                const hour = document.getElementById('routeHour').value;
+                const useSymbolic = document.getElementById('routeModel').checked;
+
+                const res = await fetch(`/datasets/combined/graph?dataset_ids=7cci-nqqb&max_rows=1500&rain_active=${rain}&target_hour=${hour}&use_symbolic=${useSymbolic}`);
                 const data = await res.json();
 
-                const records = data.tables.records || [];
-                streetNodes = [];
+                streetNodes = data.nodes || [];
+                streetEdges = data.edges || [];
                 graphLayerGroup.clearLayers();
 
-                records.forEach(acc => {
-                    const lat = parseFloat(acc.latitude);
-                    const lng = parseFloat(acc.longitude);
-                    if (isNaN(lat) || isNaN(lng)) return;
-
-                    const streetName = acc.location || "Esquina";
-
-                    let snapped = false;
-                    for (let corner of streetNodes) {
-                        if (Math.abs(corner.lat - lat) < 0.0004 && Math.abs(corner.lng - lng) < 0.0004) {
-                            corner.weight++;
-                            corner.accidents.push(acc);
-                            const count = corner.accidents.length;
-                            corner.lat = (corner.lat * (count - 1) + lat) / count;
-                            corner.lng = (corner.lng * (count - 1) + lng) / count;
-                            snapped = true;
-                            break;
-                        }
-                    }
-                    if (!snapped) {
-                        const node_id = `node_${streetNodes.length + 1}`;
-                        streetNodes.push({
-                            id: node_id,
-                            lat: lat,
-                            lng: lng,
-                            name: streetName,
-                            weight: 1,
-                            accidents: [acc]
-                        });
-                    }
-                });
-
-                // Render warning markers for High Danger Corners (>= 3 accidents)
-                streetNodes.forEach((c) => {
-                    if (c.weight >= 3) {
-                        const icon = L.divIcon({
-                            className: 'pulsing-warning-marker',
-                            iconSize: [12, 12]
-                        });
-                        L.marker([c.lat, c.lng], { icon: icon })
-                            .bindPopup(`
-                                <div style="font-family:'Outfit'; font-weight:700; color:#ef4444; font-size:12px; margin-bottom:3px;">🚨 Cruce Crítico</div>
-                                <div style="font-size:11px; color:#475569;">
-                                    <strong>Dirección:</strong> ${c.name}<br>
-                                    <strong>Choques registrados:</strong> ${c.weight}
-                                </div>
-                            `)
-                            .addTo(reportsLayerGroup);
-                    }
-                });
-
-                console.log(`Loaded ${streetNodes.length} nodes successfully.`);
+                console.log(`Loaded ${streetNodes.length} nodes and ${streetEdges.length} edges successfully.`);
             } catch (err) {
-                console.error(err);
+                console.error("Error loading graph:", err);
             } finally {
                 hideLoading();
             }
@@ -1034,8 +982,9 @@
             showLoading("Construyendo aristas de red...");
             graphLayerGroup.clearLayers();
             
+            // Draw nodes colored by ML danger percent
             streetNodes.forEach((c) => {
-                const nodeColor = c.weight > 3 ? '#ef4444' : (c.weight > 1 ? '#f59e0b' : '#10b981');
+                const nodeColor = c.danger_percent > 20 ? '#ef4444' : (c.danger_percent > 10 ? '#f59e0b' : '#10b981');
                 L.circleMarker([c.lat, c.lng], {
                     radius: 3.5 + Math.min(c.weight * 1, 15),
                     fillColor: nodeColor,
@@ -1045,6 +994,7 @@
                 }).bindPopup(`
                     <div style="font-family:'Outfit'; font-weight:700; font-size:12px; color:#1e293b;">${c.name}</div>
                     <div style="font-size:10px; color:#64748b; margin-top:2px;">Accidentes: ${c.weight}</div>
+                    <div style="font-size:10px; color:#ef4444; margin-top:2px; font-weight:700;">Riesgo IA: ${c.danger_percent}%</div>
                     <div class="flex gap-1.5 mt-2">
                         <button onclick="setDirectEndpoint('${c.id}', '${c.name.replace(/'/g, "\\'")}', [${c.lat}, ${c.lng}], 'start')" style="background:#10b981; color:white; border:none; padding:4px 8px; border-radius:6px; font-size:9px; cursor:pointer;">Origen</button>
                         <button onclick="setDirectEndpoint('${c.id}', '${c.name.replace(/'/g, "\\'")}', [${c.lat}, ${c.lng}], 'end')" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:6px; font-size:9px; cursor:pointer;">Destino</button>
@@ -1052,20 +1002,23 @@
                 `).addTo(graphLayerGroup);
             });
 
-            for (let i = 0; i < streetNodes.length; i++) {
-                const cA = streetNodes[i];
-                for (let j = i + 1; j < streetNodes.length; j++) {
-                    const cB = streetNodes[j];
-                    const dist = Math.sqrt(Math.pow(cA.lat - cB.lat, 2) + Math.pow(cA.lng - cB.lng, 2));
-                    if (dist < 0.005) {
-                        L.polyline([[cA.lat, cA.lng], [cB.lat, cB.lng]], {
-                            color: 'rgba(59, 130, 246, 0.12)',
-                            weight: 1.5,
-                            opacity: 0.4
-                        }).addTo(graphLayerGroup);
-                    }
+            // Draw edges colored by average danger percent
+            const nodeById = {};
+            streetNodes.forEach(n => { nodeById[n.id] = n; });
+
+            streetEdges.forEach(edge => {
+                const cA = nodeById[edge.source];
+                const cB = nodeById[edge.target];
+                if (cA && cB) {
+                    const avg_danger = (cA.danger_percent + cB.danger_percent) / 2.0;
+                    const edgeColor = avg_danger > 20 ? 'rgba(239, 68, 68, 0.4)' : (avg_danger > 10 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(16, 185, 129, 0.25)');
+                    L.polyline([[cA.lat, cA.lng], [cB.lat, cB.lng]], {
+                        color: edgeColor,
+                        weight: 2,
+                        opacity: 0.6
+                    }).addTo(graphLayerGroup);
                 }
-            }
+            });
             hideLoading();
         }
 
@@ -1174,10 +1127,26 @@
         // Event listeners
         function setupEventListeners() {
             document.getElementById('btnFindRoute').addEventListener('click', calculateSafestRoute);
-            document.getElementById('routeModel').addEventListener('change', (e) => {
+            document.getElementById('routeRain').addEventListener('change', async () => {
+                await fetchNodesAndBuildGraph();
+                if (map.hasLayer(graphLayerGroup)) {
+                    drawGraphConnectionLines();
+                }
+            });
+            document.getElementById('routeHour').addEventListener('change', async () => {
+                await fetchNodesAndBuildGraph();
+                if (map.hasLayer(graphLayerGroup)) {
+                    drawGraphConnectionLines();
+                }
+            });
+            document.getElementById('routeModel').addEventListener('change', async (e) => {
                 const label = document.getElementById('modelLabel');
                 if (label) {
                     label.innerText = e.target.checked ? "Fórmula" : "Red AI";
+                }
+                await fetchNodesAndBuildGraph();
+                if (map.hasLayer(graphLayerGroup)) {
+                    drawGraphConnectionLines();
                 }
             });
             document.getElementById('btnToggleGraph').addEventListener('click', toggleStreetGraphVisibility);
