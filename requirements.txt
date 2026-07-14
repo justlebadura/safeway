@@ -1,10 +1,16 @@
-requests>=2.32.0
-spacy>=3.7.0
-click>=8.1.7
-pytest>=8.3.0
+# === Vercel Production ===
 fastapi>=0.115.0
-uvicorn>=0.30.0
-matplotlib>=3.8.0
-torch>=2.4.0
-torchdiffeq>=0.2.4
+requests>=2.32.0
 numpy>=1.26.0
+networkx>=3.0
+click>=8.1.7
+urllib3>=2.0
+
+# === Optional / Local Dev ===
+# torch>=2.4.0         # Heavy (~2GB) - only needed for NN training/inference
+# torchdiffeq>=0.2.4   # Only needed for NN training
+# spacy>=3.7.0         # Not used anymore (mapper.py is pure regex)
+# matplotlib>=3.8.0    # Only for chart generation
+# scikit-learn>=1.3    # Only for symbolic regression
+# pytest>=8.3.0        # Only for testing
+# uvicorn>=0.30.0      # Dev server (Vercel uses its own)

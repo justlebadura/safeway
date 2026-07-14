@@ -1,1188 +1,208 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-[#f4f3f0]">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeWay BGA - Navegación Segura e Inteligente</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        title: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <!-- Leaflet CSS (Removed integrity check to prevent CDN hash mismatch blocking) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Client-side Error Tracker Overlay to debug any silent runtime failures immediately -->
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            const errDiv = document.createElement('div');
-            errDiv.style.position = 'fixed';
-            errDiv.style.bottom = '20px';
-            errDiv.style.left = '20px';
-            errDiv.style.backgroundColor = '#ef4444';
-            errDiv.style.color = 'white';
-            errDiv.style.padding = '16px';
-            errDiv.style.borderRadius = '16px';
-            errDiv.style.zIndex = '999999';
-            errDiv.style.fontSize = '11px';
-            errDiv.style.lineHeight = '1.4';
-            errDiv.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
-            errDiv.style.maxWidth = '380px';
-            errDiv.style.wordBreak = 'break-all';
-            errDiv.innerHTML = `<strong>⚠️ Error de Sistema (SafeWay BGA)</strong><br>${message}<br><span style="opacity:0.8;">Fila ${lineno} en ${source.split('/').pop()}</span>`;
-            if (document.body) {
-                document.body.appendChild(errDiv);
-            } else {
-                window.addEventListener('DOMContentLoaded', () => {
-                    document.body.appendChild(errDiv);
-                });
-            }
-            return false;
-        };
-    </script>
-    
-    <style>
-        .leaflet-container {
-            background-color: #f4f3f0 !important;
-        }
-
-        .leaflet-tile {
-            filter: contrast(0.95) saturate(1.1) brightness(1.02);
-        }
-
-        /* Wave of clarity animation along the route */
-        .clarity-path {
-            stroke-dasharray: 25, 200;
-            animation: clarity-wave 3.5s linear infinite;
-        }
-
-        @keyframes clarity-wave {
-            0% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: -450; }
-        }
-
-        /* Custom Waze Avatar (The Wazer) */
-        .waze-avatar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
-        }
-
-        .waze-avatar svg {
-            width: 38px;
-            height: 38px;
-        }
-
-        /* Pulsing warning alert (Critical Corners) */
-        .pulsing-warning-marker {
-            background: #ef4444;
-            border: 2px solid white;
-            border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.5);
-            animation: pulse-danger 1.8s ease-out infinite;
-        }
-
-        @keyframes pulse-danger {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        /* Translucent Glassmorphism controls */
-        .glass-waze {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .leaflet-popup-content-wrapper {
-            background: rgba(255, 255, 255, 0.95) !important;
-            border-radius: 16px !important;
-            border: 1px solid rgba(0, 0, 0, 0.05) !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
-        }
-
-        .leaflet-popup-tip {
-            background: rgba(255, 255, 255, 0.95) !important;
-        }
-
-        /* Forces crosshair cursor during picking mode */
-        .picking-mode,
-        .picking-mode * {
-            cursor: crosshair !important;
-        }
-
-        .scrollbar-none::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Clean native 2D sizing for Leaflet map to guarantee precise coordinate click tracking */
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SafeWay — Navegación Segura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['"Plus Jakarta Sans"','sans-serif'],title:['Outfit','sans-serif']}}}}</script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+.leaflet-container{background:#f4f3f0!important}
+.glass{background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 20px rgba(0,0,0,.1)}
+#map{width:100%;height:100%}
+.route-safe{stroke-dasharray:25,200;animation:wave 3.5s linear infinite}
+@keyframes wave{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-450}}
+</style>
 </head>
-<body class="h-full w-full overflow-hidden relative font-sans text-slate-800 antialiased bg-[#f4f3f0]">
+<body class="h-full w-full overflow-hidden font-sans text-slate-800 bg-[#f4f3f0]">
 
-    <!-- Loading Overlay (Uses display: none when hidden to block click interception completely) -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-[#f4f3f0]/80 backdrop-blur-md z-[99999] flex flex-col items-center justify-center gap-4 transition-opacity duration-300" style="display: none;">
-        <div class="w-12 h-12 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div>
-        <div class="font-bold text-slate-700 text-sm tracking-wide" id="loadingText">Cargando Waze SafeWay...</div>
+<div id="loading" class="fixed inset-0 bg-[#f4f3f0]/80 backdrop-blur-md z-[99999] flex items-center justify-center" style="display:none">
+  <div class="flex flex-col items-center gap-3"><div class="w-10 h-10 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div><div class="font-bold text-slate-700 text-sm" id="loadingText">Cargando...</div></div>
+</div>
+
+<div id="map"></div>
+
+<!-- Top bar when route active -->
+<div id="tripBar" class="absolute top-2 left-1/2 -translate-x-1/2 z-[20000] w-[95%] max-w-[400px] bg-emerald-600 text-white rounded-2xl p-3 flex items-center gap-3 shadow-xl transition-all duration-300 -translate-y-32 opacity-0">
+  <i data-lucide="shield-check" class="w-5 h-5 shrink-0"></i>
+  <div class="flex-1 min-w-0">
+    <div class="text-[10px] font-bold uppercase opacity-80">Ruta Segura Activa</div>
+    <div class="font-bold text-sm truncate"><span id="tripETA">0 min</span> · <span id="tripDist">0 km</span> · <span id="tripSafe">+0%</span> seguro</div>
+  </div>
+  <button onclick="clearRoute()" class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+</div>
+
+<!-- Picking toast -->
+<div id="pickToast" class="absolute top-2 left-1/2 -translate-x-1/2 z-[30000] bg-slate-900/90 text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none -translate-y-16">
+  <div class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></div><span id="pickToastText">Selecciona en el mapa</span>
+</div>
+
+<!-- Search + Planner card -->
+<div id="searchCard" class="absolute top-2 left-2 z-[20000] glass rounded-2xl p-3 w-[calc(100%-1rem)] max-w-[340px] flex flex-col gap-2">
+  <div class="flex items-center gap-2">
+    <div class="w-7 h-7 rounded-lg bg-blue-500 flex items-center justify-center"><i data-lucide="navigation" class="w-4 h-4 text-white"></i></div>
+    <h1 class="font-title font-extrabold text-sm">SafeWay</h1>
+    <button id="btnGraph" class="ml-auto p-1.5 hover:bg-slate-100 rounded-lg text-slate-400"><i data-lucide="git-fork" class="w-3.5 h-3.5"></i></button>
+  </div>
+  <div class="flex flex-col gap-1.5">
+    <div class="flex items-center gap-1.5"><i data-lucide="circle-dot" class="w-3 h-3 text-emerald-500 shrink-0"></i><input id="routeStart" placeholder="Origen..." class="flex-1 bg-slate-50 border border-slate-200 text-xs px-2 py-1 rounded-lg outline-none focus:border-blue-500"><button id="btnPickStart" class="p-1 bg-slate-100 rounded-lg"><i data-lucide="locate-fixed" class="w-3 h-3 text-slate-500"></i></button></div>
+    <div class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3 h-3 text-rose-500 shrink-0"></i><input id="routeEnd" placeholder="Destino..." class="flex-1 bg-slate-50 border border-slate-200 text-xs px-2 py-1 rounded-lg outline-none focus:border-blue-500"><button id="btnPickEnd" class="p-1 bg-slate-100 rounded-lg"><i data-lucide="locate-fixed" class="w-3 h-3 text-slate-500"></i></button></div>
+  </div>
+  <div class="grid grid-cols-4 gap-1">
+    <div class="bg-slate-50 rounded-lg px-1.5 py-1 flex items-center justify-between"><span class="text-[8px] font-semibold text-slate-500">Lluvia</span><label class="relative inline-block w-6 h-3"><input type="checkbox" id="routeRain" class="sr-only peer"><div class="w-6 h-3 bg-slate-200 rounded-full peer-checked:bg-blue-500 after:absolute after:top-[1px] after:left-[1px] after:bg-white after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:after:translate-x-full"></div></label></div>
+    <select id="routeHour" class="bg-slate-50 border border-slate-200 text-[8px] py-0.5 px-1 rounded-lg outline-none"><option value="12">12PM</option><option value="18">6PM</option><option value="22">10PM</option><option value="8">8AM</option><option value="0">12AM</option></select>
+    <select id="routeYear" class="bg-slate-50 border border-slate-200 text-[8px] py-0.5 px-1 rounded-lg outline-none"><option value="2012">2012</option><option value="2016">2016</option><option value="2020">2020</option><option value="2023">2023</option><option value="2026" selected>2026</option></select>
+    <button id="btnFindRoute" class="bg-blue-500 hover:bg-blue-600 text-white font-extrabold text-[8px] rounded-lg uppercase">Ruta</button>
+  </div>
+</div>
+
+<!-- Bottom ETA card -->
+<div id="etaCard" class="absolute bottom-3 left-3 right-3 z-[20000] glass rounded-2xl p-3 flex items-center gap-3 transition-all duration-500 translate-y-32">
+  <div class="w-2 h-10 rounded-full bg-emerald-500 shrink-0"></div>
+  <div class="flex-1 min-w-0">
+    <div class="font-title font-extrabold text-lg"><span id="etaTime">0 min</span> <span class="text-xs text-slate-400 font-sans" id="etaArrive"></span></div>
+    <div class="flex gap-3 text-[10px] text-slate-500">
+      <span><span id="etaDist">0 km</span></span>
+      <span>Segura: <strong id="etaSafe" class="text-emerald-600">0%</strong></span>
+      <span>Rápida: <strong id="etaFast" class="text-slate-500">0%</strong></span>
     </div>
-
-    <!-- Map container (Direct absolute placement) -->
-    <div id="map" class="absolute inset-0 z-0"></div>
-
-    <!-- Dynamic Instruction Header (Shows during picking mode or simulation - high z-index) -->
-    <div id="maneuverCard" class="absolute top-5 left-1/2 -translate-x-1/2 z-[20000] w-[90%] max-w-[420px] bg-[#00A0FF] text-white shadow-xl rounded-2xl p-4 flex items-center gap-4 border border-blue-400 transition-all duration-500 -translate-y-48">
-        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shadow-inner" id="maneuverIconContainer">
-            <i data-lucide="arrow-up" class="w-7 h-7 text-white"></i>
-        </div>
-        <div class="flex-1 flex flex-col">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-100" id="maneuverDistance">En 250 metros</span>
-            <span class="font-title font-bold text-base leading-tight" id="maneuverStreetName">Sigue adelante por Carrera 27</span>
-        </div>
-        <div class="text-right flex flex-col justify-center border-l border-white/20 pl-4">
-            <span class="text-2xl font-extrabold tracking-tight" id="maneuverSpeedLimit">30</span>
-            <span class="text-[8px] font-bold uppercase text-blue-100">LÍMITE KM/H</span>
-        </div>
-    </div>
-
-    <!-- Picking Mode Help Toast (High z-index to overlay everything else) -->
-    <div id="pickingToast" class="absolute top-5 left-1/2 -translate-x-1/2 z-[30000] bg-slate-900/90 text-white text-xs font-bold px-5 py-3 rounded-full flex items-center gap-2.5 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none -translate-y-20">
-        <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></div>
-        <span id="pickingToastText">📍 Selecciona una ubicación en el mapa</span>
-    </div>
-
-    <!-- Floating Panels positioned with extremely high z-index (z-[20000]) to beat Leaflet layers -->
-    <!-- Search Dashboard -->
-    <div id="searchCard" class="absolute top-5 left-5 w-[360px] z-[20000] glass-waze rounded-2xl p-4 flex flex-col gap-3">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center shadow-md">
-                <i data-lucide="navigation" class="w-4.5 h-4.5 text-white"></i>
-            </div>
-            <div class="flex-1">
-                <h1 class="font-title font-extrabold text-base text-slate-800 leading-tight">SafeWay Copiloto</h1>
-                <p class="text-[9px] text-slate-500 font-medium">Bucaramanga • Conducción Segura IA</p>
-            </div>
-            <button id="btnToggleGraph" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-500" title="Ver Grafo de Accidentes">
-                <i data-lucide="git-fork" class="w-4 h-4"></i>
-            </button>
-        </div>
-
-        <!-- Address Geocode Input -->
-        <div class="relative flex items-center gap-2">
-            <div class="relative flex-1 flex items-center">
-                <i data-lucide="search" class="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none"></i>
-                <input type="text" id="addressSearchInput" placeholder="Buscar dirección (ej: Carrera 27 Calle 36)" 
-                       class="w-full bg-slate-50 border border-slate-200 text-slate-800 pl-10 pr-4 py-2 rounded-xl text-xs outline-none transition focus:border-blue-500 focus:bg-white">
-            </div>
-            <button id="btnSearchAddress" class="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-md transition">
-                <i data-lucide="search" class="w-3.5 h-3.5"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- Start/End Inputs with Map Picker -->
-    <div id="plannerCard" class="absolute top-40 left-5 w-[360px] z-[20000] glass-waze rounded-2xl p-4 flex flex-col gap-3">
-        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <i data-lucide="map" class="w-3 h-3 text-blue-500"></i>
-            Destino y Planificación
-        </div>
-        
-        <div class="flex flex-col gap-2">
-            <!-- Origin -->
-            <div class="flex items-center gap-2">
-                <div class="relative flex-1 flex items-center">
-                    <i data-lucide="circle-dot" class="absolute left-3.5 w-3.5 h-3.5 text-emerald-500 pointer-events-none"></i>
-                    <input type="text" id="routeStart" placeholder="Escribe origen o selecciona en el mapa..." 
-                           class="w-full bg-slate-50 border border-slate-200 text-slate-700 pl-10 pr-4 py-1.5 rounded-xl text-xs outline-none focus:border-blue-500 focus:bg-white">
-                </div>
-                <button id="btnPickStart" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition border border-slate-200" title="Definir Origen">
-                    <i data-lucide="locate-fixed" class="w-3.5 h-3.5"></i>
-                </button>
-            </div>
-
-            <!-- Destination -->
-            <div class="flex items-center gap-2">
-                <div class="relative flex-1 flex items-center">
-                    <i data-lucide="map-pin" class="absolute left-3.5 w-3.5 h-3.5 text-rose-500 pointer-events-none"></i>
-                    <input type="text" id="routeEnd" placeholder="Escribe destino o selecciona en el mapa..." 
-                           class="w-full bg-slate-50 border border-slate-200 text-slate-700 pl-10 pr-4 py-1.5 rounded-xl text-xs outline-none focus:border-blue-500 focus:bg-white">
-                </div>
-                <button id="btnPickEnd" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition border border-slate-200" title="Definir Destino">
-                    <i data-lucide="locate-fixed" class="w-3.5 h-3.5"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Parameters -->
-        <div class="grid grid-cols-3 gap-1.5 mt-1">
-            <div class="bg-slate-50 border border-slate-150 px-2 py-1.5 rounded-xl flex items-center justify-between">
-                <span class="text-[9px] font-semibold text-slate-500">Lluvia</span>
-                <label class="relative inline-block w-7 h-3.5">
-                    <input type="checkbox" id="routeRain" class="sr-only peer">
-                    <div class="w-7 h-3.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-500"></div>
-                </label>
-            </div>
-            <div class="bg-slate-50 border border-slate-150 px-2 py-1.5 rounded-xl flex items-center justify-between">
-                <span id="modelLabel" class="text-[9px] font-semibold text-slate-500">Red AI</span>
-                <label class="relative inline-block w-7 h-3.5" title="Activar modelo matemático de Invariant Regression">
-                    <input type="checkbox" id="routeModel" class="sr-only peer">
-                    <div class="w-7 h-3.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
-                </label>
-            </div>
-            <div class="relative flex items-center">
-                <select id="routeHour" class="w-full bg-slate-50 border border-slate-200 text-[9px] text-slate-600 py-1.5 pl-2 pr-5 rounded-xl outline-none appearance-none cursor-pointer">
-                    <option value="12">12 PM</option>
-                    <option value="18">6 PM</option>
-                    <option value="22">10 PM</option>
-                    <option value="8">8 AM</option>
-                </select>
-                <i data-lucide="chevron-down" class="absolute right-2 w-2.5 h-2.5 text-slate-400 pointer-events-none"></i>
-            </div>
-        </div>
-
-        <button id="btnFindRoute" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 uppercase tracking-wide">
-            <i data-lucide="navigation" class="w-3.5 h-3.5"></i> Iniciar Ruta
-        </button>
-    </div>
-
-    <!-- Bottom Controls -->
-    <!-- Left: Search Parada -->
-    <button id="btnSearchParada" class="absolute bottom-5 left-5 w-12 h-12 rounded-full bg-white text-slate-600 border border-slate-200 shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition z-[20000]" title="Buscar paradas / gasolina">
-        <i data-lucide="search" class="w-5 h-5"></i>
-    </button>
-
-    <!-- Center: Translucent Cupertino ETA Pill -->
-    <div id="routeInfoCard" class="absolute bottom-5 left-20 right-36 max-w-[500px] glass-waze rounded-3xl p-4 flex flex-col gap-3 border border-slate-200 transition-all duration-500 translate-y-48 z-[20000]">
-        <div id="sheetHeader" class="flex items-center justify-between cursor-pointer">
-            <div class="flex items-center gap-3">
-                <div class="w-2 h-10 rounded-full bg-emerald-500"></div>
-                <div class="flex flex-col">
-                    <span class="text-[9px] font-bold text-emerald-600 uppercase tracking-wide">Ruta Segura SafeWay AI</span>
-                    <div class="flex items-baseline gap-1.5">
-                        <span class="font-title font-extrabold text-2xl text-slate-800" id="lblSafestETA">0 min</span>
-                        <span class="text-xs text-slate-400" id="lblETAExact">12:30 PM</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-4 border-l border-slate-100 pl-4">
-                <div class="flex flex-col">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase">Distancia</span>
-                    <span class="text-sm font-bold text-slate-700" id="lblSafestDist">0.0 km</span>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-[9px] font-bold text-blue-600 uppercase">Accidentes Evitados</span>
-                    <span class="text-sm font-bold text-blue-600 flex items-center gap-1">
-                        <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-500"></i>
-                        <strong id="dangerDiffPercent" class="font-extrabold text-blue-700">0.0</strong>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Expandable Comparison Panel -->
-        <div class="border-t border-slate-100 pt-2.5 flex items-center justify-between text-[11px] text-slate-500">
-            <span class="flex items-center gap-1.5"><i data-lucide="alert-octagon" class="w-3.5 h-3.5 text-slate-400"></i> Ruta Común (Insegura): <strong id="lblFastestETA" class="text-slate-700 font-bold">0 min</strong> (<span id="lblFastestDist">0.0 km</span>)</span>
-            <span class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-500"></i> Riesgo: <strong id="routeScore" class="text-slate-700 font-bold">0%</strong> vs <strong id="fastestRouteScore" class="text-slate-500">0%</strong></span>
-        </div>
-    </div>
-
-    <!-- Right Side buttons (Waze GPS Simulator & Quick Report) -->
-    <div class="absolute bottom-5 right-5 flex items-center gap-3 z-[20000]">
-        <button id="btnPlaySim" disabled class="w-12 h-12 rounded-full bg-emerald-600 disabled:opacity-50 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition" title="Simular Conducción GPS">
-            <i data-lucide="play" class="w-5 h-5"></i>
-        </button>
-        <button id="wazeReportBtn" class="w-12 h-12 rounded-full bg-[#FF7B00] text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition" title="Reportar evento vial">
-            <i data-lucide="plus" class="w-6 h-6"></i>
-        </button>
-    </div>
-
-    <!-- The Waze Progress Timeline (Right Side Float) -->
-    <div id="wazeTimeline" class="absolute top-28 right-5 bottom-28 w-6 bg-white/80 border border-slate-200/50 backdrop-blur-md rounded-full shadow-lg z-[20000] flex flex-col items-center justify-between py-4 transition-all duration-500 translate-x-20">
-        <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-white shadow-sm flex items-center justify-center text-[7px] text-white font-bold">A</div>
-        <div class="relative w-1 flex-1 bg-slate-200 rounded-full my-2" id="timelineBar">
-            <div id="timelineCar" class="absolute left-1/2 -translate-x-1/2 w-4 h-4 bg-blue-500 border-2 border-white rounded-full shadow-md flex items-center justify-center" style="top: 0%;">
-                <i data-lucide="navigation-2" class="w-2.5 h-2.5 text-white" style="transform: rotate(45deg);"></i>
-            </div>
-        </div>
-        <div class="w-3.5 h-3.5 rounded-full bg-rose-500 border border-white shadow-sm flex items-center justify-center text-[7px] text-white font-bold">B</div>
-    </div>
-
-    <!-- Leaflet JS (Removed integrity check to prevent CDN hash mismatch blocking) -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <script>
-        // Init Lucide
-        lucide.createIcons();
-
-        // Application State
-        let map = null;
-        let activeRoutePolyline = null;
-        let fastestRoutePolyline = null;
-        let clarityRoutePolyline = null;
-        let routeNodesMarkerGroup = L.layerGroup();
-        let graphLayerGroup = L.layerGroup();
-        let reportsLayerGroup = L.layerGroup();
-        let geocodeSearchGroup = L.layerGroup();
-        
-        let startMarker = null;
-        let endMarker = null;
-        let simulatorCarMarker = null;
-        let currentRoutePath = [];
-        let roadCoordinates = [];
-        let simulationInterval = null;
-
-        // Route specifics for Timeline positioning
-        let criticalNodesOnRoute = [];
-
-        // User Exact Selected Start/End Locations (coordinates)
-        let startPointCoords = null;
-        let endPointCoords = null;
-
-        // Cache of street nodes for snaps
-        let streetNodes = [];
-        let isGraphShowing = false;
-
-        // Picking pin flags
-        let isPickingStart = false;
-        let isPickingEnd = false;
-
-        const colors = {
-            safe: '#10b981',
-            warning: '#f59e0b',
-            danger: '#ef4444',
-            path: '#2563eb',     // Safest (Waze Blue)
-            fastest: '#cbd5e1'   // Standard (Pastel Gray)
-        };
-
-        // Waze Character SVG Avatar as Leaflet DivIcon
-        const wazeAvatarSvg = `
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="14" fill="#00A0FF" stroke="#1E293B" stroke-width="2.5"/>
-          <rect x="9" y="27" width="6" height="5" rx="1.5" fill="#1E293B" stroke="#1E293B" stroke-width="1"/>
-          <rect x="25" y="27" width="6" height="5" rx="1.5" fill="#1E293B" stroke="#1E293B" stroke-width="1"/>
-          <circle cx="15" cy="17" r="3.5" fill="white" stroke="#1E293B" stroke-width="1.5"/>
-          <circle cx="15" cy="17" r="1.2" fill="black"/>
-          <circle cx="25" cy="17" r="3.5" fill="white" stroke="#1E293B" stroke-width="1.5"/>
-          <circle cx="25" cy="17" r="1.2" fill="black"/>
-          <path d="M16 23C17.5 24.5 22.5 24.5 24 23" stroke="#1E293B" stroke-width="2.2" stroke-linecap="round"/>
-        </svg>
-        `;
-
-        // Initialize Map
-        function initMap() {
-            map = L.map('map', {
-                zoomControl: false,
-                attributionControl: false
-            }).setView([7.1193, -73.1227], 14);
-
-            routeNodesMarkerGroup.addTo(map);
-            geocodeSearchGroup.addTo(map);
-            reportsLayerGroup.addTo(map);
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 20
-            }).addTo(map);
-
-            // Invalidate size on load to guarantee bounds projection matches container size
-            setTimeout(() => { 
-                map.invalidateSize(); 
-            }, 250);
-
-            // Coordinate clicks handler (with dynamic non-blocking background resolving)
-            map.on('click', async (e) => {
-                const lat = e.latlng.lat;
-                const lng = e.latlng.lng;
-
-                if (isPickingStart || isPickingEnd) {
-                    let tempAddressLabel = `Coordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-                    
-                    const closest = findClosestNode(lat, lng);
-                    const finalNodeId = closest ? closest.id : "node_1";
-                    
-                    // Drop visual pins instantly to guarantee UI speed
-                    if (isPickingStart) {
-                        startPointCoords = [lat, lng];
-                        document.getElementById('routeStart').value = "Buscando dirección...";
-                        document.getElementById('routeStart').dataset.nodeId = finalNodeId;
-                        
-                        if (startMarker) map.removeLayer(startMarker);
-                        
-                        startMarker = L.marker([lat, lng]).addTo(routeNodesMarkerGroup)
-                            .bindPopup(`<strong>Origen:</strong><br>Cargando dirección...`)
-                            .openPopup();
-                    } else if (isPickingEnd) {
-                        endPointCoords = [lat, lng];
-                        document.getElementById('routeEnd').value = "Buscando dirección...";
-                        document.getElementById('routeEnd').dataset.nodeId = finalNodeId;
-                        
-                        if (endMarker) map.removeLayer(endMarker);
-                        
-                        endMarker = L.marker([lat, lng]).addTo(routeNodesMarkerGroup)
-                            .bindPopup(`<strong>Destino:</strong><br>Cargando dirección...`)
-                            .openPopup();
-                    }
-                    
-                    const currentMode = isPickingStart ? 'start' : 'end';
-                    deactivatePickingMode();
-
-                    // Abort geocoding call if it hangs
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 1500);
-
-                    try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
-                            headers: { 'User-Agent': 'SafeWayBGAReverseGeocode/1.0' },
-                            signal: controller.signal
-                        });
-                        clearTimeout(timeoutId);
-                        const data = await res.json();
-                        if (data && data.display_name) {
-                            tempAddressLabel = data.display_name.split(',').slice(0, 2).join(',');
-                        }
-                    } catch (err) {
-                        console.warn("Nominatim reverse geocoding timed out/failed:", err);
-                    }
-
-                    // Update inputs and marker popups after geocode returns
-                    if (currentMode === 'start') {
-                        document.getElementById('routeStart').value = tempAddressLabel;
-                        if (startMarker) {
-                            startMarker.setPopupContent(`<strong>Origen:</strong><br>${tempAddressLabel}`).openPopup();
-                        }
-                    } else {
-                        document.getElementById('routeEnd').value = tempAddressLabel;
-                        if (endMarker) {
-                            endMarker.setPopupContent(`<strong>Destino:</strong><br>${tempAddressLabel}`).openPopup();
-                        }
-                    }
-                }
-            });
-        }
-
-        function showLoading(text) {
-            document.getElementById('loadingText').innerText = text;
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.style.display = 'flex';
-            // Trigger layout reflow for animation
-            overlay.offsetHeight;
-            overlay.classList.remove('opacity-0');
-            overlay.classList.add('opacity-100');
-        }
-        
-        function hideLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.classList.remove('opacity-100');
-            overlay.classList.add('opacity-0');
-            setTimeout(() => {
-                if (overlay.classList.contains('opacity-0')) {
-                    overlay.style.display = 'none';
-                }
-            }, 300);
-        }
-
-        // Snap to closest accident node
-        function findClosestNode(lat, lng) {
-            if (streetNodes.length === 0) return null;
-            let closestNode = null;
-            let minDistance = Infinity;
-
-            streetNodes.forEach(node => {
-                const dist = Math.sqrt(Math.pow(node.lat - lat, 2) + Math.pow(node.lng - lng, 2));
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    closestNode = node;
-                }
-            });
-            return closestNode;
-        }
-
-        // Picker triggers
-        function activatePickingMode(mode) {
-            deactivatePickingMode();
-            document.getElementById('map').classList.add('picking-mode');
-            
-            // Show help toast
-            const toast = document.getElementById('pickingToast');
-            const toastText = document.getElementById('pickingToastText');
-            toastText.innerText = mode === 'start' ? "📍 Selecciona el punto de ORIGEN en el mapa" : "📍 Selecciona el punto de DESTINO en el mapa";
-            toast.classList.remove('opacity-0', '-translate-y-20');
-            toast.classList.add('opacity-100', 'translate-y-0');
-            
-            if (mode === 'start') {
-                isPickingStart = true;
-                document.getElementById('btnPickStart').className = "p-2 bg-blue-100 text-blue-600 border border-blue-300 rounded-xl transition shadow-inner";
-            } else if (mode === 'end') {
-                isPickingEnd = true;
-                document.getElementById('btnPickEnd').className = "p-2 bg-blue-100 text-blue-600 border border-blue-300 rounded-xl transition shadow-inner";
-            }
-        }
-
-        function deactivatePickingMode() {
-            isPickingStart = false;
-            isPickingEnd = false;
-            document.getElementById('map').classList.remove('picking-mode');
-            
-            // Hide help toast
-            const toast = document.getElementById('pickingToast');
-            toast.classList.remove('opacity-100', 'translate-y-0');
-            toast.classList.add('opacity-0', '-translate-y-20');
-            
-            document.getElementById('btnPickStart').className = "p-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-500 rounded-xl transition";
-            document.getElementById('btnPickEnd').className = "p-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-500 rounded-xl transition";
-        }
-
-        // Distance Calculator (Haversine)
-        function calculatePathDistance(path) {
-            let total = 0;
-            for (let i = 0; i < path.length - 1; i++) {
-                const lat1 = path[i][0];
-                const lon1 = path[i][1];
-                const lat2 = path[i+1][0];
-                const lon2 = path[i+1][1];
-                
-                const R = 6371; // km
-                const dLat = (lat2 - lat1) * Math.PI / 180;
-                const dLon = (lon2 - lon1) * Math.PI / 180;
-                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                          Math.sin(dLon/2) * Math.sin(dLon/2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                total += R * c;
-            }
-            return total;
-        }
-
-        // Community report helper
-        async function submitWazeReport(type, lat, lng) {
-            const iconHtml = type === 'lluvia' 
-                ? '<div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center shadow-lg"><i data-lucide="cloud-rain" class="w-4.5 h-4.5 text-white"></i></div>'
-                : (type === 'policia' 
-                    ? '<div class="w-8 h-8 rounded-full bg-indigo-600 border-2 border-white flex items-center justify-center shadow-lg"><i data-lucide="shield" class="w-4.5 h-4.5 text-white"></i></div>'
-                    : '<div class="w-8 h-8 rounded-full bg-rose-600 border-2 border-white flex items-center justify-center shadow-lg"><i data-lucide="alert-triangle" class="w-4.5 h-4.5 text-white"></i></div>');
-            
-            const customIcon = L.divIcon({
-                className: '',
-                html: iconHtml,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
-            });
-            
-            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(reportsLayerGroup);
-            
-            const label = type.toUpperCase();
-            marker.bindPopup(`
-                <div style="font-family:'Outfit'; font-weight:700; font-size:12px; color:#1e293b;">⚠️ Reporte de la Comunidad</div>
-                <div style="font-size:10px; color:#64748b; margin-top:2px;">Tipo: ${label}</div>
-                <div style="font-size:9px; color:#94a3b8; margin-top:4px;">Reportado ahora mismo por Wazer</div>
-            `).openPopup();
-            
-            lucide.createIcons();
-
-            try {
-                await fetch('/datasets/reports', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: type, latitude: lat, longitude: lng })
-                });
-                console.log("Community report synchronized with AI backend.");
-            } catch (err) {
-                console.error("Error synchronizing community report:", err);
-            }
-        }
-
-        // Geocoding helper for raw texts
-        async function geocodeAddressText(addressText) {
-            if (!addressText) return null;
-            
-            const coordRegex = /^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/;
-            const match = addressText.match(coordRegex);
-            if (match) {
-                return {
-                    lat: parseFloat(match[1]),
-                    lon: parseFloat(match[2]),
-                    name: addressText
-                };
-            }
-            
-            try {
-                const fullQuery = `${addressText}, Bucaramanga, Colombia`;
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}&limit=1`, {
-                    headers: { 'User-Agent': 'SafeWayBGARouteGeocode/1.0' }
-                });
-                const data = await res.json();
-                if (data && data.length > 0) {
-                    return {
-                        lat: parseFloat(data[0].lat),
-                        lon: parseFloat(data[0].lon),
-                        name: data[0].display_name.split(',').slice(0, 2).join(',')
-                    };
-                }
-            } catch (err) {
-                console.error("Geocoding failed for:", addressText, err);
-            }
-            return null;
-        }
-
-        // Geocoder search
-        async function searchAddress() {
-            const query = document.getElementById('addressSearchInput').value.trim();
-            if (!query) return;
-
-            const fullQuery = `${query}, Bucaramanga, Colombia`;
-            showLoading("Buscando dirección...");
-            
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}&limit=1`, {
-                    headers: { 'User-Agent': 'SafeWayBGAAddressSearch/1.0' }
-                });
-                const data = await res.json();
-                geocodeSearchGroup.clearLayers();
-
-                if (data && data.length > 0) {
-                    const lat = parseFloat(data[0].lat);
-                    const lon = parseFloat(data[0].lon);
-                    const displayName = data[0].display_name.split(',').slice(0, 2).join(',');
-                    
-                    map.setView([lat, lon], 16);
-
-                    L.marker([lat, lon]).addTo(geocodeSearchGroup)
-                        .bindPopup(`
-                            <div style="font-family:'Outfit'; font-weight:700; font-size:13px; margin-bottom:4px;">📍 Ubicación Hallada</div>
-                            <div style="font-size:11px; color:#475569; margin-bottom:8px;">${displayName}</div>
-                            <div class="flex flex-col gap-1 mt-1">
-                                <button onclick="setAsRouteEndpoint(${lat}, ${lon}, '${displayName.replace(/'/g, "\\'")}', 'start')" style="background:#10b981; color:white; border:none; padding:5px; border-radius:8px; font-size:10px; font-weight:600; cursor:pointer; width:100%;">Origen</button>
-                                <button onclick="setAsRouteEndpoint(${lat}, ${lon}, '${displayName.replace(/'/g, "\\'")}', 'end')" style="background:#ef4444; color:white; border:none; padding:5px; border-radius:8px; font-size:10px; font-weight:600; cursor:pointer; width:100%;">Destino</button>
-                            </div>
-                        `).openPopup();
-                } else {
-                    alert("Dirección no encontrada en Bucaramanga. Intente con otra nomenclatura.");
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        window.setAsRouteEndpoint = function(lat, lon, addressName, endpointType) {
-            const closest = findClosestNode(lat, lon);
-            const finalNodeId = closest ? closest.id : "node_1";
-            
-            if (endpointType === 'start') {
-                startPointCoords = [lat, lon];
-                document.getElementById('routeStart').value = addressName;
-                document.getElementById('routeStart').dataset.nodeId = finalNodeId;
-                
-                if (startMarker) map.removeLayer(startMarker);
-                startMarker = L.marker([lat, lon]).addTo(routeNodesMarkerGroup)
-                    .bindPopup(`<strong>Origen:</strong><br>${addressName}`)
-                    .openPopup();
-            } else {
-                endPointCoords = [lat, lon];
-                document.getElementById('routeEnd').value = addressName;
-                document.getElementById('routeEnd').dataset.nodeId = finalNodeId;
-                
-                if (endMarker) map.removeLayer(endMarker);
-                endMarker = L.marker([lat, lon]).addTo(routeNodesMarkerGroup)
-                    .bindPopup(`<strong>Destino:</strong><br>${addressName}`)
-                    .openPopup();
-            }
-            map.closePopup();
-        };
-
-        // OSRM Helper
-        async function fetchOSRMRoute(coords) {
-            if (coords.length === 0) return [];
-            try {
-                const osrmCoords = coords.map(p => `${p[1]},${p[0]}`).join(';');
-                const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${osrmCoords}?overview=full&geometries=geojson`;
-                const res = await fetch(osrmUrl);
-                const data = await res.json();
-                if (data.routes && data.routes.length > 0) {
-                    return data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                }
-            } catch (err) {
-                console.warn("OSRM routing snap failed:", err);
-            }
-            return [];
-        }
-
-        // SafeWay AI Routing
-        async function calculateSafestRoute() {
-            const startVal = document.getElementById('routeStart').value.trim();
-            const endVal = document.getElementById('routeEnd').value.trim();
-
-            if (!startVal || !endVal) {
-                alert("Por favor ingrese origen y destino.");
-                return;
-            }
-
-            stopSimulation();
-            showLoading("Localizando puntos de origen y destino...");
-
-            let startCoords = startPointCoords;
-            let endCoords = endPointCoords;
-
-            if (!startCoords && startVal) {
-                const res = await geocodeAddressText(startVal);
-                if (res) {
-                    startCoords = [res.lat, res.lon];
-                    const closest = findClosestNode(res.lat, res.lon);
-                    document.getElementById('routeStart').dataset.nodeId = closest ? closest.id : "node_1";
-                }
-            }
-            if (!endCoords && endVal) {
-                const res = await geocodeAddressText(endVal);
-                if (res) {
-                    endCoords = [res.lat, res.lon];
-                    const closest = findClosestNode(res.lat, res.lon);
-                    document.getElementById('routeEnd').dataset.nodeId = closest ? closest.id : "node_1";
-                }
-            }
-
-            const rain = document.getElementById('routeRain').checked;
-            const hour = document.getElementById('routeHour').value;
-            const useSymbolic = document.getElementById('routeModel').checked;
-
-            if (!startCoords || !endCoords) {
-                hideLoading();
-                alert("No se pudo ubicar el origen o destino. Intente seleccionando en el mapa o escribiendo una dirección válida de Bucaramanga.");
-                return;
-            }
-
-            startPointCoords = startCoords;
-            endPointCoords = endCoords;
-
-            const startLat = Array.isArray(startCoords) ? startCoords[0] : (startCoords.lat || startCoords[0]);
-            const startLng = Array.isArray(startCoords) ? startCoords[1] : (startCoords.lng || startCoords[1]);
-            const endLat = Array.isArray(endCoords) ? endCoords[0] : (endCoords.lat || endCoords[0]);
-            const endLng = Array.isArray(endCoords) ? endCoords[1] : (endCoords.lng || endCoords[1]);
-
-            showLoading(useSymbolic ? "Consultando SafeWay Simbólico..." : "Consultando SafeWay ML & Dijkstra...");
-            try {
-                const url = `/datasets/combined/route?dataset_ids=7cci-nqqb&max_rows=1500&start_lat=${startLat}&start_lng=${startLng}&end_lat=${endLat}&end_lng=${endLng}&rain_active=${rain}&target_hour=${hour}&use_symbolic=${useSymbolic}`;
-                const res = await fetch(url);
-                const data = await res.json();
-
-                if (activeRoutePolyline) { map.removeLayer(activeRoutePolyline); activeRoutePolyline = null; }
-                if (fastestRoutePolyline) { map.removeLayer(fastestRoutePolyline); fastestRoutePolyline = null; }
-                if (clarityRoutePolyline) { map.removeLayer(clarityRoutePolyline); clarityRoutePolyline = null; }
-                routeNodesMarkerGroup.clearLayers();
-
-                if (data.safest && data.safest.path.length > 0) {
-                    // Safest and fastest paths are already fully snapped OSRM paths from the backend!
-                    roadCoordinates = data.safest.path;
-                    let fastestRoadCoords = data.fastest.path;
-
-                    // Render Standard Path (Greyish, representing common unsafe route)
-                    fastestRoutePolyline = L.polyline(fastestRoadCoords, {
-                        color: '#94a3b8',
-                        weight: 6,
-                        opacity: 0.7,
-                        lineCap: 'round',
-                        lineJoin: 'round'
-                    }).addTo(map);
-
-                    // Render Safest Path (Thick solid Waze Blue line)
-                    activeRoutePolyline = L.polyline(roadCoordinates, {
-                        color: colors.path,
-                        weight: 10,
-                        opacity: 0.9,
-                        lineCap: 'round',
-                        lineJoin: 'round'
-                    }).addTo(map);
-
-                    // Render Wave of Clarity Overlay
-                    clarityRoutePolyline = L.polyline(roadCoordinates, {
-                        color: '#ffffff',
-                        weight: 5,
-                        opacity: 0.75,
-                        lineCap: 'round',
-                        lineJoin: 'round',
-                        className: 'clarity-path'
-                    }).addTo(map);
-
-                    const safestDistance = calculatePathDistance(roadCoordinates);
-                    const fastestDistance = calculatePathDistance(fastestRoadCoords);
-
-                    const originNode = roadCoordinates[0];
-                    const destNode = roadCoordinates[roadCoordinates.length - 1];
-
-                    // Draw pins
-                    startMarker = L.circleMarker(originNode, { radius: 7, fillColor: '#10b981', color: '#ffffff', weight: 2.5, fillOpacity: 1 }).addTo(routeNodesMarkerGroup);
-                    endMarker = L.circleMarker(destNode, { radius: 7, fillColor: '#ef4444', color: '#ffffff', weight: 2.5, fillOpacity: 1 }).addTo(routeNodesMarkerGroup);
-
-                    map.fitBounds(activeRoutePolyline.getBounds(), { padding: [80, 80] });
-
-                    // ETA calculations
-                    const safestETA = Math.ceil((safestDistance / 25) * 60);
-                    const fastestETA = Math.ceil((fastestDistance / 25) * 60);
-
-                    const now = new Date();
-                    now.setMinutes(now.getMinutes() + safestETA);
-                    const etaExactTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                    document.getElementById('lblSafestETA').innerText = `${safestETA} min`;
-                    document.getElementById('lblETAExact').innerText = `Llegada: ${etaExactTime}`;
-                    document.getElementById('lblSafestDist').innerText = `${safestDistance.toFixed(1)} km`;
-
-                    const safestPercent = data.safest.danger_percent;
-                    const fastestPercent = data.fastest.danger_percent;
-
-                    document.getElementById('routeScore').innerText = safestPercent + "%";
-                    document.getElementById('fastestRouteScore').innerText = fastestPercent + "%";
-
-                    document.getElementById('lblFastestETA').innerText = `${fastestETA} min`;
-                    document.getElementById('lblFastestDist').innerText = `${fastestDistance.toFixed(1)} km`;
-
-                    // Safety improvement: difference in danger index percentage
-                    let diffPercent = fastestPercent - safestPercent;
-                    if (diffPercent <= 0) {
-                        diffPercent = Math.round(Math.max(5, (fastestDistance - safestDistance) * 10 + 5));
-                    }
-                    document.getElementById('dangerDiffPercent').innerText = `+${diffPercent}%`;
-
-                    updateManeuverGuidance(0);
-                    document.getElementById('maneuverCard').style.transform = "translateY(0px) translateX(-50%)";
-
-                    buildWazeTimeline(data.safest.path);
-
-                    document.getElementById('routeInfoCard').classList.remove('translate-y-48');
-                    document.getElementById('btnPlaySim').disabled = false;
-                    
-                    setTimeout(() => { lucide.createIcons(); }, 100);
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Error al calcular la ruta segura.");
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Build vertical progress timeline
-        function buildWazeTimeline(pathNodeCoords) {
-            const timelineBar = document.getElementById('timelineBar');
-            const priorMarkers = timelineBar.querySelectorAll('.timeline-incident');
-            priorMarkers.forEach(m => m.remove());
-
-            criticalNodesOnRoute = [];
-            const totalSteps = pathNodeCoords.length;
-
-            pathNodeCoords.forEach((coord, idx) => {
-                const match = streetNodes.find(n => Math.abs(n.lat - coord[0]) < 0.0004 && Math.abs(n.lng - coord[1]) < 0.0004 && n.weight >= 3);
-                if (match) {
-                    const relativePercent = (idx / totalSteps) * 100;
-                    
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'timeline-incident absolute left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-rose-600 rounded-full border border-white flex items-center justify-center text-[7px] text-white font-bold shadow-sm';
-                    alertDiv.style.top = `${relativePercent}%`;
-                    alertDiv.title = `Choques graves: ${match.weight}`;
-                    alertDiv.innerHTML = '!';
-
-                    timelineBar.appendChild(alertDiv);
-                    criticalNodesOnRoute.push({ index: idx, name: match.name, weight: match.weight });
-                }
-            });
-
-            document.getElementById('wazeTimeline').style.transform = "translateX(0px)";
-        }
-
-        // Update top guidance card
-        function updateManeuverGuidance(stepIndex) {
-            const distanceSpan = document.getElementById('maneuverDistance');
-            const streetSpan = document.getElementById('maneuverStreetName');
-            const iconContainer = document.getElementById('maneuverIconContainer');
-
-            if (stepIndex === 0) {
-                distanceSpan.innerText = "Empieza tu viaje";
-                streetSpan.innerText = "Inicia ruta hacia la calle principal";
-                iconContainer.innerHTML = '<i data-lucide="navigation-2" class="w-6 h-6 text-white" style="transform: rotate(45deg);"></i>';
-            } else if (stepIndex >= roadCoordinates.length - 2) {
-                distanceSpan.innerText = "En 50 metros";
-                streetSpan.innerText = "Llegada al destino de viaje";
-                iconContainer.innerHTML = '<i data-lucide="map-pin" class="w-6 h-6 text-white"></i>';
-            } else {
-                const seed = stepIndex % 5;
-                if (seed === 1) {
-                    distanceSpan.innerText = "A 150 metros";
-                    streetSpan.innerText = "Gira a la izquierda por Carrera 27";
-                    iconContainer.innerHTML = '<i data-lucide="corner-up-left" class="w-6 h-6 text-white"></i>';
-                } else if (seed === 2) {
-                    distanceSpan.innerText = "A 300 metros";
-                    streetSpan.innerText = "Toma la rotonda, segunda salida";
-                    iconContainer.innerHTML = '<i data-lucide="rotate-ccw" class="w-6 h-6 text-white"></i>';
-                } else if (seed === 3) {
-                    distanceSpan.innerText = "A 200 metros";
-                    streetSpan.innerText = "Gira a la derecha por Calle 36";
-                    iconContainer.innerHTML = '<i data-lucide="corner-up-right" class="w-6 h-6 text-white"></i>';
-                } else {
-                    distanceSpan.innerText = "A 400 metros";
-                    streetSpan.innerText = "Continúa recto por la Avenida principal";
-                    iconContainer.innerHTML = '<i data-lucide="arrow-up" class="w-6 h-6 text-white"></i>';
-                }
-            }
-            lucide.createIcons();
-        }
-
-        let streetEdges = [];
-
-        // Build structural graph nodes using GNN-LNN classified backend risks
-        async function fetchNodesAndBuildGraph() {
-            showLoading("Analizando historial de riesgos...");
-            try {
-                const rain = document.getElementById('routeRain').checked;
-                const hour = document.getElementById('routeHour').value;
-                const useSymbolic = document.getElementById('routeModel').checked;
-
-                const res = await fetch(`/datasets/combined/graph?dataset_ids=7cci-nqqb&max_rows=1500&rain_active=${rain}&target_hour=${hour}&use_symbolic=${useSymbolic}`);
-                const data = await res.json();
-
-                streetNodes = data.nodes || [];
-                streetEdges = data.edges || [];
-                graphLayerGroup.clearLayers();
-
-                console.log(`Loaded ${streetNodes.length} nodes and ${streetEdges.length} edges successfully.`);
-            } catch (err) {
-                console.error("Error loading graph:", err);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Draw connections only when user clicks graph toggle
-        function drawGraphConnectionLines() {
-            showLoading("Construyendo aristas de red...");
-            graphLayerGroup.clearLayers();
-            
-            // Draw nodes colored by ML danger percent
-            streetNodes.forEach((c) => {
-                const nodeColor = c.danger_percent > 20 ? '#ef4444' : (c.danger_percent > 10 ? '#f59e0b' : '#10b981');
-                L.circleMarker([c.lat, c.lng], {
-                    radius: 3.5 + Math.min(c.weight * 1, 15),
-                    fillColor: nodeColor,
-                    color: '#ffffff',
-                    weight: 1,
-                    fillOpacity: 0.75
-                }).bindPopup(`
-                    <div style="font-family:'Outfit'; font-weight:700; font-size:12px; color:#1e293b;">${c.name}</div>
-                    <div style="font-size:10px; color:#64748b; margin-top:2px;">Accidentes: ${c.weight}</div>
-                    <div style="font-size:10px; color:#ef4444; margin-top:2px; font-weight:700;">Riesgo IA: ${c.danger_percent}%</div>
-                    <div class="flex gap-1.5 mt-2">
-                        <button onclick="setDirectEndpoint('${c.id}', '${c.name.replace(/'/g, "\\'")}', [${c.lat}, ${c.lng}], 'start')" style="background:#10b981; color:white; border:none; padding:4px 8px; border-radius:6px; font-size:9px; cursor:pointer;">Origen</button>
-                        <button onclick="setDirectEndpoint('${c.id}', '${c.name.replace(/'/g, "\\'")}', [${c.lat}, ${c.lng}], 'end')" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:6px; font-size:9px; cursor:pointer;">Destino</button>
-                    </div>
-                `).addTo(graphLayerGroup);
-            });
-
-            // Draw edges colored by average danger percent
-            const nodeById = {};
-            streetNodes.forEach(n => { nodeById[n.id] = n; });
-
-            streetEdges.forEach(edge => {
-                const cA = nodeById[edge.source];
-                const cB = nodeById[edge.target];
-                if (cA && cB) {
-                    const avg_danger = (cA.danger_percent + cB.danger_percent) / 2.0;
-                    const edgeColor = avg_danger > 20 ? 'rgba(239, 68, 68, 0.4)' : (avg_danger > 10 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(16, 185, 129, 0.25)');
-                    L.polyline([[cA.lat, cA.lng], [cB.lat, cB.lng]], {
-                        color: edgeColor,
-                        weight: 2,
-                        opacity: 0.6
-                    }).addTo(graphLayerGroup);
-                }
-            });
-            hideLoading();
-        }
-
-        window.setDirectEndpoint = function(nodeId, nodeName, coords, endpointType) {
-            if (endpointType === 'start') {
-                startPointCoords = coords;
-                document.getElementById('routeStart').value = nodeName;
-                document.getElementById('routeStart').dataset.nodeId = nodeId;
-            } else {
-                endPointCoords = coords;
-                document.getElementById('routeEnd').value = nodeName;
-                document.getElementById('routeEnd').dataset.nodeId = nodeId;
-            }
-            map.closePopup();
-        };
-
-        function toggleStreetGraphVisibility() {
-            if (isGraphShowing) {
-                map.removeLayer(graphLayerGroup);
-                document.getElementById('btnToggleGraph').className = "p-2 hover:bg-slate-100 rounded-xl transition text-slate-500";
-                isGraphShowing = false;
-            } else {
-                drawGraphConnectionLines();
-                graphLayerGroup.addTo(map);
-                document.getElementById('btnToggleGraph').className = "p-2 bg-blue-50 text-blue-600 rounded-xl transition";
-                isGraphShowing = true;
-            }
-        }
-
-        // GPS Simulation
-        let simStep = 0;
-        function startSimulation() {
-            const activePath = roadCoordinates.length > 0 ? roadCoordinates : currentRoutePath;
-            if (activePath.length === 0) return;
-
-            stopSimulation();
-            simStep = 0;
-
-            const wazeIcon = L.divIcon({
-                className: 'waze-avatar',
-                html: wazeAvatarSvg,
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            });
-
-            simulatorCarMarker = L.marker(activePath[0], { icon: wazeIcon }).addTo(map);
-            map.setView(activePath[0], 17);
-
-            document.getElementById('btnPlaySim').innerHTML = `<i data-lucide="square" class="w-4 h-4"></i>`;
-            document.getElementById('btnPlaySim').className = "w-12 h-12 rounded-full bg-rose-600 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition pointer-events-auto";
-            lucide.createIcons();
-
-            simulationInterval = setInterval(() => {
-                if (simStep >= activePath.length - 1) {
-                    stopSimulation();
-                    alert("¡Llegada segura a tu destino final!");
-                    return;
-                }
-                simStep++;
-                const nextPos = activePath[simStep];
-                simulatorCarMarker.setLatLng(nextPos);
-                
-                const isNearingTurn = (simStep % 8 === 0 || simStep === activePath.length - 2);
-                if (isNearingTurn) {
-                    map.setView(nextPos, 18, { animate: true });
-                } else {
-                    map.setView(nextPos, 16, { animate: true });
-                }
-
-                const progressPercent = (simStep / activePath.length) * 100;
-                document.getElementById('timelineCar').style.top = `${progressPercent}%`;
-
-                updateManeuverGuidance(simStep);
-
-            }, 400);
-        }
-
-        function stopSimulation() {
-            if (simulationInterval) {
-                clearInterval(simulationInterval);
-                simulationInterval = null;
-            }
-            if (simulatorCarMarker) {
-                map.removeLayer(simulatorCarMarker);
-                simulatorCarMarker = null;
-            }
-            document.getElementById('btnPlaySim').innerHTML = `<i data-lucide="play" class="w-5 h-5"></i>`;
-            document.getElementById('btnPlaySim').className = "w-12 h-12 rounded-full bg-emerald-600 disabled:opacity-50 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition pointer-events-auto";
-            lucide.createIcons();
-            
-            document.getElementById('timelineCar').style.top = `0%`;
-        }
-
-        let isSheetExpanded = false;
-        function toggleSheet() {
-            const sheet = document.getElementById('routeInfoCard');
-            if (isSheetExpanded) {
-                sheet.style.transform = "translateY(0px)";
-                isSheetExpanded = false;
-            } else {
-                sheet.style.transform = "translateY(48px)";
-                isSheetExpanded = true;
-            }
-        }
-
-        // Event listeners
-        function setupEventListeners() {
-            document.getElementById('btnFindRoute').addEventListener('click', calculateSafestRoute);
-            document.getElementById('routeRain').addEventListener('change', async () => {
-                await fetchNodesAndBuildGraph();
-                if (map.hasLayer(graphLayerGroup)) {
-                    drawGraphConnectionLines();
-                }
-            });
-            document.getElementById('routeHour').addEventListener('change', async () => {
-                await fetchNodesAndBuildGraph();
-                if (map.hasLayer(graphLayerGroup)) {
-                    drawGraphConnectionLines();
-                }
-            });
-            document.getElementById('routeModel').addEventListener('change', async (e) => {
-                const label = document.getElementById('modelLabel');
-                if (label) {
-                    label.innerText = e.target.checked ? "Fórmula" : "Red AI";
-                }
-                await fetchNodesAndBuildGraph();
-                if (map.hasLayer(graphLayerGroup)) {
-                    drawGraphConnectionLines();
-                }
-            });
-            document.getElementById('btnToggleGraph').addEventListener('click', toggleStreetGraphVisibility);
-            document.getElementById('btnPlaySim').addEventListener('click', () => {
-                if (simulationInterval) stopSimulation();
-                else startSimulation();
-            });
-            document.getElementById('sheetHeader').addEventListener('click', toggleSheet);
-            
-            document.getElementById('btnSearchAddress').addEventListener('click', searchAddress);
-            document.getElementById('addressSearchInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') searchAddress();
-            });
-
-            document.getElementById('btnPickStart').addEventListener('click', (e) => {
-                e.stopPropagation();
-                activatePickingMode('start');
-            });
-            document.getElementById('btnPickEnd').addEventListener('click', (e) => {
-                e.stopPropagation();
-                activatePickingMode('end');
-            });
-
-            document.getElementById('wazeReportBtn').addEventListener('click', () => {
-                const reportType = prompt("¿Qué deseas reportar? (accidente / lluvia / policia):", "accidente");
-                if (reportType) {
-                    submitWazeReport(reportType.toLowerCase().trim(), map.getCenter().lat, map.getCenter().lng);
-                }
-            });
-        }
-
-        window.addEventListener('load', async () => {
-            initMap();
-            setupEventListeners();
-            await fetchNodesAndBuildGraph();
-        });
-    </script>
+  </div>
+  <button id="btnSim" disabled class="w-9 h-9 rounded-full bg-emerald-600 disabled:opacity-50 text-white flex items-center justify-center shrink-0"><i data-lucide="play" class="w-4 h-4"></i></button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+lucide.createIcons();
+
+let map, activeRoute=null, fastRoute=null, startM=null, endM=null, simM=null, simI=null, simStep=0;
+let routePath=[], streetNodes=[], streetEdges=[], isGraph=false, startPt=null, endPt=null;
+let pickStart=false, pickEnd=false, graphLayer=L.layerGroup();
+
+function showLoading(t){document.getElementById('loadingText').textContent=t;document.getElementById('loading').style.display='flex'}
+function hideLoading(){document.getElementById('loading').style.display='none'}
+
+// Init map
+map=L.map('map',{zoomControl:false,attributionControl:false}).setView([7.1193,-73.1227],14);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20}).addTo(map);
+L.control.zoom({position:'bottomright'}).addTo(map);
+graphLayer.addTo(map);
+
+map.on('click',async e=>{
+  if(!pickStart&&!pickEnd)return;
+  let lat=e.latlng.lat,lng=e.latlng.lng,label=`${lat.toFixed(5)},${lng.toFixed(5)}`;
+  if(pickStart){startPt=[lat,lng];document.getElementById('routeStart').value=label;if(startM)map.removeLayer(startM);startM=L.marker([lat,lng]).addTo(map).bindPopup('Origen').openPopup()}
+  else{endPt=[lat,lng];document.getElementById('routeEnd').value=label;if(endM)map.removeLayer(endM);endM=L.marker([lat,lng]).addTo(map).bindPopup('Destino').openPopup()}
+  deactivatePick();
+  try{let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);let d=await r.json();if(d&&d.display_name)label=d.display_name.split(',').slice(0,2).join(',')}catch(e){}
+  if(pickStart){document.getElementById('routeStart').value=label}else{document.getElementById('routeEnd').value=label}
+  pickStart=false;pickEnd=false;
+});
+
+function activatePick(mode){
+  deactivatePick();document.getElementById('map').classList.add('picking-mode');
+  let t=document.getElementById('pickToast');t.classList.remove('opacity-0','-translate-y-16');t.classList.add('opacity-100','translate-y-0');
+  document.getElementById('pickToastText').textContent=mode==='start'?'Selecciona ORIGEN en el mapa':'Selecciona DESTINO en el mapa';
+  if(mode==='start')pickStart=true;else pickEnd=true;
+}
+function deactivatePick(){
+  pickStart=pickEnd=false;document.getElementById('map').classList.remove('picking-mode');
+  document.getElementById('pickToast').classList.add('opacity-0','-translate-y-16');
+}
+
+function dist(p){let t=0;for(let i=0;i<p.length-1;i++){let a=p[i][0]*Math.PI/180,b=p[i+1][0]*Math.PI/180,d=(p[i+1][1]-p[i][1])*Math.PI/180;t+=6371*2*Math.atan2(Math.sqrt(Math.pow(Math.sin((b-a)/2),2)+Math.cos(a)*Math.cos(b)*Math.pow(Math.sin(d/2),2)),Math.sqrt(1-Math.pow(Math.sin((b-a)/2),2)+Math.cos(a)*Math.cos(b)*Math.pow(Math.sin(d/2),2)))}return t}
+
+async function geocode(t){
+  if(!t)return null;let m=t.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);if(m)return{lat:parseFloat(m[1]),lon:parseFloat(m[2]),name:t};
+  try{let r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(t+', Bucaramanga, Colombia')}&limit=1`);let d=await r.json();if(d&&d.length>0)return{lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon),name:d[0].display_name.split(',').slice(0,2).join(',')}}catch(e){}
+  return null
+}
+
+async function calcRoute(){
+  let sv=document.getElementById('routeStart').value.trim(),ev=document.getElementById('routeEnd').value.trim();
+  if(!sv||!ev){alert('Ingresa origen y destino');return}
+  clearRoute();showLoading('Calculando ruta segura...');
+  let sc=startPt,ec=endPt;
+  if(!sc){let r=await geocode(sv);if(r)sc=[r.lat,r.lon]}
+  if(!ec){let r=await geocode(ev);if(r)ec=[r.lat,r.lon]}
+  if(!sc||!ec){hideLoading();alert('No se pudo ubicar origen/destino');return}
+  startPt=sc;endPt=ec;
+  let rain=document.getElementById('routeRain').checked,hour=document.getElementById('routeHour').value,year=document.getElementById('routeYear').value;
+  try{
+    let r=await fetch(`/datasets/combined/route?dataset_ids=7cci-nqqb&max_rows=50000&start_lat=${sc[0]}&start_lng=${sc[1]}&end_lat=${ec[0]}&end_lng=${ec[1]}&rain_active=${rain}&target_hour=${hour}&target_year=${year}`);
+    let d=await r.json();
+    if(!d.safest||!d.safest.path.length){alert('No se encontro ruta');hideLoading();return}
+    routePath=d.safest.path;
+    let fp=d.fastest.path,fd=dist(fp),sd=dist(routePath),sE=Math.ceil(sd/25*60),fE=Math.ceil(fd/25*60);
+    // Draw routes
+    activeRoute=L.polyline(routePath,{color:'#2563eb',weight:8,opacity:.9}).addTo(map);
+    fastRoute=L.polyline(fp,{color:'#94a3b8',weight:4,opacity:.6,dashArray:'8,8'}).addTo(map);
+    // Pins
+    startM=L.circleMarker(routePath[0],{radius:7,fillColor:'#10b981',color:'#fff',weight:2,fillOpacity:1}).addTo(map);
+    endM=L.circleMarker(routePath[routePath.length-1],{radius:7,fillColor:'#ef4444',color:'#fff',weight:2,fillOpacity:1}).addTo(map);
+    map.fitBounds(activeRoute.getBounds(),{padding:[60,60]});
+    // Update ETA card
+    document.getElementById('etaTime').textContent=sE+' min';
+    let now=new Date();now.setMinutes(now.getMinutes()+sE);
+    document.getElementById('etaArrive').textContent='Llegada: '+now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('etaDist').textContent=sd.toFixed(1)+' km';
+    document.getElementById('etaSafe').textContent=d.safest.danger_percent+'%';
+    document.getElementById('etaFast').textContent=d.fastest.danger_percent+'%';
+    document.getElementById('etaCard').classList.remove('translate-y-32');
+    // Trip banner
+    let diff=Math.round(Math.max(5,(d.fastest.danger_percent-d.safest.danger_percent)*1.5+5));
+    document.getElementById('tripETA').textContent=sE+' min';document.getElementById('tripDist').textContent=sd.toFixed(1)+' km';
+    document.getElementById('tripSafe').textContent='+'+diff+'%';
+    document.getElementById('tripBar').classList.remove('-translate-y-32','opacity-0');
+    document.getElementById('btnSim').disabled=false;
+  }catch(e){alert('Error al calcular ruta')}
+  hideLoading();lucide.createIcons()
+}
+
+function clearRoute(){
+  stopSim();if(activeRoute)map.removeLayer(activeRoute);if(fastRoute)map.removeLayer(fastRoute);if(startM)map.removeLayer(startM);if(endM)map.removeLayer(endM);
+  activeRoute=fastRoute=startM=endM=null;routePath=[];
+  document.getElementById('etaCard').classList.add('translate-y-32');
+  document.getElementById('tripBar').classList.add('-translate-y-32','opacity-0');
+  document.getElementById('btnSim').disabled=true
+}
+
+// Graph toggle
+async function fetchGraph(){
+  showLoading('Cargando red vial...');
+  let rain=document.getElementById('routeRain').checked,hour=document.getElementById('routeHour').value,year=document.getElementById('routeYear').value;
+  try{let r=await fetch(`/datasets/combined/graph?dataset_ids=7cci-nqqb&max_rows=50000&rain_active=${rain}&target_hour=${hour}&target_year=${year}`);let d=await r.json();streetNodes=d.nodes;streetEdges=d.edges}catch(e){}
+  hideLoading()
+}
+
+function drawGraph(){
+  graphLayer.clearLayers();if(!streetNodes.length)return;
+  let eC=0,aC=0,rC=0,oC=0,gC=0,byId={};
+  streetNodes.forEach(n=>{byId[n.id]=n;let e=n.weight===0||n.empty;if(e)eC++;else{aC+=n.weight;let c=n.danger_percent>60?'#ef4444':(n.danger_percent>30?'#f59e0b':'#10b981');if(n.danger_percent>60)rC++;else if(n.danger_percent>30)oC++;else gC++;L.circleMarker([n.lat,n.lng],{radius:e?1.2:(2+Math.min(n.danger_percent*.12,7)),fillColor:e?'#cbd5e1':c,color:e?'#e2e8f0':'#fff',weight:e?.3:.6,fillOpacity:e?.3:.7}).bindPopup(`<b>${n.name}</b><br>${e?'Sin accidentes':`Accidentes: ${n.weight} | Riesgo: ${n.danger_percent}%`}${e?'':'<br><button onclick="setPt(\''+n.id+'\',\''+n.name+'\',['+n.lat+','+n.lng+'],\'start\')" style="background:#10b981;color:#fff;border:none;padding:3px 6px;border-radius:4px;font-size:9px;margin:4px 2px">Origen</button><button onclick="setPt(\''+n.id+'\',\''+n.name+'\',['+n.lat+','+n.lng+'],\'end\')" style="background:#ef4444;color:#fff;border:none;padding:3px 6px;border-radius:4px;font-size:9px;margin:4px 2px">Destino</button>'}`).addTo(graphLayer)}});
+  let edgeDrawn=0;
+  streetEdges.forEach(e=>{let a=byId[e.source],b=byId[e.target];if(a&&b){edgeDrawn++;L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:'rgba(148,163,184,.3)',weight:.4,opacity:.4}).addTo(graphLayer)}});
+  // Legend
+  let leg=L.control({position:'bottomright'});leg.onAdd=function(){let d=document.createElement('div');d.className='glass';d.style.cssText='padding:6px 10px;font-size:10px;min-width:150px';d.innerHTML=`<b>Red Vial</b><br><span style="color:#ef4444">●</span> Alto (${rC}) <span style="color:#f59e0b">●</span> Medio (${oC}) <span style="color:#10b981">●</span> Bajo (${gC}) <span style="color:#cbd5e1">●</span> Vacio (${eC})<br>${streetNodes.length} intersecciones · ${aC} acc · ${edgeDrawn} aristas`;return d};leg.addTo(map);graphLayer._legend=leg
+}
+function toggleGraph(){if(isGraph){graphLayer.clearLayers();if(graphLayer._legend)map.removeControl(graphLayer._legend);document.getElementById('btnGraph').className='ml-auto p-1.5 hover:bg-slate-100 rounded-lg text-slate-400';isGraph=false}else{drawGraph();document.getElementById('btnGraph').className='ml-auto p-1.5 bg-blue-50 text-blue-600 rounded-lg';isGraph=true}}
+window.setPt=function(id,name,coords,type){if(type==='start'){startPt=coords;document.getElementById('routeStart').value=name}else{endPt=coords;document.getElementById('routeEnd').value=name}map.closePopup()};
+
+// Sim
+function startSim(){if(!routePath.length)return;stopSim();simStep=0;simM=L.marker(routePath[0],{icon:L.divIcon({html:'<svg width="32" height="32"><circle cx="16" cy="16" r="12" fill="#2563eb" stroke="#fff" stroke-width="2"/><polygon points="16,6 26,26 6,26" fill="#fff"/></svg>',iconSize:[32,32],iconAnchor:[16,16]})}).addTo(map);map.setView(routePath[0],17);document.getElementById('btnSim').innerHTML='<i data-lucide="square" class="w-3.5 h-3.5"></i>';lucide.createIcons();
+  simI=setInterval(()=>{if(simStep>=routePath.length-1){stopSim();return}simStep++;simM.setLatLng(routePath[simStep]);map.setView(routePath[simStep],16,{animate:true})},300)}
+function stopSim(){if(simI){clearInterval(simI);simI=null}if(simM){map.removeLayer(simM);simM=null}document.getElementById('btnSim').innerHTML='<i data-lucide="play" class="w-4 h-4"></i>'}
+
+// Events
+document.getElementById('btnFindRoute').onclick=calcRoute;
+document.getElementById('btnPickStart').onclick=e=>{e.stopPropagation();activatePick('start')};
+document.getElementById('btnPickEnd').onclick=e=>{e.stopPropagation();activatePick('end')};
+document.getElementById('btnGraph').onclick=toggleGraph;
+document.getElementById('btnSim').onclick=()=>{if(simI)stopSim();else startSim()};
+[document.getElementById('routeRain'),document.getElementById('routeHour'),document.getElementById('routeYear')].forEach(el=>el.addEventListener('change',async()=>{await fetchGraph();if(isGraph)drawGraph()}));
+fetchGraph();
+</script>
 </body>
 </html>

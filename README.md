@@ -55,10 +55,12 @@ El archivo `backend/api.py` contiene los endpoints principales:
 
 ## Desarrollo y ML
 
-*   **Modelos de ML:** Los modelos (`HybridGNNLNN` con `RILL`) se encuentran en `backend/model/`. Para verificar el rendimiento antes de subir cambios, ejecuta la suite de experimentos:
+*   **Modelo ML:** Arquitectura híbrida **GNN(32) + LNN(64) + LTN + RILL** con regresión simbólica.
+*   **Entrenar el modelo:**
     ```bash
-    python3 -m backend.model.experiment_runner
+    python3 -m backend.model.train_model_offline
     ```
+*   **Ver estadísticas:** Los resultados se guardan en `backend/model/training_report.png`, `training_stats.json`, `symbolic_formula.txt`.
 *   **Tests:** Ejecuta la suite de pruebas regularmente:
     ```bash
     pytest tests/

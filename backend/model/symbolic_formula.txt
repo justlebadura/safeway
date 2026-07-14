@@ -1,0 +1,14 @@
+# SafeWay v6 — Temporal LNN 2023 Prediction
+# R²=0.9357 P=0.94 R=1.00 F1=0.97
+
+risk=0.000241+0.000074*rain+0.000105*h+3.987597*sev+0.000017*acc+0.350155*sevN+-0.000487*accN+0.000002*sin+-0.000003*cos
+
+# Python:
+def symbolic_risk(rain, hour, severity, acc, sevN, accN):
+    import math; h=hour/24.0
+    return max(0.0, 0.000241 +
+        0.000074*rain + 0.000105*h +
+        3.987597*severity + 0.000017*acc +
+        0.350155*sevN + -0.000487*accN +
+        0.000002*math.sin(6.283*h) +
+        -0.000003*math.cos(6.283*h))

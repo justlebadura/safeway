@@ -1,5 +1,5 @@
 from typing import Any, Dict, List
-from microservices.routing import GraphNode
+from backend.microservices.routing import GraphNode
 
 
 class MapGrapher:
@@ -13,10 +13,6 @@ class MapGrapher:
         node_counter = 1
 
         for acc in accidents:
-            # Skip check disabled for datasets like Bucaramanga where geocoded records are marked as fallback
-            # if acc.get("is_fallback_coord"):
-            #     continue
-
             lat = acc.get("latitude")
             lng = acc.get("longitude")
             if lat is None or lng is None:
@@ -27,18 +23,16 @@ class MapGrapher:
                 acc.get("data_limpia", {}).get("barrio") or 
                 acc.get("data_limpia", {}).get("DIRECCION") or 
                 acc.get("data_limpia", {}).get("sitio_exacto_accidente") or
-                acc.get("data_limpia", {}).get("Dirección_Reporte") or
+                acc.get("data_limpia", {}).get("Direccion_Reporte") or
                 "Esquina"
             )
 
-            # Check snapping to existing structural node
             snapped = False
             for c in corners.values():
                 lat_diff = abs(c.lat - lat)
                 lng_diff = abs(c.lng - lng)
                 if lat_diff < self.proximity_threshold and lng_diff < self.proximity_threshold:
                     c.add_accident(acc)
-                    # Slightly adjust centroid to reflect the average of snapped incidents
                     count = len(c.accidents)
                     c.lat = (c.lat * (count - 1) + lat) / count
                     c.lng = (c.lng * (count - 1) + lng) / count
@@ -48,7 +42,7 @@ class MapGrapher:
             if not snapped:
                 node_id = f"node_{node_counter}"
                 node_counter += 1
-                node = GraphNode(node_id, lat, lng, label=street_name)
+                node = GraphNode(node_id, lat, lng, label=street_name, is_fallback=acc.get("is_fallback_coord", False))
                 node.add_accident(acc)
                 corners[node_id] = node
 
