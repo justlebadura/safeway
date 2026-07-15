@@ -110,6 +110,12 @@ CITY_CONFIG = {
         'center': [7.1193, -73.1227],
         'zoom': 14,
     },
+    'pereira': {
+        'dataset_id': 'pg82-4qqr',
+        'graphml': 'pereira_streets.graphml',
+        'center': [4.814, -75.694],
+        'zoom': 13,
+    },
 }
 
 def _load_osm_data(city='palmira'):
@@ -130,9 +136,29 @@ def _load_osm_data(city='palmira'):
     accidents = []
     if dataset_id in DATASET_CONFIGS:
         try:
-            for r in cache_service.get_snapshot(dataset_id, max_rows=50000, force_refresh=False).processed:
-                if r.get('latitude') is not None and r.get('longitude') is not None:
-                    accidents.append(dict(r))
+            if dataset_id == 'pg82-4qqr':
+                # Pereira: manual parse from raw data
+                raw_data = cache_service.get_snapshot(dataset_id, max_rows=50000, force_refresh=False)
+                for r in raw_data.processed:
+                    orig = r.get('data_original', {})
+                    coord = str(orig.get('coordenadas', ''))
+                    if coord and '(' in coord:
+                        parts = coord.strip('()').split()
+                        if len(parts) == 2:
+                            try:
+                                lat, lng = float(parts[0]), float(parts[1])
+                                r2 = dict(r)
+                                r2['latitude'] = lat
+                                r2['longitude'] = lng
+                                if 'lesionados_y_muertos' not in orig:
+                                    r2['data_original'] = dict(orig)
+                                    r2['data_original']['lesionados_y_muertos'] = 'MUERTO'
+                                accidents.append(r2)
+                            except: pass
+            else:
+                for r in cache_service.get_snapshot(dataset_id, max_rows=50000, force_refresh=False).processed:
+                    if r.get('latitude') is not None and r.get('longitude') is not None:
+                        accidents.append(dict(r))
         except Exception:
             pass
     accidents.extend(COMMUNITY_REPORTS)
