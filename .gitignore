@@ -7,7 +7,5 @@ __pycache__/
 .env
 .pytest_cache/
 
-
-data/*.graphml
 cache/
 data/raw_*.json
