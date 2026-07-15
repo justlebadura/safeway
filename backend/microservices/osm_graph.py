@@ -293,7 +293,7 @@ def find_safest_route_osm(
     start_lat: float, start_lng: float,
     end_lat: float, end_lng: float,
     node_risks: Dict[str, float],
-    penalty: float = 30.0,
+    penalty: float = 300.0,
 ) -> Tuple[List[Tuple[float, float]], float]:
     """
     Find safest path on OSM graph using risk-weighted Dijkstra.
@@ -385,12 +385,5 @@ def compute_risk_scores(
             betweenness=getattr(nd,'betweenness',0.0),
             mode_match=mode_match_frac
         )
-    
-    # Percentile normalization
-    sorted_risks = sorted(risks.values())
-    n_r = len(sorted_risks)
-    for key, val in risks.items():
-        rank = sorted_risks.index(val) + 1
-        risks[key] = round(10.0 * rank / n_r, 3)
     
     return risks

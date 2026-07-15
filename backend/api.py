@@ -223,7 +223,7 @@ def get_route(dataset_ids: str = Query(default="sjpx-eqfp"), max_rows: int = Que
     
     # OSM Dijkstra for safe route
     safe_path, safe_dist_m = find_safest_route_osm(
-        G, start_lat, start_lng, end_lat, end_lng, node_risks, penalty=30.0
+        G, start_lat, start_lng, end_lat, end_lng, node_risks
     )
     
     # OSRM for fast route
