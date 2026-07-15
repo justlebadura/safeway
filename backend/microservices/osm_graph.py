@@ -49,8 +49,29 @@ def _get_np():
 
 
 def load_osm_graph(graphml_path: str) -> nx.MultiDiGraph:
-    """Load OSM street graph from GraphML file."""
-    return _get_osmnx().load_graphml(graphml_path)
+    """Load OSM street graph from GraphML file. Downloads from OSM if missing."""
+    path = Path(graphml_path)
+    if not path.exists():
+        # Auto-download from OpenStreetMap
+        place_names = {
+            'palmira_streets.graphml': 'Palmira, Valle del Cauca, Colombia',
+            'bga_streets.graphml': 'Bucaramanga, Santander, Colombia',
+            'pereira_streets.graphml': 'Pereira, Risaralda, Colombia',
+        }
+        name = place_names.get(path.name)
+        if name:
+            import urllib.request, time
+            try:
+                ox = _get_osmnx()
+                G = ox.graph_from_place(name, network_type='drive')
+                path.parent.mkdir(parents=True, exist_ok=True)
+                ox.save_graphml(G, str(path))
+                return G
+            except Exception:
+                raise RuntimeError(f"Cannot load or download OSM graph: {graphml_path}")
+        else:
+            raise FileNotFoundError(f"OSM graph not found: {graphml_path}")
+    return _get_osmnx().load_graphml(str(path))
 
 
 def build_edge_index(G: nx.MultiDiGraph):
