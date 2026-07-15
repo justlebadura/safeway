@@ -125,7 +125,18 @@ def build_osm_nodes(
                     continue
             except:
                 pass
-        filtered.append(acc)
+        acc_copy = dict(acc)
+        # BGA data: apply jitter to spread barrio-level coords across the city
+        lat_val = acc_copy.get('latitude', 0) or 0
+        if abs(lat_val - 7.119) < 0.05:  # Bucaramanga area
+            import hashlib
+            rid = str(acc_copy.get('row_id', acc_copy.get('id', '')))
+            h = hashlib.md5(rid.encode()).hexdigest()
+            jx = (int(h[:8], 16) / 0xFFFFFFFF - 0.5) * 0.025
+            jy = (int(h[8:16], 16) / 0xFFFFFFFF - 0.5) * 0.025
+            acc_copy['latitude'] = lat_val + jy
+            acc_copy['longitude'] = (acc_copy.get('longitude', 0) or 0) + jx
+        filtered.append(acc_copy)
     
     node_accidents = defaultdict(list)
     snapped = 0
@@ -134,7 +145,7 @@ def build_osm_nodes(
         lng = acc.get('longitude')
         if lat is None or lng is None:
             continue
-        osm_nid = snap_to_osm_node(lat, lng, G, max_dist_m=200)
+        osm_nid = snap_to_osm_node(lat, lng, G, max_dist_m=500)
         if osm_nid:
             node_accidents[osm_nid].append(acc)
             snapped += 1

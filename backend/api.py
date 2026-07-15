@@ -132,17 +132,7 @@ def _load_osm_data(city='palmira'):
         try:
             for r in cache_service.get_snapshot(dataset_id, max_rows=50000, force_refresh=False).processed:
                 if r.get('latitude') is not None and r.get('longitude') is not None:
-                    acc = dict(r)
-                    # For BGA (barrio-level data): add small jitter to spread
-                    # accidents across the barrio instead of clustering at centroid
-                    if dataset_id == '7cci-nqqb':
-                        import hashlib
-                        h = hashlib.md5(str(r.get('row_id', acc.get('id',''))).encode()).hexdigest()
-                        jx = (int(h[:8], 16) / 0xFFFFFFFF - 0.5) * 0.008
-                        jy = (int(h[8:16], 16) / 0xFFFFFFFF - 0.5) * 0.008
-                        acc['latitude'] = acc['latitude'] + jy
-                        acc['longitude'] = acc['longitude'] + jx
-                    accidents.append(acc)
+                    accidents.append(dict(r))
         except Exception:
             pass
     accidents.extend(COMMUNITY_REPORTS)
