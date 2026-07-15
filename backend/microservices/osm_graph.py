@@ -1,99 +1,55 @@
 """
 OSM Graph Module — Real street graph for GNN training and routing.
 Replaces the synthetic Cr×Cl grid with actual OpenStreetMap topology.
-
-Imports are lazy to avoid crashing on serverless (Vercel) where torch/scipy
-may not be installed. Core routing uses pure networkx + math.
 """
 from __future__ import annotations
-import json
 import math
 import networkx as nx
 from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 from collections import defaultdict
 
+# Heavy imports — optional, fall back gracefully
+try:
+    import torch
+    _has_torch = True
+except ImportError:
+    torch = None
+    _has_torch = False
+
+try:
+    import numpy as np
+    _has_numpy = True
+except ImportError:
+    np = None
+    _has_numpy = False
+
+try:
+    from scipy.spatial import cKDTree
+    _has_scipy = True
+except ImportError:
+    cKDTree = None
+    _has_scipy = False
+
+try:
+    import osmnx as ox
+    _has_osmnx = True
+except ImportError:
+    ox = None
+    _has_osmnx = False
+
 from backend.microservices.routing import GraphNode
-
-# Heavy imports — lazy loaded when available
-_torch = None
-_ox = None
-_cKDTree = None
-_np = None
-
-def _get_torch():
-    global _torch
-    if _torch is None:
-        try:
-            import torch as _t; _torch = _t
-        except ImportError:
-            raise RuntimeError("torch not installed — needed for GNN inference")
-    return _torch
-
-def _get_osmnx():
-    global _ox
-    if _ox is None:
-        import osmnx as _o; _ox = _o
-    return _ox
-
-def _get_spatial():
-    global _cKDTree
-    if _cKDTree is None:
-        from scipy.spatial import cKDTree as _c; _cKDTree = _c
-    return _cKDTree
-
-def _get_np():
-    global _np
-    if _np is None:
-        import numpy as _n; _np = _n
-    return _np
 
 
 def load_osm_graph(graphml_path: str) -> nx.MultiDiGraph:
-    """Load OSM street graph. Prefers JSON format (no deps), falls back to GraphML."""
-    path = Path(graphml_path)
-    
-    # Try JSON version first (no osmnx needed)
-    json_path = path.with_suffix('.json')
-    if json_path.exists():
-        with open(json_path) as f:
-            data = json.load(f)
-        edges_key = 'links' if 'links' in data else 'edges'
-        # Patch for networkx compatibility
-        for e in data.get(edges_key, []):
-            if 'length' not in e: e['length'] = 10.0
-            if 'highway' not in e: e['highway'] = 'unclassified'
-        return nx.node_link_graph(data)
-    
-    # Fallback: try GraphML with osmnx
-    if path.exists():
-        return _get_osmnx().load_graphml(str(path))
-    
-    # Auto-download from OpenStreetMap
-    place_names = {
-        'palmira': 'Palmira, Valle del Cauca, Colombia',
-        'bga': 'Bucaramanga, Santander, Colombia',
-        'pereira': 'Pereira, Risaralda, Colombia',
-    }
-    name = place_names.get(path.stem.replace('_streets', ''))
-    if name:
-        try:
-            ox = _get_osmnx()
-            G = ox.graph_from_place(name, network_type='drive')
-            path.parent.mkdir(parents=True, exist_ok=True)
-            ox.save_graphml(G, str(path))
-            # Also save JSON copy
-            data = nx.node_link_data(G)
-            with open(str(json_path), 'w') as f:
-                json.dump(data, f)
-            return G
-        except Exception:
-            pass
-    raise RuntimeError(f"Cannot load OSM graph: {graphml_path}")
+    """Load OSM street graph from GraphML file. Requires osmnx."""
+    if not _has_osmnx:
+        raise RuntimeError("osmnx not installed — cannot load OSM graphs")
+    return ox.load_graphml(graphml_path)
 
 
 def build_edge_index(G: nx.MultiDiGraph):
-    """Build edge_index tensor from OSM graph. Returns torch tensor if available."""
+    """Build edge_index as tuple (src, tgt). Caller converts to tensor if needed."""
     src, tgt = [], []
     node_to_idx = {n: i for i, n in enumerate(G.nodes())}
     for u, v in G.edges():
@@ -102,11 +58,13 @@ def build_edge_index(G: nx.MultiDiGraph):
             tgt.append(node_to_idx[v])
     if not src:
         src, tgt = [0], [0]
-    return (src, tgt)  # return tuple, caller handles tensor conversion if needed
+    if _has_torch:
+        return torch.tensor([src, tgt], dtype=torch.long)
+    return (src, tgt)
 
 
 def _build_spatial_index(G: nx.MultiDiGraph):
-    """Build spatial index for fast nearest-neighbor lookup. Returns (tree, ids, coords)."""
+    """Build KDTree for fast NN lookup. Falls back to raw coords if scipy missing."""
     node_ids = []
     coords = []
     for nid, data in G.nodes(data=True):
@@ -114,41 +72,33 @@ def _build_spatial_index(G: nx.MultiDiGraph):
             node_ids.append(nid)
             coords.append([data['y'], data['x']])
     if not coords:
-        return None, [], []
-    try:
-        KD = _get_spatial()
-        tree = KD(_get_np().array(coords))
-        return tree, node_ids, _get_np().array(coords)
-    except (ImportError, RuntimeError):
-        # Fallback: store raw coords for linear search
-        return coords, node_ids, coords
+        return None, [], None
+    if _has_scipy and _has_numpy:
+        tree = cKDTree(np.array(coords))
+        return tree, node_ids, None  # KDTree
+    return None, node_ids, coords  # fallback: raw coords
 
+_spatial_cache = {}
 
 def snap_to_osm_node(lat: float, lng: float, G: nx.MultiDiGraph, max_dist_m: float = 200) -> Optional[str]:
-    """Find nearest OSM node. Uses KDTree if available, otherwise linear search."""
-    cache_key = f"spatial_{id(G)}"
-    cache = getattr(snap_to_osm_node, '_cache', {})
-    if cache_key not in cache:
-        cache[cache_key] = _build_spatial_index(G)
-        snap_to_osm_node._cache = cache
-    index, node_ids, _ = cache[cache_key]
-    if index is None:
+    """Find nearest OSM node. Uses KDTree if available, else linear search."""
+    cache_key = str(id(G))
+    if cache_key not in _spatial_cache:
+        _spatial_cache[cache_key] = _build_spatial_index(G)
+    tree, node_ids, raw_coords = _spatial_cache[cache_key]
+    if tree is None and raw_coords is None:
         return None
-    try:
-        # KDTree fast path
-        dist, idx = index.query([lat, lng], k=1)
+    if tree is not None:
+        dist, idx = tree.query([lat, lng], k=1)
         if dist * 111000 < max_dist_m:
             return node_ids[idx]
-    except AttributeError:
-        # Linear search fallback (no scipy)
-        best_dist = float('inf')
-        best_node = None
-        for i, (cy, cx) in enumerate(index):
-            d = math.sqrt((cy - lat)**2 + (cx - lng)**2) * 111000
-            if d < best_dist and d < max_dist_m:
-                best_dist = d
-                best_node = node_ids[i]
-        return best_node
+    elif raw_coords:
+        best_d = float('inf'); best_n = None
+        for i, (cy, cx) in enumerate(raw_coords):
+            d = math.sqrt((cy-lat)**2 + (cx-lng)**2) * 111000
+            if d < best_d and d < max_dist_m:
+                best_d = d; best_n = node_ids[i]
+        return best_n
     return None
 
 
@@ -160,9 +110,7 @@ def build_osm_nodes(
 ) -> Tuple[List[GraphNode], Tuple, int]:
     """
     Build GraphNode list from OSM graph + snap accidents.
-    Also computes neighbor features for GNN training.
-    Returns:
-        (nodes, edge_index_tuple, num_snapped)
+    Returns: (nodes, edge_index_tuple, num_snapped)
     """
     if modes is None:
         modes = ['MOTOCICLISTA', 'CONDUCTOR', 'PEATON', 'ACOMPAÑANTE MOTOCICLISTA',
@@ -256,7 +204,7 @@ def prepare_features(
         9: mode_match — Palmira condicion_de_la_victima (fracción que coincide con modo)
     """
     N = len(nodes)
-    feats = torch.zeros((N, 10), dtype=torch.float32)
+    feats = torch.zeros((N, 10), dtype=torch.float32) if _has_torch else [[0.0]*10 for _ in range(N)]
     
     for idx, nd in enumerate(nodes):
         feats[idx, 1] = nd.lat / 90.0 if nd.lat != 0 else 0.0
@@ -304,8 +252,8 @@ def _mode_match(mode: str, condicion: str) -> bool:
     return False
 
 
-def compute_targets(nodes: List[GraphNode], target_year: int, mode: str = 'all') -> torch.Tensor:
-    """Binary target: did this node have an accident in target_year matching the mode?"""
+def compute_targets(nodes: List[GraphNode], target_year: int, mode: str = 'all'):
+    """Binary target: did this node have an accident in target_year?"""
     targets = []
     for nd in nodes:
         hit = False
@@ -321,7 +269,9 @@ def compute_targets(nodes: List[GraphNode], target_year: int, mode: str = 'all')
                     hit = True
                     break
         targets.append(1.0 if hit else 0.0)
-    return torch.tensor(targets, dtype=torch.float32).unsqueeze(1)
+    if _has_torch:
+        return torch.tensor(targets, dtype=torch.float32).unsqueeze(1)
+    return [[t] for t in targets]
 
 
 def get_edge_weights(
