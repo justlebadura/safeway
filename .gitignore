@@ -9,3 +9,5 @@ __pycache__/
 
 
 data/*.graphml
+cache/
+data/raw_*.json
