@@ -35,7 +35,6 @@
     <h1 style="font-family:Outfit;font-weight:800;font-size:14px;margin:0;color:#1e293b">SafeWay</h1>
     <select id="citySelect" onchange="switchCity()" style="font-size:10px;padding:2px 4px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;margin-left:4px">
       <option value="palmira">Palmira</option>
-      <option value="bucaramanga">Bucaramanga</option>
       <option value="pereira">Pereira</option>
     </select>
     <button id="btnGraph" style="margin-left:auto;padding:6px;background:transparent;border:none;border-radius:8px;cursor:pointer;color:#94a3b8" title="Ver Grafo"><i data-lucide="git-fork" style="width:14px;height:14px"></i></button>
@@ -103,7 +102,6 @@ var currentMode = 'all';
 var currentCity = 'palmira';
 var cityConfig = {
   palmira: {center: [3.54,-76.31], zoom:13, dataset:'sjpx-eqfp'},
-  bucaramanga: {center: [7.1193,-73.1227], zoom:14, dataset:'7cci-nqqb'},
   pereira: {center: [4.814,-75.694], zoom:13, dataset:'pg82-4qqr'}
 };
 

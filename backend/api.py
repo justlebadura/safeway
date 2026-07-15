@@ -104,12 +104,6 @@ CITY_CONFIG = {
         'center': [3.54, -76.31],
         'zoom': 13,
     },
-    'bucaramanga': {
-        'dataset_id': '7cci-nqqb',
-        'graphml': 'bga_streets.graphml',
-        'center': [7.1193, -73.1227],
-        'zoom': 14,
-    },
     'pereira': {
         'dataset_id': 'pg82-4qqr',
         'graphml': 'pereira_streets.graphml',
@@ -134,31 +128,42 @@ def _load_osm_data(city='palmira'):
     G = load_osm_graph(graphml_path)
     
     accidents = []
-    if dataset_id in DATASET_CONFIGS:
+    if dataset_id == 'pg82-4qqr':
+        # Pereira: load from raw JSON file directly
+        raw_path = os.path.join(_repo_root, 'data', 'raw_pg82-4qqr.json')
+        if os.path.exists(raw_path):
+            import re as _re
+            with open(raw_path) as f:
+                raw_list = json.load(f)
+            for row in raw_list:
+                coord = str(row.get('coordenadas', ''))
+                if coord and '(' in coord:
+                    parts = coord.strip('()').split()
+                    if len(parts) == 2:
+                        try:
+                            lat, lng = float(parts[0]), float(parts[1])
+                            fecha = str(row.get('fecha_del_hecho', ''))
+                            hora = str(row.get('hora_hecho', ''))
+                            victima = str(row.get('victima', ''))
+                            h = 12
+                            m = _re.search(r'T(\d{2}):', hora)
+                            if m: h = int(m.group(1))
+                            accidents.append({
+                                'latitude': lat, 'longitude': lng,
+                                'date_iso': fecha[:10] if fecha else '2023-01-01',
+                                'time': f'{h:02d}:00', 'vehicles': victima,
+                                'data_original': {
+                                    'victima': victima,
+                                    'lesionados_y_muertos': 'MUERTO',
+                                    'condicion_de_la_victima': victima,
+                                }
+                            })
+                        except: pass
+    elif dataset_id in DATASET_CONFIGS:
         try:
-            if dataset_id == 'pg82-4qqr':
-                # Pereira: manual parse from raw data
-                raw_data = cache_service.get_snapshot(dataset_id, max_rows=50000, force_refresh=False)
-                for r in raw_data.processed:
-                    orig = r.get('data_original', {})
-                    coord = str(orig.get('coordenadas', ''))
-                    if coord and '(' in coord:
-                        parts = coord.strip('()').split()
-                        if len(parts) == 2:
-                            try:
-                                lat, lng = float(parts[0]), float(parts[1])
-                                r2 = dict(r)
-                                r2['latitude'] = lat
-                                r2['longitude'] = lng
-                                if 'lesionados_y_muertos' not in orig:
-                                    r2['data_original'] = dict(orig)
-                                    r2['data_original']['lesionados_y_muertos'] = 'MUERTO'
-                                accidents.append(r2)
-                            except: pass
-            else:
-                for r in cache_service.get_snapshot(dataset_id, max_rows=50000, force_refresh=False).processed:
-                    if r.get('latitude') is not None and r.get('longitude') is not None:
-                        accidents.append(dict(r))
+            for r in cache_service.get_snapshot(dataset_id, max_rows=50000, force_refresh=False).processed:
+                if r.get('latitude') is not None and r.get('longitude') is not None:
+                    accidents.append(dict(r))
         except Exception:
             pass
     accidents.extend(COMMUNITY_REPORTS)
