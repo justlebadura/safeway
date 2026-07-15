@@ -78,14 +78,14 @@ def symbolic_regression(model, nodes, ei, samples):
         with torch.no_grad(): pr = model(s['x'], ei)
         lf = s['x'][-1]
         for i in range(N):
-            row = [lf[i,j].item() for j in range(10)]
+            row = [lf[i,j].item() for j in range(8)]
             Xf.append(row)
             yp.append(pr[i,0].item())
     X = np.array(Xf, dtype=np.float64); y = np.array(yp, dtype=np.float64)
     from sklearn.linear_model import Ridge
     rd = Ridge(alpha=0.01); rd.fit(X,y); r2 = rd.score(X,y)
     c = rd.coef_
-    names = ['lluvia','lat','lng','sev','acc','deg','nb_acc','nb_sev','btwn','mode']
+    names = ['lluvia','sev','acc','deg','nb_acc','nb_sev','btwn','mode']
     formula = f"risk={rd.intercept_:.6f}"
     for i in range(len(c)):
         formula += f"+{c[i]:.6f}*{names[i]}"
@@ -105,7 +105,7 @@ def train():
     N = len(full_nodes)
     print(f"\n  Nodes: {N} | Samples: {len(samples)} | Edges: {ei.shape[1]}", flush=True)
     
-    model = HybridGNNLNN(in_features=10, gnn_hidden=GNN_H, lnn_hidden=LNN_H)
+    model = HybridGNNLNN(in_features=8, gnn_hidden=GNN_H, lnn_hidden=LNN_H)
     model.train()
     opt = optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
     crit = HybridLoss(lambda_logic=LAMBDA)
@@ -157,7 +157,7 @@ def train():
     if formula:
         fp = os.path.join(_backend_dir, "model", "symbolic_formula.txt")
         with open(fp, "w") as f:
-            f.write(f"# SafeWay v8-final — 10 features (5 OSM+API + 5 Palmira GPS)\n")
+            f.write(f"# SafeWay v9 — 8 structural features (generalizes across cities)\n")
             f.write(f"# City: Palmira | Target: {TARGET_YEAR} | R²={r2:.4f}\n")
             f.write(f"# P={m['precision']:.2f} R={m['recall']:.2f} F1={m['f1']:.2f}\n\n")
             f.write(formula)

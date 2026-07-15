@@ -200,30 +200,26 @@ def prepare_features(
     mode: str = 'all',
 ) -> torch.Tensor:
     """
-    Build feature tensor for GNN input (10 dims).
+    Build feature tensor for GNN input (8 dims — all structural, no geography).
     
     Features:
-        0: lluvia_real (0/1) — Open-Meteo Archive API (precipitation_sum > 0 ese día)
-        1: lat_norm — OpenStreetMap (lat/90°)
-        2: lng_norm — OpenStreetMap (lng/180°)
-        3: severity — Palmira lesionados_y_muertos (MUERTO=1, LESIONADO=0.5, else=0.25)
-        4: acc_density — Palmira GPS → snap OSM (count / 20)
-        5: degree — OpenStreetMap street_count / 9
-        6: neighbor_acc — Palmira + OSM (promedio accidentes en vecinos / 20)
-        7: neighbor_sev — Palmira + OSM (promedio severidad en vecinos)
-        8: betweenness — OpenStreetMap (centralidad de intermediación)
-        9: mode_match — Palmira condicion_de_la_victima (fracción que coincide con modo)
+        0: lluvia_real — Open-Meteo Archive API (precipitation_sum > 0 ese dia)
+        1: severity — severidad promedio (MUERTO=1, LESIONADO=0.5, else=0.25)
+        2: acc_density — accidentes en el nodo / 20
+        3: degree — grado del nodo / 9 (OpenStreetMap street_count)
+        4: neighbor_acc — promedio accidentes en vecinos / 20
+        5: neighbor_sev — promedio severidad en vecinos
+        6: betweenness — centralidad de intermediacion (OpenStreetMap)
+        7: mode_match — fraccion que coincide con modo de transporte
     """
     N = len(nodes)
-    feats = torch.zeros((N, 10), dtype=torch.float32) if _has_torch else [[0.0]*10 for _ in range(N)]
+    feats = torch.zeros((N, 8), dtype=torch.float32)
     
     for idx, nd in enumerate(nodes):
-        feats[idx, 1] = nd.lat / 90.0 if nd.lat != 0 else 0.0
-        feats[idx, 2] = nd.lng / 180.0 if nd.lng != 0 else 0.0
-        feats[idx, 5] = getattr(nd, 'degree', 1) / 9.0
-        feats[idx, 6] = min(1.0, getattr(nd, '_neighbor_acc', 0) / 20.0)
-        feats[idx, 7] = getattr(nd, '_neighbor_sev', 0.5)
-        feats[idx, 8] = getattr(nd, 'betweenness', 0.0)
+        feats[idx, 3] = getattr(nd, 'degree', 1) / 9.0
+        feats[idx, 4] = min(1.0, getattr(nd, '_neighbor_acc', 0) / 20.0)
+        feats[idx, 5] = getattr(nd, '_neighbor_sev', 0.5)
+        feats[idx, 6] = getattr(nd, 'betweenness', 0.0)
         
         if nd.accidents:
             sev_total = 0.0
@@ -241,9 +237,9 @@ def prepare_features(
                 if orig.get('lluvia_real', False): lluvia_hits += 1
             
             feats[idx, 0] = lluvia_hits / total_acc if lluvia_hits > 0 else 0.0
-            feats[idx, 3] = sev_total / total_acc
-            feats[idx, 4] = min(1.0, total_acc / 20.0)
-            feats[idx, 9] = mode_hits / total_acc
+            feats[idx, 1] = sev_total / total_acc
+            feats[idx, 2] = min(1.0, total_acc / 20.0)
+            feats[idx, 7] = mode_hits / total_acc
     
     return feats
 
@@ -386,8 +382,6 @@ def compute_risk_scores(
         
         risks[nd.osm_id] = _symbolic_risk(
             rain=lluvia,
-            lat_norm=nd.lat/90.0 if nd.lat!=0 else 0,
-            lng_norm=nd.lng/180.0 if nd.lng!=0 else 0,
             severity=sev,
             acc_density=min(1.0, n/20.0),
             degree=getattr(nd,'degree',1)/9.0,

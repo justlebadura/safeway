@@ -52,12 +52,11 @@ def _load_symbolic_formula():
     _sym_coefs = [0.0] + [0.0]*9
     return _sym_coefs
 
-def _symbolic_risk(rain=0, lat_norm=0, lng_norm=0, severity=0, acc_density=0, degree=0, 
+def _symbolic_risk(rain=0, severity=0, acc_density=0, degree=0, 
                    neighbor_acc=0, neighbor_sev=0, betweenness=0, mode_match=0):
-    """Symbolic risk from 10-feature formula (5 OSM+API + 5 Palmira GPS)."""
+    """Symbolic risk from 8 structural features (generalizes across cities)."""
     cf = _load_symbolic_formula()
-    # cf[0]=R², cf[1]=intercept, cf[2:]=features: rain,lat,lng,sev,acc,deg,nb_acc,nb_sev,btwn,mode
-    feats = [rain, lat_norm, lng_norm, severity, acc_density, degree, neighbor_acc, neighbor_sev, betweenness, mode_match]
+    feats = [rain, severity, acc_density, degree, neighbor_acc, neighbor_sev, betweenness, mode_match]
     risk = cf[1] if len(cf) > 1 else 0.0
     for i in range(min(len(cf)-2, len(feats))):
         risk += cf[i+2] * feats[i]
