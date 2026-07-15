@@ -1,27 +1,60 @@
 """
 OSM Graph Module — Real street graph for GNN training and routing.
 Replaces the synthetic Cr×Cl grid with actual OpenStreetMap topology.
+
+Imports are lazy to avoid crashing on serverless (Vercel) where torch/scipy
+may not be installed. Core routing uses pure networkx + math.
 """
+from __future__ import annotations
 import math
-import torch
-import numpy as np
 import networkx as nx
 from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 from collections import defaultdict
-from scipy.spatial import cKDTree
 
 from backend.microservices.routing import GraphNode
+
+# Heavy imports — lazy loaded when available
+_torch = None
+_ox = None
+_cKDTree = None
+_np = None
+
+def _get_torch():
+    global _torch
+    if _torch is None:
+        try:
+            import torch as _t; _torch = _t
+        except ImportError:
+            raise RuntimeError("torch not installed — needed for GNN inference")
+    return _torch
+
+def _get_osmnx():
+    global _ox
+    if _ox is None:
+        import osmnx as _o; _ox = _o
+    return _ox
+
+def _get_spatial():
+    global _cKDTree
+    if _cKDTree is None:
+        from scipy.spatial import cKDTree as _c; _cKDTree = _c
+    return _cKDTree
+
+def _get_np():
+    global _np
+    if _np is None:
+        import numpy as _n; _np = _n
+    return _np
 
 
 def load_osm_graph(graphml_path: str) -> nx.MultiDiGraph:
     """Load OSM street graph from GraphML file."""
-    import osmnx as ox
-    return ox.load_graphml(graphml_path)
+    return _get_osmnx().load_graphml(graphml_path)
 
 
-def build_edge_index(G: nx.MultiDiGraph) -> torch.Tensor:
-    """Build edge_index tensor from OSM graph."""
+def build_edge_index(G: nx.MultiDiGraph):
+    """Build edge_index tensor from OSM graph. Returns torch tensor if available."""
     src, tgt = [], []
     node_to_idx = {n: i for i, n in enumerate(G.nodes())}
     for u, v in G.edges():
@@ -29,12 +62,12 @@ def build_edge_index(G: nx.MultiDiGraph) -> torch.Tensor:
             src.append(node_to_idx[u])
             tgt.append(node_to_idx[v])
     if not src:
-        return torch.tensor([[0], [0]], dtype=torch.long)
-    return torch.tensor([src, tgt], dtype=torch.long)
+        src, tgt = [0], [0]
+    return (src, tgt)  # return tuple, caller handles tensor conversion if needed
 
 
 def _build_spatial_index(G: nx.MultiDiGraph):
-    """Build KDTree for fast nearest-neighbor lookup."""
+    """Build spatial index for fast nearest-neighbor lookup. Returns (tree, ids, coords)."""
     node_ids = []
     coords = []
     for nid, data in G.nodes(data=True):
@@ -42,26 +75,41 @@ def _build_spatial_index(G: nx.MultiDiGraph):
             node_ids.append(nid)
             coords.append([data['y'], data['x']])
     if not coords:
-        return None, [], np.array([])
-    tree = cKDTree(np.array(coords))
-    return tree, node_ids, np.array(coords)
-
-
-_spatial_cache = {}
+        return None, [], []
+    try:
+        KD = _get_spatial()
+        tree = KD(_get_np().array(coords))
+        return tree, node_ids, _get_np().array(coords)
+    except (ImportError, RuntimeError):
+        # Fallback: store raw coords for linear search
+        return coords, node_ids, coords
 
 
 def snap_to_osm_node(lat: float, lng: float, G: nx.MultiDiGraph, max_dist_m: float = 200) -> Optional[str]:
-    """Find nearest OSM node using KDTree for fast lookup."""
-    cache_key = id(G)
-    if cache_key not in _spatial_cache:
-        _spatial_cache[cache_key] = _build_spatial_index(G)
-    tree, node_ids, _ = _spatial_cache[cache_key]
-    if tree is None:
+    """Find nearest OSM node. Uses KDTree if available, otherwise linear search."""
+    cache_key = f"spatial_{id(G)}"
+    cache = getattr(snap_to_osm_node, '_cache', {})
+    if cache_key not in cache:
+        cache[cache_key] = _build_spatial_index(G)
+        snap_to_osm_node._cache = cache
+    index, node_ids, _ = cache[cache_key]
+    if index is None:
         return None
-    dist, idx = tree.query([lat, lng], k=1)
-    dist_m = dist * 111000  # degrees to meters
-    if dist_m < max_dist_m:
-        return node_ids[idx]
+    try:
+        # KDTree fast path
+        dist, idx = index.query([lat, lng], k=1)
+        if dist * 111000 < max_dist_m:
+            return node_ids[idx]
+    except AttributeError:
+        # Linear search fallback (no scipy)
+        best_dist = float('inf')
+        best_node = None
+        for i, (cy, cx) in enumerate(index):
+            d = math.sqrt((cy - lat)**2 + (cx - lng)**2) * 111000
+            if d < best_dist and d < max_dist_m:
+                best_dist = d
+                best_node = node_ids[i]
+        return best_node
     return None
 
 
@@ -70,13 +118,12 @@ def build_osm_nodes(
     G: nx.MultiDiGraph,
     modes: List[str] = None,
     temporal_window: int = None,
-) -> Tuple[List[GraphNode], torch.Tensor, int]:
+) -> Tuple[List[GraphNode], Tuple, int]:
     """
     Build GraphNode list from OSM graph + snap accidents.
     Also computes neighbor features for GNN training.
-    
     Returns:
-        (nodes, edge_index, num_snapped)
+        (nodes, edge_index_tuple, num_snapped)
     """
     if modes is None:
         modes = ['MOTOCICLISTA', 'CONDUCTOR', 'PEATON', 'ACOMPAÑANTE MOTOCICLISTA',
