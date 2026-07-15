@@ -262,11 +262,10 @@ def _score_path(path, node_risks, G):
     return round(total / max(hits, 1), 3)
 
 def _danger_from_hz(hz):
-    if hz < 1: return 5
-    if hz < 2: return 20
-    if hz < 4: return 50
-    if hz < 6: return 75
-    return 95
+    """Map hazard score to danger percentage (0-100)."""
+    # Hazard scores range ~0 to ~3 with ×300 penalty
+    hz = max(0, min(3, hz))
+    return round(hz / 3.0 * 100)
 
 def _simple_fallback(start_lat, start_lng, end_lat, end_lng):
     d_km = _path_length_km([(start_lat,start_lng),(end_lat,end_lng)])

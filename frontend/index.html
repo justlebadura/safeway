@@ -210,6 +210,8 @@ function clearRoute(){
   stopSim();
   if(activeRoute)map.removeLayer(activeRoute);activeRoute=null;
   if(fastRoute)map.removeLayer(fastRoute);fastRoute=null;
+  if(startM)map.removeLayer(startM);startM=null;
+  if(endM)map.removeLayer(endM);endM=null;
   routePath=[];
   document.getElementById('etaCard').style.transform='translateY(120px)';
   document.getElementById('btnSim').disabled=true;document.getElementById('btnSim').style.opacity='0.5'
