@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SafeWay — Navegación Segura</title>
+<title>SafeWay — Palmira</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -12,196 +12,258 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 .leaflet-container{background:#f4f3f0!important}
-.glass{background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 20px rgba(0,0,0,.1)}
-#map{width:100%;height:100%}
-.route-safe{stroke-dasharray:25,200;animation:wave 3.5s linear infinite}
-@keyframes wave{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-450}}
+.glass{background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 20px rgba(0,0,0,.1);border-radius:16px}
+#map{position:absolute;top:0;left:0;width:100%;height:100%}
+.mode-btn{padding:4px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;font-size:9px;cursor:pointer;font-weight:600;color:#64748b;transition:all .15s}
+.mode-btn.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
 </style>
 </head>
-<body class="h-full w-full overflow-hidden font-sans text-slate-800 bg-[#f4f3f0]">
+<body style="margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif;background:#f4f3f0;color:#1e293b">
 
-<div id="loading" class="fixed inset-0 bg-[#f4f3f0]/80 backdrop-blur-md z-[99999] flex items-center justify-center" style="display:none">
-  <div class="flex flex-col items-center gap-3"><div class="w-10 h-10 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div><div class="font-bold text-slate-700 text-sm" id="loadingText">Cargando...</div></div>
+<div id="loading" style="display:none;position:fixed;inset:0;background:rgba(244,243,240,.8);backdrop-filter:blur(8px);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+  <div style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite"></div>
+  <div style="font-weight:700;font-size:14px;color:#334155" id="loadingText">Cargando...</div>
 </div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 <div id="map"></div>
 
-<!-- Top bar when route active -->
-<div id="tripBar" class="absolute top-2 left-1/2 -translate-x-1/2 z-[20000] w-[95%] max-w-[400px] bg-emerald-600 text-white rounded-2xl p-3 flex items-center gap-3 shadow-xl transition-all duration-300 -translate-y-32 opacity-0">
-  <i data-lucide="shield-check" class="w-5 h-5 shrink-0"></i>
-  <div class="flex-1 min-w-0">
-    <div class="text-[10px] font-bold uppercase opacity-80">Ruta Segura Activa</div>
-    <div class="font-bold text-sm truncate"><span id="tripETA">0 min</span> · <span id="tripDist">0 km</span> · <span id="tripSafe">+0%</span> seguro</div>
+<!-- Search panel -->
+<div class="glass" style="position:absolute;top:8px;left:8px;z-index:20000;padding:12px;width:calc(100% - 16px);max-width:340px;display:flex;flex-direction:column;gap:8px">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div style="width:28px;height:28px;background:#3b82f6;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="shield-check" style="width:16px;height:16px;color:#fff"></i></div>
+    <h1 style="font-family:Outfit;font-weight:800;font-size:14px;margin:0;color:#1e293b">SafeWay</h1>
+    <select id="citySelect" onchange="switchCity()" style="font-size:10px;padding:2px 4px;border-radius:4px;border:1px solid #e2e8f0;background:#f8fafc;margin-left:4px">
+      <option value="palmira">Palmira</option>
+      <option value="bucaramanga">Bucaramanga</option>
+    </select>
+    <button id="btnGraph" style="margin-left:auto;padding:6px;background:transparent;border:none;border-radius:8px;cursor:pointer;color:#94a3b8" title="Ver Grafo"><i data-lucide="git-fork" style="width:14px;height:14px"></i></button>
   </div>
-  <button onclick="clearRoute()" class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
-</div>
 
-<!-- Picking toast -->
-<div id="pickToast" class="absolute top-2 left-1/2 -translate-x-1/2 z-[30000] bg-slate-900/90 text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none -translate-y-16">
-  <div class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></div><span id="pickToastText">Selecciona en el mapa</span>
-</div>
-
-<!-- Search + Planner card -->
-<div id="searchCard" class="absolute top-2 left-2 z-[20000] glass rounded-2xl p-3 w-[calc(100%-1rem)] max-w-[340px] flex flex-col gap-2">
-  <div class="flex items-center gap-2">
-    <div class="w-7 h-7 rounded-lg bg-blue-500 flex items-center justify-center"><i data-lucide="navigation" class="w-4 h-4 text-white"></i></div>
-    <h1 class="font-title font-extrabold text-sm">SafeWay</h1>
-    <button id="btnGraph" class="ml-auto p-1.5 hover:bg-slate-100 rounded-lg text-slate-400"><i data-lucide="git-fork" class="w-3.5 h-3.5"></i></button>
-  </div>
-  <div class="flex flex-col gap-1.5">
-    <div class="flex items-center gap-1.5"><i data-lucide="circle-dot" class="w-3 h-3 text-emerald-500 shrink-0"></i><input id="routeStart" placeholder="Origen..." class="flex-1 bg-slate-50 border border-slate-200 text-xs px-2 py-1 rounded-lg outline-none focus:border-blue-500"><button id="btnPickStart" class="p-1 bg-slate-100 rounded-lg"><i data-lucide="locate-fixed" class="w-3 h-3 text-slate-500"></i></button></div>
-    <div class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3 h-3 text-rose-500 shrink-0"></i><input id="routeEnd" placeholder="Destino..." class="flex-1 bg-slate-50 border border-slate-200 text-xs px-2 py-1 rounded-lg outline-none focus:border-blue-500"><button id="btnPickEnd" class="p-1 bg-slate-100 rounded-lg"><i data-lucide="locate-fixed" class="w-3 h-3 text-slate-500"></i></button></div>
-  </div>
-  <div class="grid grid-cols-4 gap-1">
-    <div class="bg-slate-50 rounded-lg px-1.5 py-1 flex items-center justify-between"><span class="text-[8px] font-semibold text-slate-500">Lluvia</span><label class="relative inline-block w-6 h-3"><input type="checkbox" id="routeRain" class="sr-only peer"><div class="w-6 h-3 bg-slate-200 rounded-full peer-checked:bg-blue-500 after:absolute after:top-[1px] after:left-[1px] after:bg-white after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:after:translate-x-full"></div></label></div>
-    <select id="routeHour" class="bg-slate-50 border border-slate-200 text-[8px] py-0.5 px-1 rounded-lg outline-none"><option value="12">12PM</option><option value="18">6PM</option><option value="22">10PM</option><option value="8">8AM</option><option value="0">12AM</option></select>
-    <select id="routeYear" class="bg-slate-50 border border-slate-200 text-[8px] py-0.5 px-1 rounded-lg outline-none"><option value="2012">2012</option><option value="2016">2016</option><option value="2020">2020</option><option value="2023">2023</option><option value="2026" selected>2026</option></select>
-    <button id="btnFindRoute" class="bg-blue-500 hover:bg-blue-600 text-white font-extrabold text-[8px] rounded-lg uppercase">Ruta</button>
-  </div>
-</div>
-
-<!-- Bottom ETA card -->
-<div id="etaCard" class="absolute bottom-3 left-3 right-3 z-[20000] glass rounded-2xl p-3 flex items-center gap-3 transition-all duration-500 translate-y-32">
-  <div class="w-2 h-10 rounded-full bg-emerald-500 shrink-0"></div>
-  <div class="flex-1 min-w-0">
-    <div class="font-title font-extrabold text-lg"><span id="etaTime">0 min</span> <span class="text-xs text-slate-400 font-sans" id="etaArrive"></span></div>
-    <div class="flex gap-3 text-[10px] text-slate-500">
-      <span><span id="etaDist">0 km</span></span>
-      <span>Segura: <strong id="etaSafe" class="text-emerald-600">0%</strong></span>
-      <span>Rápida: <strong id="etaFast" class="text-slate-500">0%</strong></span>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:6px">
+      <i data-lucide="circle-dot" style="width:12px;height:12px;color:#10b981;flex-shrink:0"></i>
+      <input id="routeStart" placeholder="Origen..." readonly style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;font-size:11px;padding:6px 8px;border-radius:8px;outline:none">
+      <button id="btnPickStart" style="padding:4px 6px;background:#f1f5f9;border:none;border-radius:8px;cursor:pointer"><i data-lucide="locate-fixed" style="width:12px;height:12px;color:#64748b"></i></button>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <i data-lucide="map-pin" style="width:12px;height:12px;color:#ef4444;flex-shrink:0"></i>
+      <input id="routeEnd" placeholder="Destino..." readonly style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;font-size:11px;padding:6px 8px;border-radius:8px;outline:none">
+      <button id="btnPickEnd" style="padding:4px 6px;background:#f1f5f9;border:none;border-radius:8px;cursor:pointer"><i data-lucide="locate-fixed" style="width:12px;height:12px;color:#64748b"></i></button>
     </div>
   </div>
-  <button id="btnSim" disabled class="w-9 h-9 rounded-full bg-emerald-600 disabled:opacity-50 text-white flex items-center justify-center shrink-0"><i data-lucide="play" class="w-4 h-4"></i></button>
+
+  <!-- Mode selector -->
+  <div style="display:flex;gap:4px">
+    <button class="mode-btn active" data-mode="all" onclick="setMode(this)"><i data-lucide="globe" style="width:10px;height:10px;display:inline"></i> Todo</button>
+    <button class="mode-btn" data-mode="carro" onclick="setMode(this)"><i data-lucide="car" style="width:10px;height:10px;display:inline"></i> Carro</button>
+    <button class="mode-btn" data-mode="moto" onclick="setMode(this)"><i data-lucide="bike" style="width:10px;height:10px;display:inline"></i> Moto</button>
+    <button class="mode-btn" data-mode="peaton" onclick="setMode(this)"><i data-lucide="footprints" style="width:10px;height:10px;display:inline"></i> Peatón</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+    <select id="routeHour" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:9px;padding:4px;border-radius:6px;outline:none">
+      <option value="12">12 PM</option><option value="18">6 PM</option><option value="22">10 PM</option><option value="8">8 AM</option><option value="0">12 AM</option>
+    </select>
+    <select id="routeYear" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:9px;padding:4px;border-radius:6px;outline:none">
+      <option value="2025" selected>2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option>
+    </select>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:4px;border-radius:6px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:9px;font-weight:600;color:#64748b">Lluvia</span>
+      <label style="position:relative;display:inline-block;width:24px;height:12px">
+        <input type="checkbox" id="routeRain" style="display:none">
+        <div id="rainToggle" style="width:24px;height:12px;background:#e2e8f0;border-radius:999px;transition:background .2s"></div>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- ETA card -->
+<div id="etaCard" class="glass" style="position:absolute;bottom:8px;left:8px;right:8px;z-index:20000;padding:12px;display:flex;align-items:center;gap:12px;transition:transform .3s;transform:translateY(120px);max-width:500px;margin:0 auto">
+  <div style="width:2px;height:40px;background:#10b981;border-radius:999px;flex-shrink:0"></div>
+  <div style="flex:1;min-width:0">
+    <div style="font-family:Outfit;font-weight:800;font-size:18px"><span id="etaTime">0 min</span></div>
+    <div style="display:flex;gap:12px;font-size:10px;color:#64748b">
+      <span id="etaDist">0 km</span>
+      <span>Segura: <strong id="etaSafe" style="color:#10b981">-%</strong></span>
+      <span>Rapida: <strong id="etaFast" style="color:#64748b">-%</strong></span>
+    </div>
+  </div>
+  <button id="btnSim" disabled style="width:36px;height:36px;background:#10b981;border:none;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.5">
+    <i data-lucide="play" style="width:16px;height:16px"></i>
+  </button>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 lucide.createIcons();
 
-let map, activeRoute=null, fastRoute=null, startM=null, endM=null, simM=null, simI=null, simStep=0;
-let routePath=[], streetNodes=[], streetEdges=[], isGraph=false, startPt=null, endPt=null;
-let pickStart=false, pickEnd=false, graphLayer=L.layerGroup();
+var currentMode = 'all';
+var currentCity = 'palmira';
+var cityConfig = {
+  palmira: {center: [3.54,-76.31], zoom:13, dataset:'sjpx-eqfp'},
+  bucaramanga: {center: [7.1193,-73.1227], zoom:14, dataset:'7cci-nqqb'}
+};
 
-function showLoading(t){document.getElementById('loadingText').textContent=t;document.getElementById('loading').style.display='flex'}
-function hideLoading(){document.getElementById('loading').style.display='none'}
+function switchCity(){
+  currentCity = document.getElementById('citySelect').value;
+  var cfg = cityConfig[currentCity];
+  map.setView(cfg.center, cfg.zoom);
+  clearRoute(); graphLayer.clearLayers(); if(graphLayer._legend) map.removeControl(graphLayer._legend);
+  isGraph=false; document.getElementById('btnGraph').style.color='#94a3b8';
+  startPt=null; endPt=null;
+  document.getElementById('routeStart').value=''; document.getElementById('routeEnd').value='';
+  document.getElementById('etaCard').style.transform='translateY(120px)';
+  fetchGraph();
+}
+function setMode(btn){
+  document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  currentMode = btn.dataset.mode;
+  if(startPt && endPt) calcRoute();
+  fetchGraph(); if(isGraph) drawGraph();
+}
 
-// Init map
-map=L.map('map',{zoomControl:false,attributionControl:false}).setView([7.1193,-73.1227],14);
+document.getElementById('routeRain').addEventListener('change',function(){
+  document.getElementById('rainToggle').style.background=this.checked?'#3b82f6':'#e2e8f0'
+});
+
+// State
+var map, activeRoute, fastRoute, startM, endM, simM, simI, simStep=0;
+var routePath=[], streetNodes=[], streetEdges=[], isGraph=false, startPt=null, endPt=null;
+var pickStart=false, pickEnd=false, graphLayer;
+
+function show(t){document.getElementById('loadingText').textContent=t;document.getElementById('loading').style.display='flex'}
+function hide(){document.getElementById('loading').style.display='none'}
+
+// Init map - Palmira center
+map=L.map('map',{zoomControl:false,attributionControl:false}).setView([3.54,-76.31],13);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20}).addTo(map);
 L.control.zoom({position:'bottomright'}).addTo(map);
-graphLayer.addTo(map);
+graphLayer=L.layerGroup().addTo(map);
 
-map.on('click',async e=>{
+map.on('click',function(e){
   if(!pickStart&&!pickEnd)return;
-  let lat=e.latlng.lat,lng=e.latlng.lng,label=`${lat.toFixed(5)},${lng.toFixed(5)}`;
-  if(pickStart){startPt=[lat,lng];document.getElementById('routeStart').value=label;if(startM)map.removeLayer(startM);startM=L.marker([lat,lng]).addTo(map).bindPopup('Origen').openPopup()}
-  else{endPt=[lat,lng];document.getElementById('routeEnd').value=label;if(endM)map.removeLayer(endM);endM=L.marker([lat,lng]).addTo(map).bindPopup('Destino').openPopup()}
-  deactivatePick();
-  try{let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);let d=await r.json();if(d&&d.display_name)label=d.display_name.split(',').slice(0,2).join(',')}catch(e){}
-  if(pickStart){document.getElementById('routeStart').value=label}else{document.getElementById('routeEnd').value=label}
+  var lat=e.latlng.lat,lng=e.latlng.lng,label=lat.toFixed(4)+', '+lng.toFixed(4);
+  if(pickStart){
+    startPt=[lat,lng];document.getElementById('routeStart').value=label;
+    if(startM)map.removeLayer(startM);
+    startM=L.marker([lat,lng]).addTo(map).bindPopup('Origen').openPopup()
+  }else{
+    endPt=[lat,lng];document.getElementById('routeEnd').value=label;
+    if(endM)map.removeLayer(endM);
+    endM=L.marker([lat,lng]).addTo(map).bindPopup('Destino').openPopup()
+  }
   pickStart=false;pickEnd=false;
+  document.getElementById('map').style.cursor='';
+  if(startPt&&endPt)calcRoute()
 });
 
 function activatePick(mode){
-  deactivatePick();document.getElementById('map').classList.add('picking-mode');
-  let t=document.getElementById('pickToast');t.classList.remove('opacity-0','-translate-y-16');t.classList.add('opacity-100','translate-y-0');
-  document.getElementById('pickToastText').textContent=mode==='start'?'Selecciona ORIGEN en el mapa':'Selecciona DESTINO en el mapa';
-  if(mode==='start')pickStart=true;else pickEnd=true;
-}
-function deactivatePick(){
-  pickStart=pickEnd=false;document.getElementById('map').classList.remove('picking-mode');
-  document.getElementById('pickToast').classList.add('opacity-0','-translate-y-16');
+  pickStart=mode==='start';pickEnd=mode==='end';
+  document.getElementById('map').style.cursor='crosshair'
 }
 
-function dist(p){let t=0;for(let i=0;i<p.length-1;i++){let a=p[i][0]*Math.PI/180,b=p[i+1][0]*Math.PI/180,d=(p[i+1][1]-p[i][1])*Math.PI/180;t+=6371*2*Math.atan2(Math.sqrt(Math.pow(Math.sin((b-a)/2),2)+Math.cos(a)*Math.cos(b)*Math.pow(Math.sin(d/2),2)),Math.sqrt(1-Math.pow(Math.sin((b-a)/2),2)+Math.cos(a)*Math.cos(b)*Math.pow(Math.sin(d/2),2)))}return t}
-
-async function geocode(t){
-  if(!t)return null;let m=t.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);if(m)return{lat:parseFloat(m[1]),lon:parseFloat(m[2]),name:t};
-  try{let r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(t+', Bucaramanga, Colombia')}&limit=1`);let d=await r.json();if(d&&d.length>0)return{lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon),name:d[0].display_name.split(',').slice(0,2).join(',')}}catch(e){}
-  return null
+function dist(p){
+  var t=0;
+  for(var i=0;i<p.length-1;i++){
+    var a=p[i][0]*Math.PI/180,b=p[i+1][0]*Math.PI/180,d=(p[i+1][1]-p[i][1])*Math.PI/180;
+    t+=6371*2*Math.atan2(Math.sqrt(Math.pow(Math.sin((b-a)/2),2)+Math.cos(a)*Math.cos(b)*Math.pow(Math.sin(d/2),2)),Math.sqrt(1-Math.pow(Math.sin((b-a)/2),2)-Math.cos(a)*Math.cos(b)*Math.pow(Math.sin(d/2),2)+Math.cos(a)*Math.cos(b)*Math.pow(Math.sin(d/2),2)))
+  }
+  return t
 }
 
 async function calcRoute(){
-  let sv=document.getElementById('routeStart').value.trim(),ev=document.getElementById('routeEnd').value.trim();
-  if(!sv||!ev){alert('Ingresa origen y destino');return}
-  clearRoute();showLoading('Calculando ruta segura...');
-  let sc=startPt,ec=endPt;
-  if(!sc){let r=await geocode(sv);if(r)sc=[r.lat,r.lon]}
-  if(!ec){let r=await geocode(ev);if(r)ec=[r.lat,r.lon]}
-  if(!sc||!ec){hideLoading();alert('No se pudo ubicar origen/destino');return}
-  startPt=sc;endPt=ec;
-  let rain=document.getElementById('routeRain').checked,hour=document.getElementById('routeHour').value,year=document.getElementById('routeYear').value;
+  if(!startPt||!endPt)return;
+  clearRoute();show('Calculando...');
+  var rain=document.getElementById('routeRain').checked,
+      hour=document.getElementById('routeHour').value,
+      year=document.getElementById('routeYear').value;
+  var url='/datasets/combined/route?dataset_ids='+cityConfig[currentCity].dataset+'&start_lat='+startPt[0]+'&start_lng='+startPt[1]+'&end_lat='+endPt[0]+'&end_lng='+endPt[1]+'&rain_active='+rain+'&target_hour='+hour+'&target_year='+year+'&mode='+currentMode+'&city='+currentCity;
   try{
-    let r=await fetch(`/datasets/combined/route?dataset_ids=7cci-nqqb&max_rows=50000&start_lat=${sc[0]}&start_lng=${sc[1]}&end_lat=${ec[0]}&end_lng=${ec[1]}&rain_active=${rain}&target_hour=${hour}&target_year=${year}`);
-    let d=await r.json();
-    if(!d.safest||!d.safest.path.length){alert('No se encontro ruta');hideLoading();return}
+    var r=await fetch(url);
+    if(!r.ok){hide();alert('Error '+r.status);return}
+    var d=await r.json();
+    if(!d.safest||!d.safest.path||!d.safest.path.length){hide();alert('Sin ruta');return}
+
     routePath=d.safest.path;
-    let fp=d.fastest.path,fd=dist(fp),sd=dist(routePath),sE=Math.ceil(sd/25*60),fE=Math.ceil(fd/25*60);
-    // Draw routes
+    var fp=d.fastest&&d.fastest.path?d.fastest.path:[[startPt[0],startPt[1]],[endPt[0],endPt[1]]];
+    var sD=Math.round(d.safest.dur_min||0),sK=(d.safest.dist_km||dist(routePath));
+
     activeRoute=L.polyline(routePath,{color:'#2563eb',weight:8,opacity:.9}).addTo(map);
     fastRoute=L.polyline(fp,{color:'#94a3b8',weight:4,opacity:.6,dashArray:'8,8'}).addTo(map);
-    // Pins
     startM=L.circleMarker(routePath[0],{radius:7,fillColor:'#10b981',color:'#fff',weight:2,fillOpacity:1}).addTo(map);
     endM=L.circleMarker(routePath[routePath.length-1],{radius:7,fillColor:'#ef4444',color:'#fff',weight:2,fillOpacity:1}).addTo(map);
     map.fitBounds(activeRoute.getBounds(),{padding:[60,60]});
-    // Update ETA card
-    document.getElementById('etaTime').textContent=sE+' min';
-    let now=new Date();now.setMinutes(now.getMinutes()+sE);
-    document.getElementById('etaArrive').textContent='Llegada: '+now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('etaDist').textContent=sd.toFixed(1)+' km';
-    document.getElementById('etaSafe').textContent=d.safest.danger_percent+'%';
-    document.getElementById('etaFast').textContent=d.fastest.danger_percent+'%';
-    document.getElementById('etaCard').classList.remove('translate-y-32');
-    // Trip banner
-    let diff=Math.round(Math.max(5,(d.fastest.danger_percent-d.safest.danger_percent)*1.5+5));
-    document.getElementById('tripETA').textContent=sE+' min';document.getElementById('tripDist').textContent=sd.toFixed(1)+' km';
-    document.getElementById('tripSafe').textContent='+'+diff+'%';
-    document.getElementById('tripBar').classList.remove('-translate-y-32','opacity-0');
-    document.getElementById('btnSim').disabled=false;
-  }catch(e){alert('Error al calcular ruta')}
-  hideLoading();lucide.createIcons()
+
+    document.getElementById('etaTime').textContent=sD+' min';
+    document.getElementById('etaDist').textContent=sK.toFixed(1)+' km';
+    document.getElementById('etaSafe').textContent=(d.safest.danger_percent||'?')+'%';
+    document.getElementById('etaFast').textContent=(d.fastest&&d.fastest.danger_percent?d.fastest.danger_percent:'?')+'%';
+    document.getElementById('etaCard').style.transform='translateY(0)';
+    document.getElementById('btnSim').disabled=false;document.getElementById('btnSim').style.opacity='1';
+  }catch(e){alert(e.message)}
+  hide();lucide.createIcons()
 }
 
 function clearRoute(){
-  stopSim();if(activeRoute)map.removeLayer(activeRoute);if(fastRoute)map.removeLayer(fastRoute);if(startM)map.removeLayer(startM);if(endM)map.removeLayer(endM);
-  activeRoute=fastRoute=startM=endM=null;routePath=[];
-  document.getElementById('etaCard').classList.add('translate-y-32');
-  document.getElementById('tripBar').classList.add('-translate-y-32','opacity-0');
-  document.getElementById('btnSim').disabled=true
+  stopSim();
+  if(activeRoute)map.removeLayer(activeRoute);activeRoute=null;
+  if(fastRoute)map.removeLayer(fastRoute);fastRoute=null;
+  routePath=[];
+  document.getElementById('etaCard').style.transform='translateY(120px)';
+  document.getElementById('btnSim').disabled=true;document.getElementById('btnSim').style.opacity='0.5'
 }
 
-// Graph toggle
+// Graph
 async function fetchGraph(){
-  showLoading('Cargando red vial...');
-  let rain=document.getElementById('routeRain').checked,hour=document.getElementById('routeHour').value,year=document.getElementById('routeYear').value;
-  try{let r=await fetch(`/datasets/combined/graph?dataset_ids=7cci-nqqb&max_rows=50000&rain_active=${rain}&target_hour=${hour}&target_year=${year}`);let d=await r.json();streetNodes=d.nodes;streetEdges=d.edges}catch(e){}
-  hideLoading()
+  var rain=document.getElementById('routeRain').checked,hour=document.getElementById('routeHour').value,year=document.getElementById('routeYear').value;
+  try{var r=await fetch('/datasets/combined/graph?dataset_ids='+cityConfig[currentCity].dataset+'&rain_active='+rain+'&target_hour='+hour+'&target_year='+year+'&mode='+currentMode+'&city='+currentCity);var d=await r.json();streetNodes=d.nodes;streetEdges=d.edges}catch(e){}
 }
 
 function drawGraph(){
-  graphLayer.clearLayers();if(!streetNodes.length)return;
-  let eC=0,aC=0,rC=0,oC=0,gC=0,byId={};
-  streetNodes.forEach(n=>{byId[n.id]=n;let e=n.weight===0||n.empty;if(e)eC++;else{aC+=n.weight;let c=n.danger_percent>60?'#ef4444':(n.danger_percent>30?'#f59e0b':'#10b981');if(n.danger_percent>60)rC++;else if(n.danger_percent>30)oC++;else gC++;L.circleMarker([n.lat,n.lng],{radius:e?1.2:(2+Math.min(n.danger_percent*.12,7)),fillColor:e?'#cbd5e1':c,color:e?'#e2e8f0':'#fff',weight:e?.3:.6,fillOpacity:e?.3:.7}).bindPopup(`<b>${n.name}</b><br>${e?'Sin accidentes':`Accidentes: ${n.weight} | Riesgo: ${n.danger_percent}%`}${e?'':'<br><button onclick="setPt(\''+n.id+'\',\''+n.name+'\',['+n.lat+','+n.lng+'],\'start\')" style="background:#10b981;color:#fff;border:none;padding:3px 6px;border-radius:4px;font-size:9px;margin:4px 2px">Origen</button><button onclick="setPt(\''+n.id+'\',\''+n.name+'\',['+n.lat+','+n.lng+'],\'end\')" style="background:#ef4444;color:#fff;border:none;padding:3px 6px;border-radius:4px;font-size:9px;margin:4px 2px">Destino</button>'}`).addTo(graphLayer)}});
-  let edgeDrawn=0;
-  streetEdges.forEach(e=>{let a=byId[e.source],b=byId[e.target];if(a&&b){edgeDrawn++;L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:'rgba(148,163,184,.3)',weight:.4,opacity:.4}).addTo(graphLayer)}});
-  // Legend
-  let leg=L.control({position:'bottomright'});leg.onAdd=function(){let d=document.createElement('div');d.className='glass';d.style.cssText='padding:6px 10px;font-size:10px;min-width:150px';d.innerHTML=`<b>Red Vial</b><br><span style="color:#ef4444">●</span> Alto (${rC}) <span style="color:#f59e0b">●</span> Medio (${oC}) <span style="color:#10b981">●</span> Bajo (${gC}) <span style="color:#cbd5e1">●</span> Vacio (${eC})<br>${streetNodes.length} intersecciones · ${aC} acc · ${edgeDrawn} aristas`;return d};leg.addTo(map);graphLayer._legend=leg
+  if(!streetNodes.length)return;graphLayer.clearLayers();
+  var eC=0,aC=0,rC=0,oC=0,gC=0,byId={};
+  streetNodes.forEach(function(n){
+    byId[n.id]=n;
+    var e=n.weight===0;
+    if(e)eC++;else{
+      aC+=n.weight;
+      var c=n.danger_percent>60?'#ef4444':(n.danger_percent>30?'#f59e0b':'#10b981');
+      if(n.danger_percent>60)rC++;else if(n.danger_percent>30)oC++;else gC++;
+      var sz=2+Math.min(n.danger_percent*0.12,7);
+      L.circleMarker([n.lat,n.lng],{radius:sz,fillColor:c,color:'#fff',weight:.8,fillOpacity:.7})
+        .bindPopup('<b>'+n.name+'</b><br>Accidentes: '+n.weight+'<br>Riesgo: '+n.danger_percent+'%').addTo(graphLayer)
+    }
+  });
+  streetEdges.forEach(function(e){var a=byId[e.source],b=byId[e.target];if(a&&b){L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:'rgba(148,163,184,.3)',weight:.4,opacity:.4}).addTo(graphLayer)}});
+  var leg=L.control({position:'bottomright'});
+  leg.onAdd=function(){var d=document.createElement('div');d.className='glass';d.style.cssText='padding:6px 10px;font-size:10px;min-width:150px';d.innerHTML='<b>Red Vial Palmira</b><br>Alto ('+rC+') Medio ('+oC+') Bajo ('+gC+') Vacio ('+eC+')<br>'+streetNodes.length+' intersecciones';return d};leg.addTo(map);graphLayer._legend=leg
 }
-function toggleGraph(){if(isGraph){graphLayer.clearLayers();if(graphLayer._legend)map.removeControl(graphLayer._legend);document.getElementById('btnGraph').className='ml-auto p-1.5 hover:bg-slate-100 rounded-lg text-slate-400';isGraph=false}else{drawGraph();document.getElementById('btnGraph').className='ml-auto p-1.5 bg-blue-50 text-blue-600 rounded-lg';isGraph=true}}
-window.setPt=function(id,name,coords,type){if(type==='start'){startPt=coords;document.getElementById('routeStart').value=name}else{endPt=coords;document.getElementById('routeEnd').value=name}map.closePopup()};
+
+function toggleGraph(){
+  if(isGraph){graphLayer.clearLayers();if(graphLayer._legend)map.removeControl(graphLayer._legend);document.getElementById('btnGraph').style.color='#94a3b8';isGraph=false}
+  else{drawGraph();document.getElementById('btnGraph').style.color='#3b82f6';isGraph=true}
+}
 
 // Sim
-function startSim(){if(!routePath.length)return;stopSim();simStep=0;simM=L.marker(routePath[0],{icon:L.divIcon({html:'<svg width="32" height="32"><circle cx="16" cy="16" r="12" fill="#2563eb" stroke="#fff" stroke-width="2"/><polygon points="16,6 26,26 6,26" fill="#fff"/></svg>',iconSize:[32,32],iconAnchor:[16,16]})}).addTo(map);map.setView(routePath[0],17);document.getElementById('btnSim').innerHTML='<i data-lucide="square" class="w-3.5 h-3.5"></i>';lucide.createIcons();
-  simI=setInterval(()=>{if(simStep>=routePath.length-1){stopSim();return}simStep++;simM.setLatLng(routePath[simStep]);map.setView(routePath[simStep],16,{animate:true})},300)}
-function stopSim(){if(simI){clearInterval(simI);simI=null}if(simM){map.removeLayer(simM);simM=null}document.getElementById('btnSim').innerHTML='<i data-lucide="play" class="w-4 h-4"></i>'}
+function startSim(){
+  if(!routePath.length)return;stopSim();simStep=0;
+  simM=L.marker(routePath[0],{icon:L.divIcon({html:'<svg width="32" height="32"><circle cx="16" cy="16" r="12" fill="#2563eb" stroke="#fff" stroke-width="2"/><polygon points="16,6 26,26 6,26" fill="#fff"/></svg>',iconSize:[32,32],iconAnchor:[16,16]})}).addTo(map);
+  map.setView(routePath[0],17);
+  document.getElementById('btnSim').innerHTML='<i data-lucide="square" style="width:14px;height:14px"></i>';lucide.createIcons();
+  simI=setInterval(function(){if(simStep>=routePath.length-1){stopSim();return}simStep++;simM.setLatLng(routePath[simStep]);map.setView(routePath[simStep],16,{animate:true})},300)
+}
+function stopSim(){if(simI){clearInterval(simI);simI=null}if(simM){map.removeLayer(simM);simM=null}document.getElementById('btnSim').innerHTML='<i data-lucide="play" style="width:16px;height:16px"></i>'}
 
 // Events
-document.getElementById('btnFindRoute').onclick=calcRoute;
-document.getElementById('btnPickStart').onclick=e=>{e.stopPropagation();activatePick('start')};
-document.getElementById('btnPickEnd').onclick=e=>{e.stopPropagation();activatePick('end')};
+document.getElementById('btnPickStart').onclick=function(e){e.stopPropagation();activatePick('start')};
+document.getElementById('btnPickEnd').onclick=function(e){e.stopPropagation();activatePick('end')};
 document.getElementById('btnGraph').onclick=toggleGraph;
-document.getElementById('btnSim').onclick=()=>{if(simI)stopSim();else startSim()};
-[document.getElementById('routeRain'),document.getElementById('routeHour'),document.getElementById('routeYear')].forEach(el=>el.addEventListener('change',async()=>{await fetchGraph();if(isGraph)drawGraph()}));
+document.getElementById('btnSim').onclick=function(){if(simI)stopSim();else startSim()};
+document.getElementById('routeRain').addEventListener('change',function(){fetchGraph();if(isGraph)drawGraph();if(startPt&&endPt)calcRoute()});
+document.getElementById('routeHour').addEventListener('change',function(){fetchGraph();if(isGraph)drawGraph();if(startPt&&endPt)calcRoute()});
+document.getElementById('routeYear').addEventListener('change',function(){fetchGraph();if(isGraph)drawGraph();if(startPt&&endPt)calcRoute()});
 fetchGraph();
 </script>
 </body>
