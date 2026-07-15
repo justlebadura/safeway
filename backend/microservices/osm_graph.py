@@ -6,6 +6,7 @@ Imports are lazy to avoid crashing on serverless (Vercel) where torch/scipy
 may not be installed. Core routing uses pure networkx + math.
 """
 from __future__ import annotations
+import json
 import math
 import networkx as nx
 from typing import List, Dict, Tuple, Optional
@@ -49,29 +50,46 @@ def _get_np():
 
 
 def load_osm_graph(graphml_path: str) -> nx.MultiDiGraph:
-    """Load OSM street graph from GraphML file. Downloads from OSM if missing."""
+    """Load OSM street graph. Prefers JSON format (no deps), falls back to GraphML."""
     path = Path(graphml_path)
-    if not path.exists():
-        # Auto-download from OpenStreetMap
-        place_names = {
-            'palmira_streets.graphml': 'Palmira, Valle del Cauca, Colombia',
-            'bga_streets.graphml': 'Bucaramanga, Santander, Colombia',
-            'pereira_streets.graphml': 'Pereira, Risaralda, Colombia',
-        }
-        name = place_names.get(path.name)
-        if name:
-            import urllib.request, time
-            try:
-                ox = _get_osmnx()
-                G = ox.graph_from_place(name, network_type='drive')
-                path.parent.mkdir(parents=True, exist_ok=True)
-                ox.save_graphml(G, str(path))
-                return G
-            except Exception:
-                raise RuntimeError(f"Cannot load or download OSM graph: {graphml_path}")
-        else:
-            raise FileNotFoundError(f"OSM graph not found: {graphml_path}")
-    return _get_osmnx().load_graphml(str(path))
+    
+    # Try JSON version first (no osmnx needed)
+    json_path = path.with_suffix('.json')
+    if json_path.exists():
+        with open(json_path) as f:
+            data = json.load(f)
+        edges_key = 'links' if 'links' in data else 'edges'
+        # Patch for networkx compatibility
+        for e in data.get(edges_key, []):
+            if 'length' not in e: e['length'] = 10.0
+            if 'highway' not in e: e['highway'] = 'unclassified'
+        return nx.node_link_graph(data)
+    
+    # Fallback: try GraphML with osmnx
+    if path.exists():
+        return _get_osmnx().load_graphml(str(path))
+    
+    # Auto-download from OpenStreetMap
+    place_names = {
+        'palmira': 'Palmira, Valle del Cauca, Colombia',
+        'bga': 'Bucaramanga, Santander, Colombia',
+        'pereira': 'Pereira, Risaralda, Colombia',
+    }
+    name = place_names.get(path.stem.replace('_streets', ''))
+    if name:
+        try:
+            ox = _get_osmnx()
+            G = ox.graph_from_place(name, network_type='drive')
+            path.parent.mkdir(parents=True, exist_ok=True)
+            ox.save_graphml(G, str(path))
+            # Also save JSON copy
+            data = nx.node_link_data(G)
+            with open(str(json_path), 'w') as f:
+                json.dump(data, f)
+            return G
+        except Exception:
+            pass
+    raise RuntimeError(f"Cannot load OSM graph: {graphml_path}")
 
 
 def build_edge_index(G: nx.MultiDiGraph):
