@@ -120,8 +120,11 @@ def build_osm_nodes(
     for acc in accidents:
         if temporal_window is not None:
             try:
-                year = int(str(acc.get('date_iso', '2022'))[:4])
-                if year > temporal_window:
+                date_str = str(acc.get('date_iso', '2022'))
+                year = int(date_str[:4])
+                month = int(date_str[5:7]) if len(date_str) > 7 else 1
+                year_frac = year + (month - 1) / 12.0
+                if year_frac > temporal_window:
                     continue
             except:
                 pass
