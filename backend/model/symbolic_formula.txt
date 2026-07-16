@@ -1,5 +1,5 @@
 # SafeWay v9 — 8 structural features + 6 timesteps + LTN
-# City: Palmira | Target: 2024 | R²=0.3787
-# P=0.12 R=0.64 F1=0.21
+# City: Palmira | Target: 2024 | R²=0.3769
+# P=0.13 R=0.65 F1=0.21
 
-risk=-0.092231+0.000000*lluvia+-0.237198*sev+0.972787*acc+0.489469*deg+1.397882*nb_acc+0.282154*nb_sev+0.000000*btwn+0.677988*mode
+risk=-0.092522+0.000000*lluvia+-0.242254*sev+0.969781*acc+0.491661*deg+1.437382*nb_acc+0.275141*nb_sev+0.000000*btwn+0.676887*mode

@@ -159,10 +159,27 @@ def _load_osm_data(city='palmira'):
                             })
                         except: pass
     elif dataset_id in DATASET_CONFIGS:
+        # Load rain data for Palmira (Open-Meteo)
+        rain_lookup = {}
+        rain_path = os.path.join(_repo_root, 'data', 'palmira_rain.json')
+        if os.path.exists(rain_path) and dataset_id == 'sjpx-eqfp':
+            try:
+                with open(rain_path) as f:
+                    rain_lookup = json.load(f)
+            except: pass
+        
         try:
             for r in cache_service.get_snapshot(dataset_id, max_rows=50000, force_refresh=False).processed:
                 if r.get('latitude') is not None and r.get('longitude') is not None:
-                    accidents.append(dict(r))
+                    acc = dict(r)
+                    # Enrich with precipitation data
+                    if rain_lookup and acc.get('date_iso'):
+                        date_str = acc['date_iso'][:10] if len(str(acc['date_iso'])) >= 10 else str(acc['date_iso'])
+                        prec = rain_lookup.get(date_str, 0)
+                        if prec > 0:
+                            acc['data_original'] = dict(acc.get('data_original', {}))
+                            acc['data_original']['precip_mm'] = prec
+                    accidents.append(acc)
         except Exception:
             pass
     accidents.extend(COMMUNITY_REPORTS)

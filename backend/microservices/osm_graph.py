@@ -206,7 +206,7 @@ def prepare_features(
     Build feature tensor for GNN input (8 dims — all structural, no geography).
     
     Features:
-        0: lluvia_real — Open-Meteo Archive API (precipitation_sum > 0 ese dia)
+        0: rain_intensity — precipitacion promedio (mm) / 30 (Open-Meteo)
         1: severity — severidad promedio (MUERTO=1, LESIONADO=0.5, else=0.25)
         2: acc_density — accidentes en el nodo / 20
         3: degree — grado del nodo / 9 (OpenStreetMap street_count)
@@ -227,7 +227,8 @@ def prepare_features(
         if nd.accidents:
             sev_total = 0.0
             mode_hits = 0
-            lluvia_hits = 0
+            rain_sum = 0.0
+            rain_count = 0
             total_acc = len(nd.accidents)
             for acc in nd.accidents:
                 orig = acc.get('data_original', {})
@@ -237,9 +238,12 @@ def prepare_features(
                 elif 'LESIONADO' in g: sev_total += 0.5
                 else: sev_total += 0.25
                 if mode == 'all' or _mode_match(mode, cond): mode_hits += 1
-                if orig.get('lluvia_real', False): lluvia_hits += 1
+                precip = orig.get('precip_mm', 0)
+                if precip and precip > 0:
+                    rain_sum += min(precip, 50)  # cap at 50mm
+                    rain_count += 1
             
-            feats[idx, 0] = lluvia_hits / total_acc if lluvia_hits > 0 else 0.0
+            feats[idx, 0] = (rain_sum / max(rain_count, 1)) / 30.0 if rain_count > 0 else 0.0
             feats[idx, 1] = sev_total / total_acc
             feats[idx, 2] = min(1.0, total_acc / 20.0)
             feats[idx, 7] = mode_hits / total_acc
@@ -366,7 +370,7 @@ def compute_risk_scores(
     risks = {}
     for nd in nodes:
         n = len(nd.accidents)
-        sev = 0.0; lluvia = 0.0; mode_match_frac = 0.0
+        sev = 0.0; rain_intensity = 0.0; mode_match_frac = 1.0
         if n > 0:
             for acc in nd.accidents:
                 orig = acc.get('data_original', {})
@@ -374,9 +378,11 @@ def compute_risk_scores(
                 if 'MUERTO' in g: sev += 1.0
                 elif 'LESIONADO' in g: sev += 0.5
                 else: sev += 0.25
-                if orig.get('lluvia_real', False): lluvia += 1
+                precip = orig.get('precip_mm', 0)
+                if precip and precip > 0:
+                    rain_intensity += min(precip, 50) / 30.0
             sev /= n
-            lluvia = lluvia / n
+            rain_intensity /= n
             conds = [str(a.get('data_original',{}).get('condicion_de_la_victima','')).upper() for a in nd.accidents]
             if mode == 'all': mode_match_frac = 1.0
             elif mode == 'moto': mode_match_frac = sum(1 for c in conds if 'MOTOCICLISTA' in c) / n
@@ -384,7 +390,7 @@ def compute_risk_scores(
             elif mode == 'peaton': mode_match_frac = sum(1 for c in conds if 'PEAT' in c) / n
         
         risks[nd.osm_id] = _symbolic_risk(
-            rain=lluvia,
+            rain=rain_intensity,
             severity=sev,
             acc_density=min(1.0, n/20.0),
             degree=getattr(nd,'degree',1)/9.0,
