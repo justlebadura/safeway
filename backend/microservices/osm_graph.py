@@ -307,7 +307,7 @@ def find_safest_route_osm(
     start_lat: float, start_lng: float,
     end_lat: float, end_lng: float,
     node_risks: Dict[str, float],
-    penalty: float = 300.0,
+    penalty: float = 500.0,
 ) -> Tuple[List[Tuple[float, float]], float]:
     """
     Find safest path on OSM graph using risk-weighted Dijkstra.
@@ -326,14 +326,25 @@ def find_safest_route_osm(
         nd = G.nodes[start_node]
         return [(nd['y'], nd['x'])], 0.0
     
-    # Build weighted graph
+    # Build weighted graph with danger zones
+    # Top 10% most dangerous nodes get 5x penalty (hard avoidance)
     G_weighted = nx.DiGraph()
+    
+    sorted_risks = sorted(node_risks.values(), reverse=True)
+    danger_threshold = sorted_risks[max(0, int(len(sorted_risks) * 0.05) - 1)] if sorted_risks else 0
+    
     for u, v, data in G.edges(data=True):
         length = data.get('length', 10.0)
         risk_v = node_risks.get(v, 0.0)
         risk_u = node_risks.get(u, 0.0)
-        G_weighted.add_edge(u, v, weight=length + risk_v * penalty, length=length)
-        G_weighted.add_edge(v, u, weight=length + risk_u * penalty, length=length)
+        
+        zone_v = 20.0 if risk_v >= danger_threshold else 1.0
+        zone_u = 20.0 if risk_u >= danger_threshold else 1.0
+        
+        w_v = length + risk_v * penalty * zone_v
+        w_u = length + risk_u * penalty * zone_u
+        G_weighted.add_edge(u, v, weight=w_v, length=length)
+        G_weighted.add_edge(v, u, weight=w_u, length=length)
     
     # Run Dijkstra
     try:
