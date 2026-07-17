@@ -330,10 +330,10 @@ def find_safest_route_osm(
     G_weighted = nx.DiGraph()
     for u, v, data in G.edges(data=True):
         length = data.get('length', 10.0)
-        risk = node_risks.get(v, 0.0)
-        weight = length + risk * penalty
-        G_weighted.add_edge(u, v, weight=weight, length=length)
-        G_weighted.add_edge(v, u, weight=length + node_risks.get(u, 0.0) * penalty, length=length)
+        risk_v = node_risks.get(v, 0.0)
+        risk_u = node_risks.get(u, 0.0)
+        G_weighted.add_edge(u, v, weight=length + risk_v * penalty, length=length)
+        G_weighted.add_edge(v, u, weight=length + risk_u * penalty, length=length)
     
     # Run Dijkstra
     try:
